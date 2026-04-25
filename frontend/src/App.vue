@@ -16,10 +16,6 @@
       :no-tabs="newDialogOptions.eventOnly"
       :folder-id="newDialogOptions.folderId"
     />
-    <UpgradeDialog
-      :value="upgradeDialogVisible"
-      @input="handleUpgradeDialogInput"
-    />
     <UpvoteRedditSnackbar />
     <div
       v-if="showHeader"
@@ -32,15 +28,6 @@
         <router-link :to="{ name: 'home' }">
           <Logo type="timeful" />
         </router-link>
-        <v-expand-x-transition>
-          <span
-            v-if="isPremiumUser"
-            class="tw-ml-2 tw-cursor-default tw-rounded-md tw-bg-[linear-gradient(-25deg,#0a483d,#00994c,#126045,#0a483d)] tw-px-2 tw-py-1 tw-text-sm tw-font-semibold tw-text-white tw-opacity-80"
-          >
-            Premium
-          </span>
-        </v-expand-x-transition>
-
         <v-spacer />
 
         <v-btn
@@ -229,7 +216,7 @@ html {
 </style>
 
 <script>
-import { mapMutations, mapState, mapActions, mapGetters } from "vuex"
+import { mapMutations, mapState, mapActions } from "vuex"
 import {
   get,
   getLocation,
@@ -237,15 +224,8 @@ import {
   post,
   signInGoogle,
   signInOutlook,
-  isPremiumUser,
 } from "@/utils"
-import {
-  authTypes,
-  calendarTypes,
-  eventTypes,
-  numFreeEvents,
-  upgradeDialogTypes,
-} from "@/constants"
+import { authTypes, calendarTypes } from "@/constants"
 import AutoSnackbar from "@/components/AutoSnackbar"
 import AuthUserMenu from "@/components/AuthUserMenu.vue"
 import SignInNotSupportedDialog from "@/components/SignInNotSupportedDialog.vue"
@@ -253,7 +233,6 @@ import UpvoteRedditSnackbar from "@/components/UpvoteRedditSnackbar.vue"
 import Logo from "@/components/Logo.vue"
 import isWebview from "is-ua-webview"
 import NewDialog from "./components/NewDialog.vue"
-import UpgradeDialog from "@/components/pricing/UpgradeDialog.vue"
 import SignInDialog from "@/components/SignInDialog.vue"
 import DiscordBanner from "@/components/DiscordBanner.vue"
 
@@ -273,7 +252,6 @@ export default {
     NewDialog,
     UpvoteRedditSnackbar,
     Logo,
-    UpgradeDialog,
     SignInDialog,
     DiscordBanner,
   },
@@ -287,13 +265,10 @@ export default {
   }),
 
   computed: {
-    ...mapGetters(["isPremiumUser"]),
     ...mapState([
       "authUser",
       "error",
       "info",
-      "enablePaywall",
-      "upgradeDialogVisible",
       "newDialogOptions",
     ]),
     isPhone() {
@@ -329,15 +304,9 @@ export default {
       "setAuthUser",
       "setSignUpFormEnabled",
       "setPricingPageConversion",
-      "setEnablePaywall",
       "setFeatureFlagsLoaded",
     ]),
-    ...mapActions([
-      "getEvents",
-      "showUpgradeDialog",
-      "hideUpgradeDialog",
-      "createNew",
-    ]),
+    ...mapActions(["getEvents", "createNew"]),
     handleScroll(e) {
       this.scrollY = window.scrollY
     },
@@ -413,16 +382,10 @@ export default {
       // this.$posthog.getFeatureFlag("pricing-page-conversion")
       // )
       // )
-      // this.setEnablePaywall(this.$posthog.isFeatureEnabled("enable-paywall"))
       this.setFeatureFlagsLoaded(true)
     },
     trackFeedbackClick() {
       this.$posthog.capture("give_feedback_button_clicked")
-    },
-    handleUpgradeDialogInput(value) {
-      if (!value) {
-        this.hideUpgradeDialog()
-      }
     },
   },
 
