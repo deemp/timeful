@@ -50,25 +50,27 @@
             class="landing-hero-subtitle tw-text-center tw-text-very-dark-gray"
           >
             Coordinate group meetings without the back and forth.
-            <br class="tw-hidden sm:tw-block" />
-            Integrates with your
-            <v-tooltip
-              top
-              content-class="tw-bg-very-dark-gray tw-shadow-lg tw-opacity-100"
-            >
-              <template #activator="{ props }">
+            <template v-if="signInEnabled">
+              <br class="tw-hidden sm:tw-block" />
+              Integrates with your
+              <v-tooltip
+                top
+                content-class="tw-bg-very-dark-gray tw-shadow-lg tw-opacity-100"
+              >
+                <template #activator="{ props }">
+                  <span
+                    class="landing-calendar-link"
+                    v-bind="props"
+                    >calendar</span
+                  >
+                </template>
                 <span
-                  class="landing-calendar-link"
-                  v-bind="props"
-                  >calendar</span
-                >
-              </template>
-              <span
-                >Timeful allows you to autofill your availability from Google
-                Calendar,<br class="tw-hidden sm:tw-block" />
-                Outlook, Apple Calendar, or an ICS feed URL.</span
-              > </v-tooltip
-            >.
+                  >Timeful allows you to autofill your availability from Google
+                  Calendar,<br class="tw-hidden sm:tw-block" />
+                  Outlook, Apple Calendar, or an ICS feed URL.</span
+                > </v-tooltip
+              >.
+            </template>
           </div>
         </div>
 
