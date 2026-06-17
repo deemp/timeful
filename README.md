@@ -1,6 +1,6 @@
 <div align="center">
   
-<img src="./.github/assets/images/logo.svg" width="200px" alt="Timeful logo" />
+<img src="./assets/readme/logo.svg" width="200px" alt="Timeful logo" />
 
 </div>
 <br />
@@ -14,7 +14,7 @@
 
 </div>
 
-<img src="./.github/assets/images/hero.jpg" alt="Timeful hero" />
+<img src="./assets/readme/hero.jpg" alt="Timeful hero" />
 
 Timeful is a scheduling platform helps you find the best time for a group to meet. It is a free availability poll that is easy to use and integrates with your calendar.
 
