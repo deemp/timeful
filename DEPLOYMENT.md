@@ -12,7 +12,7 @@ Production and staging deployment using Docker Compose behind a Caddy reverse pr
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/schej-it/timeful.app
+git clone https://github.com/deemp/timeful
 cd timeful.app
 
 # 2. Create the root deployment environment file
