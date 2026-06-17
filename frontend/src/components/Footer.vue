@@ -30,7 +30,7 @@
               </svg>
             </a>
             <a
-              href="https://github.com/schej-it/timeful.app"
+              :href="gitHubRepoUrl"
               aria-label="GitHub"
               target="_blank"
               ><v-icon class="tw-text-white/80 hover:tw-text-white"
@@ -166,6 +166,7 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { useMainStore } from "@/stores/main"
+import { gitHubRepoUrl } from "@/utils/github"
 
 defineOptions({ name: "AppFooter" })
 

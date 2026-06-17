@@ -34,6 +34,7 @@ interface ImportMetaEnv {
   readonly VITE_ENABLE_FREEMIUM?: string
   readonly VITE_ENABLE_THIRD_PARTY_SHELL?: string
   readonly VITE_SHOW_FORMERLY_KNOWN_AS_SCHEJ?: string
+  readonly VITE_GITHUB_REPO_URL: string
 }
 
 interface ImportMeta {

@@ -5,6 +5,7 @@ import { nextTick } from "vue"
 import { describe, expect, it, vi } from "vitest"
 import { render } from "github-buttons"
 import GithubStarButton from "./GithubStarButton.vue"
+import * as githubUtils from "@/utils/github"
 
 vi.mock("github-buttons", () => ({
   render: vi.fn((_anchor: HTMLAnchorElement, callback: (el: HTMLIFrameElement) => void) => {
@@ -16,11 +17,14 @@ vi.mock("github-buttons", () => ({
 }))
 
 describe("GithubStarButton", () => {
-  it("passes the legacy GitHub star anchor to the GitHub Buttons renderer", async () => {
+  it("passes the GitHub star anchor to the GitHub Buttons renderer", async () => {
+    const repoUrl = "https://github.com/my-org/my-repo"
+    vi.spyOn(githubUtils, "gitHubRepoUrl", "get").mockReturnValue(repoUrl)
+
     const wrapper = mount(GithubStarButton)
 
     const anchor = wrapper.get("a")
-    expect(anchor.attributes("href")).toBe("https://github.com/schej-it/timeful.app")
+    expect(anchor.attributes("href")).toBe(repoUrl)
     expect(anchor.attributes("data-show-count")).toBe("true")
     expect(anchor.attributes("aria-label")).toBe("Star timeful.app on GitHub")
 

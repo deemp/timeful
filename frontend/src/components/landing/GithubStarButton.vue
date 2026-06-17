@@ -2,7 +2,7 @@
   <span ref="buttonMount" class="landing-github-star-button">
     <a
       ref="buttonAnchor"
-      href="https://github.com/schej-it/timeful.app"
+      :href="gitHubRepoUrl"
       data-show-count="true"
       aria-label="Star timeful.app on GitHub"
     >
@@ -14,6 +14,7 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref } from "vue"
 import { render } from "github-buttons"
+import { gitHubRepoUrl } from "@/utils/github"
 
 defineOptions({ name: "GithubStarButton" })
 
