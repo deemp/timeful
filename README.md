@@ -18,6 +18,8 @@
 
 Timeful is a scheduling platform helps you find the best time for a group to meet. It is a free availability poll that is easy to use and integrates with your calendar.
 
+Original implementation: <https://github.com/schej-it/timeful.app>
+
 Hosted version of the site: <https://timeful.app>
 
 Built with [Vue 2](https://github.com/vuejs/vue), [MongoDB](https://github.com/mongodb/mongo), [Go](https://github.com/golang/go), and [TailwindCSS](https://github.com/tailwindlabs/tailwindcss)
