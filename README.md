@@ -14,7 +14,7 @@
 
 </div>
 
-<img src="./assets/readme/hero.jpg" alt="Timeful hero" />
+<img src="./frontend/src/assets/demo/event.webp" alt="Timeful hero" />
 
 Timeful is a scheduling platform helps you find the best time for a group to meet. It is a free availability poll that is easy to use and integrates with your calendar.
 
