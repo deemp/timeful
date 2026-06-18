@@ -1377,6 +1377,7 @@ const timedGridActions = computed<ScheduleOverlapTimeGridActions>(() => ({
   startDrag,
   moveDrag: (e) => {
     drag.moveDrag(e)
+    tooltipPosition.value = { x: e.clientX, y: e.clientY }
     if (dragging.value && !props.event.daysOnly && dragCur.value) {
       setTooltipForRowCol(dragCur.value.row, dragCur.value.col)
     }
@@ -1544,6 +1545,7 @@ function getTimeslotVon(row: number, col: number): Record<string, () => void> {
       }
     },
     mouseleave: () => {
+      tooltipPosition.value = null
       tooltipContent.value = ""
     },
   }

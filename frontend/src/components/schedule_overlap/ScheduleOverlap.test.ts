@@ -1788,4 +1788,27 @@ describe("ScheduleOverlap", () => {
       ).size
     ).toBe(vm.splitTimes[0].length)
   })
+
+  it("tracks cursor position during drag move and clears on timeslot mouseleave", async () => {
+    const wrapper = mountScheduleOverlap()
+    const vm = wrapper.vm as unknown as {
+      tooltipPosition: { x: number; y: number } | null
+      timedGridViewModel: {
+        actions: {
+          moveDrag: (e: { clientX: number; clientY: number }) => void
+        }
+      }
+      getTimeslotVon: (row: number, col: number) => Record<string, () => void>
+    }
+
+    expect(vm.tooltipPosition).toBeNull()
+
+    vm.timedGridViewModel.actions.moveDrag({ clientX: 150, clientY: 280 })
+
+    expect(vm.tooltipPosition).toEqual({ x: 150, y: 280 })
+
+    vm.getTimeslotVon(1, 0).mouseleave()
+
+    expect(vm.tooltipPosition).toBeNull()
+  })
 })
