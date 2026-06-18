@@ -17,18 +17,33 @@
 </template>
 
 <script setup lang="ts">
-import { toRef } from "vue"
-import { useTooltipState } from "@/composables/useTooltipState"
+import { toRef, watch } from "vue"
+import { useTooltipState, TOOLTIP_Y_OFFSET_PX } from "@/composables/useTooltipState"
 
 defineOptions({ name: "AppTooltip" })
 
 const props = withDefaults(
   defineProps<{
     content?: string
+    positionOverride?: { x: number; y: number } | null
   }>(),
-  { content: "" }
+  { content: "", positionOverride: null }
 )
 
-const { handleMouseEnter, handleMouseLeave, handleMouseMove, isVisible, style } =
+const { handleMouseEnter, handleMouseLeave, handleMouseMove, isVisible, style, position } =
   useTooltipState(toRef(props, "content"))
+
+watch(
+  () => props.positionOverride,
+  (pos) => {
+    if (pos) {
+      position.value = {
+        x: pos.x,
+        y: pos.y < 100
+          ? pos.y + TOOLTIP_Y_OFFSET_PX
+          : pos.y - TOOLTIP_Y_OFFSET_PX,
+      }
+    }
+  }
+)
 </script>

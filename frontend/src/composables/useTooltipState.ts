@@ -1,6 +1,6 @@
 import { computed, onBeforeUnmount, ref, watch, type ComputedRef, type Ref } from "vue"
 
-const TOOLTIP_Y_OFFSET_PX = 30
+export const TOOLTIP_Y_OFFSET_PX = 28
 const TOOLTIP_SHOW_DELAY_MS = 700
 
 export interface TooltipPosition {
@@ -51,7 +51,9 @@ export const useTooltipState = (content: Ref<string>): TooltipState => {
     handleMouseMove: event => {
       position.value = {
         x: event.clientX,
-        y: event.clientY - TOOLTIP_Y_OFFSET_PX,
+        y: event.clientY < 100
+          ? event.clientY + TOOLTIP_Y_OFFSET_PX
+          : event.clientY - TOOLTIP_Y_OFFSET_PX,
       }
     },
     handleMouseEnter: () => {

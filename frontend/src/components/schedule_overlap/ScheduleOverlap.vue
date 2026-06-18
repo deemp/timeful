@@ -1,6 +1,6 @@
 <template>
   <span>
-    <Tooltip :content="tooltipContent">
+    <Tooltip :content="tooltipContent" :position-override="tooltipPosition">
       <div class="tw-select-none tw-py-4" style="-webkit-touch-callout: none">
         <div
           class="schedule-overlap-layout tw-flex"
@@ -323,6 +323,7 @@ const allowDrag = computed(
 const dragging = ref(false)
 const dragStart = ref<RowCol | null>(null)
 const dragCur = ref<RowCol | null>(null)
+const tooltipPosition = ref<{ x: number; y: number } | null>(null)
 const fetchedResponses = ref<Record<string, FetchedResponse | undefined>>({})
 const loadingResponses = ref({
   loading: false,
@@ -1355,13 +1356,40 @@ const daysOnlyGridActions = computed<ScheduleOverlapDaysOnlyGridActions>(() => (
   closeHint,
 }))
 
+function setTooltipForRowCol(row: number, col: number) {
+  const date =
+    getDateFromRowCol(row, col) ?? getDisplayDateFromRowCol(row, col)
+  if (date) {
+    tooltipContent.value = formatTooltipContent({
+      date,
+      curTimezone: curTimezone.value,
+      timeslotDuration: timeslotDuration.value,
+      timeType: timeType.value,
+      isSpecificDates: grid.isSpecificDates.value,
+    })
+  }
+}
+
 const timedGridActions = computed<ScheduleOverlapTimeGridActions>(() => ({
   prevPage,
   nextPage,
   calendarScroll: onCalendarScroll,
   startDrag,
-  moveDrag,
-  endDrag,
+  moveDrag: (e) => {
+    drag.moveDrag(e)
+    if (dragging.value && !props.event.daysOnly && dragCur.value) {
+      setTooltipForRowCol(dragCur.value.row, dragCur.value.col)
+    }
+  },
+  endDrag: (e) => {
+    if (!props.event.daysOnly && dragCur.value) {
+      setTooltipForRowCol(dragCur.value.row, dragCur.value.col)
+    }
+    if (e) {
+      tooltipPosition.value = { x: e.clientX, y: e.clientY }
+    }
+    drag.endDrag(e)
+  },
   resetCurTimeslot: ui.resetCurTimeslot,
   closeHint,
   signUpForBlock: (block) => {

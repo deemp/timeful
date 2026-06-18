@@ -43,11 +43,11 @@ describe("Tooltip", () => {
 
     expect(wrapper.text()).toContain("Hello")
 
-    await trigger.trigger("mousemove", { clientX: 100, clientY: 80 })
+    await trigger.trigger("mousemove", { clientX: 100, clientY: 200 })
 
     const tooltip = wrapper.get(".tw-fixed")
     expect(tooltip.attributes("style")).toContain("left: 100px;")
-    expect(tooltip.attributes("style")).toContain("top: 50px;")
+    expect(tooltip.attributes("style")).toContain("top: 172px;")
     expect(tooltip.attributes("style")).toContain("translate(-50%, -50%)")
 
     await trigger.trigger("mouseleave")
