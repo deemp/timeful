@@ -5,11 +5,11 @@
     >
       <div
         :class="timedGrid.calendarOnly ? 'tw-invisible' : 'tw-visible'"
-        class="tw-sticky tw-top-14 tw-z-10 -tw-ml-3 tw-mb-3 tw-h-11 tw-bg-white sm:tw-top-16 sm:tw-ml-0"
+        class="tw-sticky tw-top-14 tw-z-10 -tw-ml-3 tw-mb-3 tw-h-11 tw-bg-white sm:tw-top-16 sm:tw-ml-0 tw-flex tw-items-center tw-justify-center"
       >
         <div
           :class="timedGrid.hasPrevPage ? 'tw-visible' : 'tw-invisible'"
-          class="tw-sticky tw-top-14 tw-ml-0.5 tw-self-start tw-pt-1.5 sm:tw-top-16 sm:-tw-ml-2"
+          class="tw-sticky tw-top-14 sm:tw-top-16"
         >
           <v-btn
             class="tw-border-gray tw-h-[36px] tw-w-[36px] tw-min-w-[36px]"
@@ -308,11 +308,11 @@
   <div
     v-if="!timedGrid.calendarOnly"
     :class="timedGrid.calendarOnly ? 'tw-invisible' : 'tw-visible'"
-    class="tw-sticky tw-top-14 tw-z-10 tw-mb-4 tw-h-11 tw-bg-white sm:tw-top-16"
+    class="tw-w-8 tw-flex-none sm:tw-w-12 tw-flex tw-items-center tw-justify-center tw-sticky tw-top-14 tw-z-10 tw-mb-4 tw-h-11 tw-bg-white sm:tw-top-16"
   >
     <div
       :class="timedGrid.hasNextPage ? 'tw-visible' : 'tw-invisible'"
-      class="tw-sticky tw-top-14 -tw-mr-2 tw-self-start tw-pt-1.5 sm:tw-top-16"
+      class="tw-sticky tw-top-14 sm:tw-top-16"
     >
       <v-btn
         class="tw-border-gray tw-h-[36px] tw-w-[36px] tw-min-w-[36px]"
