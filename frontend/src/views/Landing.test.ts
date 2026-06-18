@@ -137,11 +137,13 @@ describe("Landing", () => {
       },
     })
 
-    const navLabels = ["How it works", "Blog", "Sign in"]
+    const navLabels = ["How it works", "Sign in"]
     const navButtons = wrapper.findAll("button").filter((button) => navLabels.includes(button.text()))
-
-    expect(navButtons).toHaveLength(3)
+    expect(navButtons).toHaveLength(2)
     expect(navButtons.every((button) => button.attributes("data-variant") === "text")).toBe(true)
+
+    const iconButtons = wrapper.findAll("button").filter((button) => button.text().length === 0)
+    expect(iconButtons.length).toBeGreaterThanOrEqual(1)
   })
 
   it("keeps the landing hero style hooks for calendar, CTA, and legacy note parity", async () => {

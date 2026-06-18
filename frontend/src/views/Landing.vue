@@ -12,7 +12,24 @@
 
           <LandingPageHeader>
             <v-btn variant="text" @click="openHowItWorksDialog">How it works</v-btn>
-            <v-btn variant="text" href="/blog">Blog</v-btn>
+            <v-tooltip
+              bottom
+              content-class="tw-bg-very-dark-gray tw-shadow-lg tw-opacity-100"
+            >
+              <template #activator="{ props }">
+                <v-btn
+                  variant="plain"
+                  icon
+                  v-bind="props"
+                  :href="gitHubRepoUrl"
+                  target="_blank"
+                  aria-label="GitHub"
+                >
+                  <v-icon>mdi-github</v-icon>
+                </v-btn>
+              </template>
+              <span>{{ gitHubRepoDisplay }}</span>
+            </v-tooltip>
             <div v-if="authUser" class="tw-ml-2">
               <AuthUserMenu />
             </div>
@@ -260,7 +277,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue"
+import { computed, ref, watch } from "vue"
 import { storeToRefs } from "pinia"
 import { useHead } from "@unhead/vue"
 import { useRouter } from "vue-router"
@@ -277,6 +294,7 @@ import SignInDialog from "@/components/SignInDialog.vue"
 import { calendarTypes } from "@/constants"
 import HowItWorksDialog from "@/components/HowItWorksDialog.vue"
 import Footer from "@/components/Footer.vue"
+import { gitHubRepoUrl } from "@/utils/github"
 import { useMainStore } from "@/stores/main"
 import { useDisplayHelpers } from "@/utils/useDisplayHelpers"
 import { posthog } from "@/plugins/posthog"
@@ -517,6 +535,15 @@ function openHowItWorksDialog() {
 function openDashboard() {
   void router.push({ name: "home" })
 }
+
+const gitHubRepoDisplay = computed(() => {
+  try {
+    const url = new URL(gitHubRepoUrl)
+    return url.pathname.replace(/^\//, "")
+  } catch {
+    return "GitHub"
+  }
+})
 
 watch(
   display.name,

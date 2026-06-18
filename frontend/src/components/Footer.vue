@@ -80,7 +80,7 @@
         <div class="tw-flex tw-flex-col tw-gap-2">
           <div class="tw-mb-1 tw-font-bold">Links</div>
           <div>
-            <a href="/blog" class="tw-text-sm">Blog</a>
+            <a :href="gitHubRepoUrl" target="_blank" class="tw-text-sm">GitHub</a>
           </div>
           <div>
             <v-menu :nudge-bottom="10" offset-y :close-on-content-click="false">
