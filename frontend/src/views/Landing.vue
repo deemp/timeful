@@ -532,9 +532,6 @@ watch(
 </script>
 
 <style scoped>
-.landing-page-shell {
-  padding-top: 3.25rem;
-}
 
 .landing-hero-copy {
   margin-bottom: 1.5rem;

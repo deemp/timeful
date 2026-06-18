@@ -1,6 +1,5 @@
 <template>
   <v-app>
-    <DiscordBanner />
     <AutoSnackbar color="error" :text="error" />
     <AutoSnackbar color="tw-bg-blue" :text="info" />
     <SignInNotSupportedDialog v-model="webviewDialog" />
@@ -125,7 +124,6 @@ import { fetchAuthUserProfile } from "@/utils/services/UserService"
 import { signInEnabled } from "@/utils/signInAvailability"
 import AutoSnackbar from "@/components/AutoSnackbar.vue"
 import AuthUserMenu from "@/components/AuthUserMenu.vue"
-import DiscordBanner from "@/components/DiscordBanner.vue"
 import Logo from "@/components/Logo.vue"
 import NewDialog from "@/components/NewDialog.vue"
 import SignInDialog from "@/components/SignInDialog.vue"

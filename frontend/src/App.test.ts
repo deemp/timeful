@@ -148,7 +148,6 @@ describe("App auth restore state", () => {
         },
         stubs: {
           SignInDialog: SignInDialogStub,
-          DiscordBanner: true,
           AutoSnackbar: true,
           SignInNotSupportedDialog: true,
           NewDialog: true,
@@ -201,7 +200,6 @@ describe("App auth restore state", () => {
         },
         stubs: {
           SignInDialog: true,
-          DiscordBanner: true,
           AutoSnackbar: true,
           SignInNotSupportedDialog: true,
           NewDialog: true,
@@ -254,7 +252,6 @@ describe("App auth restore state", () => {
         },
         stubs: {
           SignInDialog: true,
-          DiscordBanner: true,
           AutoSnackbar: true,
           SignInNotSupportedDialog: true,
           NewDialog: true,
