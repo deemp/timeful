@@ -94,12 +94,6 @@
           >
             {{ authUser ? "Open dashboard" : "Create event" }}
           </v-btn>
-          <div
-            v-if="!authUser"
-            class="tw-text-center tw-text-xs tw-text-dark-gray sm:tw-text-sm"
-          >
-            It's free! No login required.
-          </div>
         </div>
         <div class="tw-relative tw-w-full">
           <!-- Green background -->
