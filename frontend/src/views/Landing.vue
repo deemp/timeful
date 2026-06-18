@@ -60,7 +60,6 @@
           <div
             class="landing-hero-subtitle tw-text-center tw-text-very-dark-gray"
           >
-            Coordinate group meetings without the back and forth.
             <template v-if="signInEnabled">
               <br class="tw-hidden sm:tw-block" />
               Integrates with your
