@@ -4,7 +4,7 @@
       class="landing-page-shell tw-relative tw-m-auto tw-mb-12 tw-flex tw-max-w-6xl tw-flex-col tw-px-4 sm:tw-mb-20"
     >
       <!-- Header -->
-      <div class="tw-mb-16 sm:tw-mb-28">
+      <div class="tw-mb-4 sm:tw-mb-10">
         <div class="tw-flex tw-items-center tw-pt-5">
           <Logo type="timeful" />
 
@@ -98,7 +98,7 @@
         <div class="tw-relative tw-w-full">
           <!-- Green background -->
           <div
-            class="tw-absolute -tw-bottom-12 tw-left-1/2 tw-h-[85%] tw-w-screen -tw-translate-x-1/2 tw-bg-green sm:-tw-bottom-20"
+            class="tw-absolute tw-top-2/3 tw-left-1/2 tw-h-[20vh] tw-w-screen -tw-translate-x-1/2 tw-bg-green sm:tw-h-[75vh]"
           ></div>
 
           <!-- Hero image -->
@@ -106,7 +106,7 @@
             class="tw-relative tw-z-20 tw-w-full tw-rounded-lg tw-border tw-border-light-gray-stroke tw-bg-white tw-shadow-xl sm:tw-rounded-xl md:tw-mx-auto md:tw-w-fit"
           >
             <div
-              class="tw-mx-4 tw-py-8 md:tw-w-[700px] lg:tw-w-[800px]"
+              class="tw-mx-4 tw-py-2 md:tw-w-[700px] lg:tw-w-[800px]"
             >
               <v-img
                 class="tw-size-full"
@@ -154,19 +154,6 @@
       />
     </div>
 
-    <!-- Hero image -->
-    <div
-      class="tw-flex tw-justify-center tw-bg-green tw-px-4 tw-pb-12 tw-pt-24 md:tw-pb-16"
-    >
-      <div
-        class="tw-max-w-3xl tw-flex-1"
-      >
-        <v-img
-          :src="eventImage"
-          contain
-        />
-      </div>
-    </div>
 
     <!-- Reddit Testimonials -->
     <div class="tw-flex tw-justify-center tw-bg-light-gray tw-py-12">
