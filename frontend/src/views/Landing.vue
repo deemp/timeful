@@ -96,21 +96,18 @@
             class="tw-absolute -tw-bottom-12 tw-left-1/2 tw-h-[85%] tw-w-screen -tw-translate-x-1/2 tw-bg-green sm:-tw-bottom-20"
           ></div>
 
-          <!-- Hero video -->
+          <!-- Hero image -->
           <div
             class="tw-relative tw-z-20 tw-w-full tw-rounded-lg tw-border tw-border-light-gray-stroke tw-bg-white tw-shadow-xl sm:tw-rounded-xl md:tw-mx-auto md:tw-w-fit"
           >
             <div
-              class="tw-relative tw-mx-4 tw-aspect-square md:tw-size-[700px] lg:tw-size-[800px]"
+              class="tw-mx-4 tw-py-8 md:tw-w-[700px] lg:tw-w-[800px]"
             >
               <v-img
-                class="tw-absolute tw-left-0 tw-top-0 tw-z-20 tw-size-full tw-transition-opacity tw-duration-300"
-                :class="{ 'tw-opacity-0': isVideoPlaying }"
-                src="@/assets/img/hero.jpg"
-                transition="fade-transition"
+                class="tw-size-full"
+                :src="eventImage"
                 contain
               />
-              <div ref="vimeoMount" class="tw-size-full" />
             </div>
           </div>
         </div>
@@ -152,22 +149,17 @@
       />
     </div>
 
-    <!-- Video -->
+    <!-- Hero image -->
     <div
       class="tw-flex tw-justify-center tw-bg-green tw-px-4 tw-pb-12 tw-pt-24 md:tw-pb-16"
     >
       <div
-        class="tw-h-[300px] tw-max-w-3xl tw-flex-1 sm:tw-h-[400px] md:tw-h-[450px]"
+        class="tw-max-w-3xl tw-flex-1"
       >
-        <iframe
-          class="tw-h-full tw-w-full"
-          src="https://www.youtube.com/embed/vFkBC8BrkOk?si=pF64JAIyDhom_1do"
-          title="Timeful demo"
-          frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          referrerpolicy="strict-origin-when-cross-origin"
-          allowfullscreen
-        ></iframe>
+        <v-img
+          :src="eventImage"
+          contain
+        />
       </div>
     </div>
 
@@ -268,7 +260,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount } from "vue"
+import { ref, watch } from "vue"
 import { storeToRefs } from "pinia"
 import { useHead } from "@unhead/vue"
 import { useRouter } from "vue-router"
@@ -281,7 +273,6 @@ import NewDialog from "@/components/NewDialog.vue"
 import GithubStarButton from "@/components/landing/GithubStarButton.vue"
 import LandingPageHeader from "@/components/landing/LandingPageHeader.vue"
 import Logo from "@/components/Logo.vue"
-import Player from "@vimeo/player"
 import SignInDialog from "@/components/SignInDialog.vue"
 import { calendarTypes } from "@/constants"
 import HowItWorksDialog from "@/components/HowItWorksDialog.vue"
@@ -292,6 +283,7 @@ import { posthog } from "@/plugins/posthog"
 import { signInEnabled } from "@/utils/signInAvailability"
 import AuthUserMenu from "@/components/AuthUserMenu.vue"
 import FormerlyKnownAs from "@/components/FormerlyKnownAs.vue"
+import eventImage from "@/assets/demo/event.webp"
 import type { User } from "@/types"
 
 defineOptions({ name: 'AppLanding' })
@@ -463,27 +455,7 @@ const redditComments: RedditComment[] = [
   //     "https://styles.redditmedia.com/t5_d7myp/styles/profileIcon_snoof50f1128-f439-433b-a6b2-8e987630e506-headshot.png?width=64&height=64&frame=1&auto=webp&crop=&s=94077bf80603c2855747f1bfc0b9dd1539fae75c",
   // },
 ]
-const vimeoMount = ref<HTMLDivElement>()
-let vimeoPlayer: Player | null = null
 const showHowItWorksDialog = ref(false)
-const isVideoPlaying = ref(false)
-
-onMounted(() => {
-  if (vimeoMount.value) {
-    vimeoPlayer = new Player(vimeoMount.value, {
-      url: "https://player.vimeo.com/video/1083205305?h=d58bef862a",
-      width: 800,
-      height: 800,
-      muted: true,
-      playsinline: true,
-      responsive: true,
-      controls: false,
-      autoplay: true,
-      loop: true,
-    })
-    vimeoPlayer.on("play", onPlay)
-  }
-})
 
 function loadRiveAnimation() {
   // if (!rive.value) {
@@ -542,19 +514,9 @@ function openHowItWorksDialog() {
   posthog.capture("how_it_works_clicked")
 }
 
-function onPlay() {
-  setTimeout(() => {
-    isVideoPlaying.value = true
-  }, 1000)
-}
-
 function openDashboard() {
   void router.push({ name: "home" })
 }
-
-onBeforeUnmount(() => {
-  void vimeoPlayer?.destroy()
-})
 
 watch(
   display.name,
