@@ -57,7 +57,7 @@
                 >
                   {{ day.dateString }}
                 </div>
-                <div class="tw-text-base tw-capitalize sm:tw-text-lg">
+                <div class="tw-text-sm tw-capitalize sm:tw-text-lg">
                   {{ day.dayText }}
                 </div>
               </div>

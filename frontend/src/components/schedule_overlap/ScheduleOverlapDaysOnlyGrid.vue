@@ -25,7 +25,7 @@
       <div
         v-for="day in daysOnlyGrid.daysOfWeek"
         :key="day"
-        class="schedule-overlap-days-only-grid__weekday tw-flex-1 tw-p-2 tw-text-center tw-text-base tw-capitalize tw-text-dark-gray"
+        class="schedule-overlap-days-only-grid__weekday tw-flex-1 tw-p-2 tw-text-center tw-text-sm tw-capitalize tw-text-dark-gray sm:tw-text-base"
       >
         {{ day }}
       </div>
