@@ -51,12 +51,6 @@
           class="landing-hero-copy tw-flex tw-flex-col tw-items-center"
         >
           <div
-            class="landing-github-badge tw-flex tw-select-none tw-items-center tw-rounded-full tw-border tw-border-light-gray-stroke tw-bg-white/70 tw-text-sm tw-text-dark-gray"
-          >
-            We're open source!
-            <GithubStarButton class="landing-github-button" />
-          </div>
-          <div
             id="header"
             class="landing-hero-heading tw-text-center tw-font-medium"
           >
@@ -287,7 +281,6 @@ import FAQ from "@/components/FAQ.vue"
 import Header from "@/components/Header.vue"
 import NumberBullet from "@/components/NumberBullet.vue"
 import NewDialog from "@/components/NewDialog.vue"
-import GithubStarButton from "@/components/landing/GithubStarButton.vue"
 import LandingPageHeader from "@/components/landing/LandingPageHeader.vue"
 import Logo from "@/components/Logo.vue"
 import SignInDialog from "@/components/SignInDialog.vue"
