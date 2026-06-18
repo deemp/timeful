@@ -2268,7 +2268,7 @@ watch(
 }
 
 .desktop-primary-availability-button {
-  border: 1px solid theme("colors.light-green") !important;
+  border: 1px solid #29bc68 !important;
 }
 
 .desktop-primary-availability-button--add {

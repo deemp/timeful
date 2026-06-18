@@ -308,8 +308,8 @@ html {
 }
 
 .v-messages__message {
-  font-size: theme("fontSize.xs");
-  line-height: 1.25;
+  font-size: 0.813rem;
+  line-height: 1rem;
 }
 
 /** Buttons */
@@ -319,7 +319,7 @@ html {
 }
 .v-btn:not(.v-btn--round, .v-btn-toggle > .v-btn).v-size--default {
   height: 38px !important;
-  border-radius: theme("borderRadius.md") !important;
+  border-radius: 0.375rem !important;
 }
 .v-menu__content {
   box-shadow: 0px 5px 5px -1px rgba(0, 0, 0, 0.1),

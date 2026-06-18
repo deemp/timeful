@@ -640,6 +640,9 @@ watch(
 </style>
 <style lang="postcss">
 .rdt-h {
-  @apply tw-rounded tw-bg-light-green/20 tw-px-px tw-text-black;
+  border-radius: 0.25rem;
+  background-color: rgb(41 188 104 / 0.2);
+  padding-inline: 1px;
+  color: #000000;
 }
 </style>

@@ -195,12 +195,12 @@ void copyContractAddress
 
 <style scoped lang="postcss">
 div:has(a) {
-  @apply tw-leading-none;
+  line-height: 1;
 }
 a {
-  @apply tw-text-white/80 !important;
+  color: rgb(255 255 255 / 0.8) !important;
 }
 a:hover {
-  @apply tw-text-white !important;
+  color: #ffffff !important;
 }
 </style>
