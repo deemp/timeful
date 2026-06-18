@@ -61,7 +61,7 @@ describe("OverflowGradient", () => {
     mutationObservers.length = 0
     vi.stubGlobal(
       "ResizeObserver",
-      vi.fn((callback: ResizeObserverCallback) => {
+      vi.fn(function (this: unknown, callback: ResizeObserverCallback) {
         const observer = new ResizeObserverStub(callback)
         resizeObservers.push(observer)
         return observer
@@ -69,7 +69,7 @@ describe("OverflowGradient", () => {
     )
     vi.stubGlobal(
       "MutationObserver",
-      vi.fn((callback: MutationCallback) => {
+      vi.fn(function (this: unknown, callback: MutationCallback) {
         const observer = new MutationObserverStub(callback)
         mutationObservers.push(observer)
         return observer

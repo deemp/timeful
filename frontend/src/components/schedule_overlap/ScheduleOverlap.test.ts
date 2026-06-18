@@ -1789,7 +1789,7 @@ describe("ScheduleOverlap", () => {
     ).toBe(vm.splitTimes[0].length)
   })
 
-  it("tracks cursor position during drag move and clears on timeslot mouseleave", async () => {
+  it("tracks cursor position during drag move and clears on timeslot mouseleave", () => {
     const wrapper = mountScheduleOverlap()
     const vm = wrapper.vm as unknown as {
       tooltipPosition: { x: number; y: number } | null
