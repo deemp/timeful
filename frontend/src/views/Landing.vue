@@ -4,7 +4,7 @@
       class="landing-page-shell tw-relative tw-m-auto tw-mb-12 tw-flex tw-max-w-6xl tw-flex-col tw-px-4 sm:tw-mb-20"
     >
       <!-- Header -->
-      <div class="tw-mb-4 sm:tw-mb-10">
+      <div class="tw-mb-[1.7rem]">
         <div class="tw-flex tw-items-center tw-pt-5">
           <Logo type="timeful" />
 
@@ -534,7 +534,7 @@ watch(
 <style scoped>
 
 .landing-hero-copy {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.7rem;
   max-width: 26rem;
 }
 
@@ -582,7 +582,7 @@ watch(
 }
 
 .landing-hero-cta {
-  margin-bottom: 3rem;
+  margin-bottom: 1.7rem;
   display: flex;
   flex-direction: column;
   align-items: center;
