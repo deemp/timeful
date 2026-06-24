@@ -19,7 +19,7 @@
         class="tw-mb-3 tw-w-full"
         @click="emit('signInLinkApple')"
       />
-      <div class="tw-text-center tw-text-xs tw-text-dark-gray">
+      <div v-if="privacyPolicyEnabled" class="tw-text-center tw-text-xs tw-text-dark-gray">
         By continuing, you agree to our
         <router-link
           class="tw-text-blue"
@@ -56,6 +56,7 @@
 import { storeToRefs } from "pinia"
 import SignInGoogleBtn from "../SignInGoogleBtn.vue"
 import { useMainStore } from "@/stores/main"
+import { privacyPolicyEnabled } from "@/utils/privacyPolicy"
 
 const emit = defineEmits<{
   back: []

@@ -71,7 +71,11 @@
             </a>
           </div>
           <div class="tw-flex tw-flex-col tw-gap-2">
-            <router-link :to="{ name: 'privacy-policy' }" class="tw-text-sm">
+            <router-link
+              v-if="privacyPolicyEnabled"
+              :to="{ name: 'privacy-policy' }"
+              class="tw-text-sm"
+            >
               Privacy Policy
             </router-link>
           </div>
@@ -168,6 +172,7 @@ import { computed } from "vue"
 import { useMainStore } from "@/stores/main"
 import { feedbackUrl } from "@/utils/feedback"
 import { gitHubRepoUrl } from "@/utils/github"
+import { privacyPolicyEnabled } from "@/utils/privacyPolicy"
 
 defineOptions({ name: "AppFooter" })
 

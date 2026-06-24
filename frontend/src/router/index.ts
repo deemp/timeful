@@ -5,6 +5,7 @@ import {
 } from "vue-router"
 import { get } from "@/utils"
 import { signInEnabled } from "@/utils/signInAvailability"
+import { privacyPolicyEnabled } from "@/utils/privacyPolicy"
 import {
   getEventRouteProps,
   getGroupRouteProps,
@@ -69,11 +70,15 @@ const routes: RouteRecordRaw[] = [
     name: "auth",
     component: () => import("@/views/Auth.vue"),
   },
-  {
-    path: "/privacy-policy",
-    name: "privacy-policy",
-    component: () => import("@/views/PrivacyPolicy.vue"),
-  },
+  ...(privacyPolicyEnabled
+    ? [
+        {
+          path: "/privacy-policy",
+          name: "privacy-policy",
+          component: () => import("@/views/PrivacyPolicy.vue"),
+        },
+      ]
+    : []),
   {
     path: "/cookie-settings",
     name: "cookie-settings",

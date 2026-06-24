@@ -76,7 +76,7 @@
               </v-btn>
             </div>
           </div>
-          <div class="tw-text-center tw-text-xs">
+          <div v-if="privacyPolicyEnabled" class="tw-text-center tw-text-xs">
             By continuing, you agree to our
             <router-link class="tw-text-blue" :to="{ name: 'privacy-policy' }"
               >privacy policy</router-link
@@ -210,6 +210,7 @@ import { ref } from "vue"
 import { calendarTypes, type CalendarType } from "@/constants"
 import type { User } from "@/types"
 import { useSignInDialogState } from "@/composables/useSignInDialogState"
+import { privacyPolicyEnabled } from "@/utils/privacyPolicy"
 
 defineProps<{ modelValue: boolean }>()
 

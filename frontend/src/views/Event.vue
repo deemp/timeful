@@ -658,6 +658,7 @@
             class="tw-w-full tw-border-t tw-border-solid tw-border-gray"
           ></div>
           <v-btn
+            v-if="privacyPolicyEnabled"
             class="tw-h-16"
             block
             variant="text"
@@ -672,6 +673,7 @@
         class="tw-mb-16 tw-hidden tw-flex-col tw-items-center tw-justify-between sm:tw-flex"
       >
         <router-link
+          v-if="privacyPolicyEnabled"
           class="tw-text-xs tw-font-medium tw-text-gray"
           :to="{ name: 'privacy-policy' }"
         >
@@ -934,6 +936,7 @@ import FormerlyKnownAs from "@/components/FormerlyKnownAs.vue"
 import EventOptions from "@/components/schedule_overlap/EventOptions.vue"
 import { AsyncPubliftAd } from "@/components/event/asyncPubliftAd"
 import { freemiumEnabled } from "@/utils/freemium"
+import { privacyPolicyEnabled } from "@/utils/privacyPolicy"
 
 import { useMainStore } from "@/stores/main"
 import { useDisplayHelpers } from "@/utils/useDisplayHelpers"

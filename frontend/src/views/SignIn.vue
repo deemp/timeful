@@ -99,7 +99,7 @@
                 </v-btn>
               </div>
             </div>
-            <div class="tw-text-center tw-text-xs">
+            <div v-if="privacyPolicyEnabled" class="tw-text-center tw-text-xs">
               By continuing, you agree to our
               <router-link
                 class="tw-text-blue"
@@ -265,6 +265,7 @@ import { posthog } from "@/plugins/posthog"
 import { Temporal } from "temporal-polyfill"
 import type { User } from "@/types"
 import { verifyOtpSignIn } from "@/utils/services/UserService"
+import { privacyPolicyEnabled } from "@/utils/privacyPolicy"
 
 const props = defineProps<{
   initialIsSignUp?: boolean

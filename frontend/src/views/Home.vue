@@ -66,6 +66,7 @@
 
       <div class="tw-flex tw-flex-col tw-items-center tw-justify-between">
         <router-link
+          v-if="privacyPolicyEnabled"
           class="tw-text-xs tw-font-medium tw-text-gray"
           :to="{ name: 'privacy-policy' }"
         >
@@ -106,6 +107,7 @@ import FormerlyKnownAs from "@/components/FormerlyKnownAs.vue"
 import type { EventDraft } from "@/composables/event/types"
 import { hasEventDraftData } from "@/composables/event/draftBoundary"
 import { fetchAuthUserProfile } from "@/utils/services/UserService"
+import { privacyPolicyEnabled } from "@/utils/privacyPolicy"
 
 defineOptions({ name: 'AppHome' })
 
