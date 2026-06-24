@@ -1,0 +1,52 @@
+name: Feature Request
+description: Suggest an improvement or new capability
+title: "[Feature]: <short title>"
+labels: enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to Solve
+      description: What user need, pain point, or workflow gap is driving this request?
+      placeholder: Describe the problem or opportunity...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Solution
+      description: Describe the feature, behavior, or UX change you want to see.
+      placeholder: Describe the change you want...
+    validations:
+      required: true
+
+  - type: textarea
+    id: user_impact
+    attributes:
+      label: User Impact
+      description: Who benefits from this, and how would their workflow improve?
+      placeholder: Explain the expected benefit for users...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What workarounds or alternative approaches have you considered?
+      placeholder: Describe any alternatives or current workarounds...
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and Constraints
+      description: Note any technical constraints, dependencies, rollout concerns, or non-goals.
+      placeholder: Include constraints, dependencies, or implementation considerations...
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional Context
+      description: Add screenshots, mockups, links, or any extra context that would help.
+      placeholder: Add any supporting context here...
