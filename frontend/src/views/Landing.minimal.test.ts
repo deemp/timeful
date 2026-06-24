@@ -109,7 +109,7 @@ describe("Landing minimal mode", () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain("timeful")
-    expect(wrapper.text()).toContain("How it works")
+    expect(wrapper.text()).toContain("Give feedback")
     expect(wrapper.text()).toContain("Find a time to meet")
     expect(wrapper.text()).toContain("Create event")
     expect(wrapper.find('[data-test="hero-card"]').exists()).toBe(true)

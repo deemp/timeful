@@ -20,7 +20,7 @@
           <v-spacer />
 
           <LandingPageHeader>
-            <v-btn variant="text" @click="openHowItWorksDialog">How it works</v-btn>
+            <v-btn variant="text" :href="feedbackUrl" target="_blank" @click="trackFeedbackClick">Give feedback</v-btn>
             <v-tooltip
               bottom
               content-class="tw-bg-very-dark-gray tw-shadow-lg tw-opacity-100"
@@ -131,43 +131,6 @@
       </div>
     </div>
 
-    <!-- How it works -->
-    <div
-      v-if="richLandingEnabled"
-      id="how-it-works"
-      class="tw-grid tw-place-content-center tw-px-4 tw-pt-12"
-    >
-      <div class="tw-mx-auto tw-flex tw-flex-col tw-gap-4">
-        <div
-          class="tw-mb-4 tw-text-center tw-text-2xl tw-font-medium sm:tw-text-3xl lg:tw-text-4xl"
-        >
-          How it works
-        </div>
-        <div
-          v-for="(step, i) in howItWorksSteps"
-          :key="i"
-          class="tw-flex tw-items-center tw-gap-2"
-        >
-          <NumberBullet>{{ i + 1 }}</NumberBullet>
-          <div class="tw-text-base tw-font-medium md:tw-text-xl">{{ step }}</div>
-        </div>
-      </div>
-      <div
-        class="tw-mb-6 tw-mt-10 tw-text-center tw-text-3xl tw-font-medium md:tw-mb-12 md:tw-mt-20 md:tw-text-6xl"
-      >
-        It's that simple.
-      </div>
-      <v-img
-        alt="schej character"
-        src="@/assets/schej_character.png"
-        :height="isPhone ? 200 : 300"
-        transition="fade-transition"
-        contain
-        class="-tw-mb-12"
-      />
-    </div>
-
-
     <!-- Reddit Testimonials -->
     <div
       v-if="richLandingEnabled"
@@ -262,11 +225,7 @@
     <!-- New event dialog -->
     <NewDialog v-model="newDialog" no-tabs @sign-in="signIn" />
 
-    <!-- Add the dialog component -->
-    <HowItWorksDialog
-      v-if="showHowItWorksDialog"
-      v-model="showHowItWorksDialog"
-    />
+
   </div>
 </template>
 
@@ -279,17 +238,15 @@ import { useDisplay } from "vuetify"
 import { signInGoogle, signInOutlook } from "@/utils"
 import FAQ from "@/components/FAQ.vue"
 import Header from "@/components/Header.vue"
-import NumberBullet from "@/components/NumberBullet.vue"
 import NewDialog from "@/components/NewDialog.vue"
 import LandingPageHeader from "@/components/landing/LandingPageHeader.vue"
 import Logo from "@/components/Logo.vue"
 import SignInDialog from "@/components/SignInDialog.vue"
 import { calendarTypes } from "@/constants"
-import HowItWorksDialog from "@/components/HowItWorksDialog.vue"
+import { feedbackUrl } from "@/utils/feedback"
 import Footer from "@/components/Footer.vue"
 import { gitHubRepoUrl } from "@/utils/github"
 import { useMainStore } from "@/stores/main"
-import { useDisplayHelpers } from "@/utils/useDisplayHelpers"
 import { posthog } from "@/plugins/posthog"
 import { richLandingEnabled } from "@/utils/landingAvailability"
 import { signInEnabled } from "@/utils/signInAvailability"
@@ -325,16 +282,10 @@ const router = useRouter()
 const display = useDisplay()
 const mainStore = useMainStore()
 const { authUser } = storeToRefs(mainStore)
-const { isPhone } = useDisplayHelpers()
 const landingSignInEnabled = signInEnabled && richLandingEnabled
 
 const signInDialog = ref(false)
 const newDialog = ref(false)
-const howItWorksSteps = [
-  "Create a Timeful event",
-  "Share the Timeful link with your group for them to fill out",
-  "See where everybody's availability overlaps!",
-]
 const faqs: FaqEntry[] = [
   {
     question: "Does Timeful support timezones?",
@@ -468,7 +419,6 @@ const redditComments: RedditComment[] = [
   //     "https://styles.redditmedia.com/t5_d7myp/styles/profileIcon_snoof50f1128-f439-433b-a6b2-8e987630e506-headshot.png?width=64&height=64&frame=1&auto=webp&crop=&s=94077bf80603c2855747f1bfc0b9dd1539fae75c",
   // },
 ]
-const showHowItWorksDialog = ref(false)
 
 function loadRiveAnimation() {
   // if (!rive.value) {
@@ -522,9 +472,8 @@ function signIn() {
   void router.push({ name: "sign-in" })
 }
 
-function openHowItWorksDialog() {
-  showHowItWorksDialog.value = true
-  posthog.capture("how_it_works_clicked")
+function trackFeedbackClick() {
+  posthog.capture("give_feedback_button_clicked")
 }
 
 function openDashboard() {

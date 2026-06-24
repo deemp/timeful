@@ -107,7 +107,7 @@ describe("Landing", () => {
 
     await flushPromises()
 
-    expect(wrapper.text()).toContain("Create a Timeful event")
+    expect(wrapper.text()).toContain("Create event")
     expect(wrapper.findAll(".reddit-comment .rdt-h")).toHaveLength(5)
     expect(wrapper.html()).not.toContain("v-html")
   })
@@ -137,7 +137,7 @@ describe("Landing", () => {
       },
     })
 
-    const navLabels = ["How it works", "Sign in"]
+    const navLabels = ["Give feedback", "Sign in"]
     const navButtons = wrapper.findAll("button").filter((button) => navLabels.includes(button.text()))
     expect(navButtons).toHaveLength(2)
     expect(navButtons.every((button) => button.attributes("data-variant") === "text")).toBe(true)
@@ -217,7 +217,7 @@ describe("Landing", () => {
     await flushPromises()
 
     expect(wrapper.find('[data-test="formerly-known-as"]').exists()).toBe(true)
-    expect(wrapper.find("#how-it-works").exists()).toBe(true)
+    expect(wrapper.find("#how-it-works").exists()).toBe(false)
     expect(wrapper.find('[data-test="landing-footer"]').exists()).toBe(true)
     expect(wrapper.text()).toContain("People love us on Reddit!")
     expect(wrapper.text()).toContain("Frequently Asked Questions")
