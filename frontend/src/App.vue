@@ -61,6 +61,26 @@
         >
           Give feedback
         </v-btn>
+        <v-tooltip
+          v-if="showFeedbackBtn"
+          bottom
+          content-class="tw-bg-very-dark-gray tw-shadow-lg tw-opacity-100"
+        >
+          <template #activator="{ props }">
+            <v-btn
+              variant="plain"
+              icon
+              class="tw-ml-1"
+              v-bind="props"
+              :href="gitHubRepoUrl"
+              target="_blank"
+              aria-label="GitHub"
+            >
+              <v-icon>mdi-github</v-icon>
+            </v-btn>
+          </template>
+          <span>{{ gitHubRepoDisplay }}</span>
+        </v-tooltip>
         <!-- <v-btn
           v-if="!isPhone"
           text
@@ -119,6 +139,7 @@ import { posthog } from "@/plugins/posthog"
 import { useMainStore } from "@/stores/main"
 import { getSignInRestoreQuery } from "@/router/authRestoreState"
 import { feedbackUrl } from "@/utils/feedback"
+import { gitHubRepoUrl } from "@/utils/github"
 import { useDisplayHelpers } from "@/utils/useDisplayHelpers"
 import type { User } from "@/types"
 import { fetchAuthUserProfile } from "@/utils/services/UserService"
@@ -155,6 +176,14 @@ const showHeader = computed(() =>
 )
 
 const showFeedbackBtn = computed(() => !isPhone.value || route.name === "home")
+const gitHubRepoDisplay = computed(() => {
+  try {
+    const url = new URL(gitHubRepoUrl)
+    return url.pathname.replace(/^\//, "")
+  } catch {
+    return "GitHub"
+  }
+})
 
 const routerViewClass = computed(() => {
   if (!showHeader.value) return ""
