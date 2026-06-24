@@ -32,7 +32,7 @@
         <v-list-item
           v-if="showFeedbackBtn"
           id="feedback-btn"
-          href="https://forms.gle/A96i4TTWeKgH3P1W6"
+          :href="feedbackUrl"
           target="_blank"
         >
           <v-list-item-title class="tw-flex tw-items-center tw-gap-1">
@@ -67,6 +67,7 @@ import UserAvatarContent from "@/components/UserAvatarContent.vue"
 import TeamsNotReadyDialog from "@/components/TeamsNotReadyDialog.vue"
 import { useMainStore } from "@/stores/main"
 import { post } from "@/utils"
+import { feedbackUrl } from "@/utils/feedback"
 import { useDisplayHelpers } from "@/utils/useDisplayHelpers"
 import { posthog } from "@/plugins/posthog"
 

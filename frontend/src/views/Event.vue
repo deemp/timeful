@@ -637,7 +637,7 @@
             block
             variant="text"
             class="tw-h-16"
-            href="https://forms.gle/A96i4TTWeKgH3P1W6"
+            :href="feedbackUrl"
             target="_blank"
           >
             Give feedback to Timeful team
@@ -973,6 +973,7 @@ import {
   getGuestOwnershipCollectionStorageKey,
 } from "@/composables/schedule_overlap/scheduleOverlapStorage"
 import { getResponseDisplayName, normalizeGuestName } from "@/utils/guestName"
+import { feedbackUrl } from "@/utils/feedback"
 import type { Event, User } from "@/types"
 import { fetchAuthUserProfile } from "@/utils/services/UserService"
 import { toQueryInstantString } from "@/utils/temporalQuery"

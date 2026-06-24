@@ -52,6 +52,7 @@ Frontend build-time variables:
 - `VITE_ENABLE_RICH_LANDING`
 - `VITE_ENABLE_THIRD_PARTY_SHELL`
 - `VITE_SHOW_FORMERLY_KNOWN_AS_SCHEJ`
+- `VITE_FEEDBACK_URL`
 
 Compose-to-frontend build arg mappings:
 
@@ -73,6 +74,8 @@ Compose-to-frontend build arg mappings:
   heading, the primary create-event CTA, and the hero preview card. This minimal mode
   hides landing sign-in affordances, the formerly-known-as note, the in-page how-it-works
   section, testimonials, the FAQ, and the footer.
+- **`VITE_FEEDBACK_URL`** — Controls where frontend “Give feedback” links point.
+  Defaults to `https://github.com/deemp/timeful/issues` when unset or blank.
 
 Backend runtime variables:
 

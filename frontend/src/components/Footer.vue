@@ -104,7 +104,7 @@
           </div>
           <div>
             <a
-              href="https://forms.gle/A96i4TTWeKgH3P1W6"
+              :href="feedbackUrl"
               target="_blank"
               class="tw-text-sm"
               >Give Feedback</a
@@ -166,6 +166,7 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { useMainStore } from "@/stores/main"
+import { feedbackUrl } from "@/utils/feedback"
 import { gitHubRepoUrl } from "@/utils/github"
 
 defineOptions({ name: "AppFooter" })
