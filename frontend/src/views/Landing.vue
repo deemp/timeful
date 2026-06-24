@@ -1,7 +1,16 @@
 <template>
-  <div class="tw-bg-light-gray">
+  <div
+    :class="[
+      'tw-relative tw-min-h-screen tw-bg-light-gray',
+    ]"
+  >
     <div
-      class="landing-page-shell tw-relative tw-m-auto tw-mb-12 tw-flex tw-max-w-6xl tw-flex-col tw-px-4 sm:tw-mb-20"
+      v-if="!richLandingEnabled"
+      data-test="minimal-viewport-band"
+      class="tw-pointer-events-none tw-fixed tw-bottom-0 tw-left-0 tw-right-0 tw-top-[72vh] tw-bg-green"
+    ></div>
+    <div
+      class="landing-page-shell tw-relative tw-z-10 tw-m-auto tw-mb-12 tw-flex tw-max-w-6xl tw-flex-col tw-px-4 sm:tw-mb-20"
     >
       <!-- Header -->
       <div class="tw-mb-[1.7rem]">
@@ -30,11 +39,11 @@
               </template>
               <span>{{ gitHubRepoDisplay }}</span>
             </v-tooltip>
-            <div v-if="authUser" class="tw-ml-2">
+            <div v-if="richLandingEnabled && authUser" class="tw-ml-2">
               <AuthUserMenu />
             </div>
             <v-btn
-              v-else-if="signInEnabled"
+              v-else-if="landingSignInEnabled"
               variant="text"
               :to="{ name: 'sign-in' }"
             >
@@ -43,7 +52,7 @@
           </LandingPageHeader>
         </div>
 
-        <FormerlyKnownAs />
+        <FormerlyKnownAs v-if="richLandingEnabled" />
       </div>
 
       <div class="tw-flex tw-flex-col tw-items-center">
@@ -58,29 +67,29 @@
           </div>
 
           <div
+            v-if="landingSignInEnabled"
             class="landing-hero-subtitle tw-text-center tw-text-very-dark-gray"
           >
-            <template v-if="signInEnabled">
-              <br class="tw-hidden sm:tw-block" />
-              Integrates with your
-              <v-tooltip
-                top
-                content-class="tw-bg-very-dark-gray tw-shadow-lg tw-opacity-100"
-              >
-                <template #activator="{ props }">
-                  <span
-                    class="landing-calendar-link"
-                    v-bind="props"
-                    >calendar</span
-                  >
-                </template>
+            <br class="tw-hidden sm:tw-block" />
+            Integrates with your
+            <v-tooltip
+              top
+              content-class="tw-bg-very-dark-gray tw-shadow-lg tw-opacity-100"
+            >
+              <template #activator="{ props }">
                 <span
-                  >Timeful allows you to autofill your availability from Google
-                  Calendar,<br class="tw-hidden sm:tw-block" />
-                  Outlook, Apple Calendar, or an ICS feed URL.</span
-                > </v-tooltip
-              >.
-            </template>
+                  class="landing-calendar-link"
+                  v-bind="props"
+                  >calendar</span
+                >
+              </template>
+              <span
+                >Timeful allows you to autofill your availability from Google
+                Calendar,<br class="tw-hidden sm:tw-block" />
+                Outlook, Apple Calendar, or an ICS feed URL.</span
+              >
+            </v-tooltip>
+            .
           </div>
         </div>
 
@@ -97,7 +106,11 @@
         <div class="tw-relative tw-w-full">
           <!-- Green background -->
           <div
-            class="tw-absolute tw-top-2/3 tw-left-1/2 tw-h-[20vh] tw-w-screen -tw-translate-x-1/2 tw-bg-green sm:tw-h-[75vh]"
+            v-if="richLandingEnabled"
+            :class="[
+              'tw-absolute tw-left-1/2 tw-w-screen -tw-translate-x-1/2 tw-bg-green',
+              'tw-top-2/3 tw-h-[20vh] sm:tw-h-[75vh]',
+            ]"
           ></div>
 
           <!-- Hero image -->
@@ -120,6 +133,7 @@
 
     <!-- How it works -->
     <div
+      v-if="richLandingEnabled"
       id="how-it-works"
       class="tw-grid tw-place-content-center tw-px-4 tw-pt-12"
     >
@@ -155,7 +169,10 @@
 
 
     <!-- Reddit Testimonials -->
-    <div class="tw-flex tw-justify-center tw-bg-light-gray tw-py-12">
+    <div
+      v-if="richLandingEnabled"
+      class="tw-flex tw-justify-center tw-bg-light-gray tw-py-12"
+    >
       <div class="tw-mx-4 tw-max-w-3xl tw-flex-1 sm:tw-mx-16">
         <div class="tw-text-center">
           <Header> People love us on Reddit! </Header>
@@ -210,7 +227,10 @@
     </div>
 
     <!-- FAQ -->
-    <div class="tw-flex tw-justify-center tw-pt-12">
+    <div
+      v-if="richLandingEnabled"
+      class="tw-flex tw-justify-center tw-pt-12"
+    >
       <div class="tw-mx-4 tw-mb-12 tw-max-w-3xl tw-flex-1 sm:tw-mx-16">
         <div id="faq-section" class="tw-text-center lg:tw-pt-3">
           <Header> Frequently Asked Questions </Header>
@@ -229,11 +249,11 @@
       </div>
     </div>
 
-    <Footer />
+    <Footer v-if="richLandingEnabled" />
 
     <!-- Sign in dialog -->
     <SignInDialog
-      v-if="signInEnabled"
+      v-if="landingSignInEnabled"
       v-model="signInDialog"
       @sign-in="_signIn"
       @email-sign-in="_emailSignIn"
@@ -271,6 +291,7 @@ import { gitHubRepoUrl } from "@/utils/github"
 import { useMainStore } from "@/stores/main"
 import { useDisplayHelpers } from "@/utils/useDisplayHelpers"
 import { posthog } from "@/plugins/posthog"
+import { richLandingEnabled } from "@/utils/landingAvailability"
 import { signInEnabled } from "@/utils/signInAvailability"
 import AuthUserMenu from "@/components/AuthUserMenu.vue"
 import FormerlyKnownAs from "@/components/FormerlyKnownAs.vue"
@@ -305,6 +326,7 @@ const display = useDisplay()
 const mainStore = useMainStore()
 const { authUser } = storeToRefs(mainStore)
 const { isPhone } = useDisplayHelpers()
+const landingSignInEnabled = signInEnabled && richLandingEnabled
 
 const signInDialog = ref(false)
 const newDialog = ref(false)

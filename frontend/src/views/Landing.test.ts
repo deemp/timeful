@@ -188,4 +188,38 @@ describe("Landing", () => {
     expect(legacyNote.text()).toContain('Formerly known as "Schej"')
     expect(primaryCta.classes()).toContain("tw-text-white")
   })
+
+  it("renders the rich landing sections by default", async () => {
+    const wrapper = shallowMount(Landing, {
+      global: {
+        stubs: {
+          AuthUserMenu: true,
+          FAQ: true,
+          Footer: { template: '<footer data-test="landing-footer" />' },
+          FormerlyKnownAs: { template: '<div data-test="formerly-known-as" />' },
+          Header: PassThroughStub,
+          HowItWorksDialog: true,
+          LandingPageHeader: PassThroughStub,
+          Logo: true,
+          NewDialog: true,
+          NumberBullet: PassThroughStub,
+          SignInDialog: true,
+          "v-avatar": PassThroughStub,
+          "v-btn": VBtnStub,
+          "v-icon": true,
+          "v-img": true,
+          "v-spacer": true,
+          "v-tooltip": VTooltipStub,
+        },
+      },
+    })
+
+    await flushPromises()
+
+    expect(wrapper.find('[data-test="formerly-known-as"]').exists()).toBe(true)
+    expect(wrapper.find("#how-it-works").exists()).toBe(true)
+    expect(wrapper.find('[data-test="landing-footer"]').exists()).toBe(true)
+    expect(wrapper.text()).toContain("People love us on Reddit!")
+    expect(wrapper.text()).toContain("Frequently Asked Questions")
+  })
 })

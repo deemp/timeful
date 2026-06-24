@@ -49,6 +49,7 @@ Frontend build-time variables:
 - `VITE_POSTHOG_API_KEY`
 - `VITE_ENABLE_SIGN_IN`
 - `VITE_ENABLE_FREEMIUM`
+- `VITE_ENABLE_RICH_LANDING`
 - `VITE_ENABLE_THIRD_PARTY_SHELL`
 - `VITE_SHOW_FORMERLY_KNOWN_AS_SCHEJ`
 
@@ -66,6 +67,12 @@ Compose-to-frontend build arg mappings:
   "Requires sign-in, which is disabled in this build." Existing auth sessions still
   work, so previously signed-in users retain access to auth-protected routes.
   This is a frontend-only gate; backend auth endpoints remain live regardless.
+- **`VITE_ENABLE_RICH_LANDING`** — Controls whether the full landing page is shown.
+  Defaults to `true` when unset or blank. Set to `false` to keep only the Timeful
+  brand, the header "How it works" action, the GitHub icon, the "Find a time to meet"
+  heading, the primary create-event CTA, and the hero preview card. This minimal mode
+  hides landing sign-in affordances, the formerly-known-as note, the in-page how-it-works
+  section, testimonials, the FAQ, and the footer.
 
 Backend runtime variables:
 
