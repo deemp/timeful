@@ -109,7 +109,7 @@
       <div class="tw-relative tw-overflow-hidden">
         <div
           ref="respondentsScrollView"
-          class="-tw-ml-2 tw-pl-2 tw-pt-2 tw-text-sm"
+          class="-tw-ml-2 tw-pl-2 tw-text-sm"
           :class="
             isPhone && !maxHeight
               ? 'tw-overflow-hidden'

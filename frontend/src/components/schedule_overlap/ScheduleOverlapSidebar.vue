@@ -4,7 +4,15 @@
     :class="
       sidebar.isPhone
         ? ''
-        : 'tw-sticky tw-top-16 tw-flex-none tw-self-start tw-py-0 tw-pl-0 tw-pr-0 tw-pt-14'
+        : [
+            'tw-sticky tw-top-16 tw-flex-none tw-self-start tw-py-0 tw-pl-0 tw-pr-0',
+            (sidebar.state === states.HEATMAP ||
+              sidebar.state === states.BEST_TIMES ||
+              sidebar.state === states.SINGLE_AVAILABILITY ||
+              sidebar.state === states.SUBSET_AVAILABILITY) &&
+              'tw-pt-11',
+            sidebar.state === states.EDIT_AVAILABILITY && 'tw-pt-14',
+          ]
     "
     :style="{ width: sidebar.rightSideWidth }"
   >

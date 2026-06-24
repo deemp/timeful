@@ -171,6 +171,13 @@ describe("RespondentsList", () => {
     expect(nameActionRow.find(".respondent-row-actions").exists()).toBe(true)
   })
 
+  it("does not add extra top padding inside the respondents scroller", () => {
+    expect(respondentsListSource).toContain('class="-tw-ml-2 tw-pl-2 tw-text-sm"')
+    expect(respondentsListSource).not.toContain(
+      'class="-tw-ml-2 tw-pl-2 tw-pt-2 tw-text-sm"'
+    )
+  })
+
   it("treats equal ZonedDateTime values as matching respondent if-needed slots", () => {
     const matchingDate = zdt("2026-01-01T09:00:00Z")
     const setEntry = zdt("2026-01-01T09:00:00Z")

@@ -174,4 +174,66 @@ describe("ScheduleOverlapSidebar", () => {
     expect(wrapper.classes()).toContain("tw-sticky")
     expect(wrapper.find(".async-publift-ad-stub").exists()).toBe(false)
   })
+
+  it("aligns the desktop respondents panel heading with the top of the grid body", () => {
+    const wrapper = mount(ScheduleOverlapSidebar, {
+      props: {
+        sidebar: {
+          ...buildScheduleOverlapSidebarViewModel(),
+          state: states.HEATMAP,
+          isPhone: false,
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+        },
+      },
+    })
+
+    expect(wrapper.classes()).toContain("tw-sticky")
+    expect(wrapper.classes()).toContain("tw-pt-11")
+    expect(wrapper.classes()).not.toContain("tw-pt-14")
+  })
+
+  it("keeps the hovered respondents state aligned with the grid body", () => {
+    const wrapper = mount(ScheduleOverlapSidebar, {
+      props: {
+        sidebar: {
+          ...buildScheduleOverlapSidebarViewModel(),
+          state: states.SINGLE_AVAILABILITY,
+          isPhone: false,
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+        },
+      },
+    })
+
+    expect(wrapper.classes()).toContain("tw-sticky")
+    expect(wrapper.classes()).toContain("tw-pt-11")
+    expect(wrapper.classes()).not.toContain("tw-pt-14")
+  })
+
+  it("keeps the desktop top offset while rendering edit availability controls", () => {
+    const wrapper = mount(ScheduleOverlapSidebar, {
+      props: {
+        sidebar: {
+          ...buildScheduleOverlapSidebarViewModel(),
+          state: states.EDIT_AVAILABILITY,
+          isPhone: false,
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+        },
+      },
+    })
+
+    expect(wrapper.classes()).toContain("tw-sticky")
+    expect(wrapper.classes()).toContain("tw-pt-14")
+  })
 })
