@@ -173,12 +173,47 @@ Semi-structured TODO list
 - [ ] When scrolling shown in timezones, the drop-down list gets narrow or wide depending on the width of the content.
 - [ ] On the specific times page <http://127.0.0.1:4173/e/Eb67A>, when I switch timezone from +5 to +6, the left-most upper-most enabled slot should become disabled
 - [ ] On the specific times page <http://127.0.0.1:4173/e/Eb67A>, when I switch timezone from +5 to +4 and on june 14, 0-4 are selected, jun 13 should appear
+- [ ] make the feedback link configurable via .env and point to issues in my repo
+- [ ] add flag to disable sign-in
+- [ ] document flags that disable features
+- [ ] make it possible to disable sign-in on backend
+- [ ] add flag for enabling discord banner at the top (disabled by default)
+- [ ] demo
+  - first convert png to webp <https://picflow.com/convert/png-to-webp>
+  - remember scale and screen size and make full page
+  - then <https://ezgif.com/webp-maker>
+    - 600 ms delay
+    - 1200 ms for the last one
+    - quality 90
+  - <https://ezgif.com/webp-maker/ezgif-62a1b9a1b6704abf-split.html>
+- [ ] rich landing enabled flag - enable more than just the title and demo
+- [ ] remove formerly known as schej and flag
+- [ ] font size of hours and days of week too large on mobile
+- [ ] tooltip with time should appear where I hover cursor or release it
+- [ ] on click on lock icon, show a tooltip with explanation why not editable
+- [ ] improve readme
+  - [ ] replace the icon
+  - [ ] update the site link
+  - [ ] add warning about unstability and possible loss of information and under construction
+  - [ ] update technologies
+- [ ] add github button on the event page
+- [ ] in FAQ, align text and +
+- [ ] in FAQ, don't mention calendars when sign in is disabled
+- [ ] How it works section still exists?
+- [ ] landing on mobile - no button at the top, better buttons like on desktop
+- [x] on the event page, responses should be aligned top with the grid top
+- [x] add flag to enable privacy policy
+- [ ] should be able to edit specific times again
+- [ ] show all hours should show all hours, not trimmed. Currently, it trims wrong
 
 ## MUST
 
 - [ ] Event can be edited only by the creator. The description too
 - [ ] event in +3, edit specific times in +9, some time slots are lost
 - [ ] event in +3,
+- [ ] specific times uses the default 9-18 after unselecting 9-18
+- [ ] when autofill is disabled, only manually should be enabled
+- [ ] default hours for new event shoul be 9-18
 
 ## COULD
 
