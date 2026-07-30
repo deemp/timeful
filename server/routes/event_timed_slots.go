@@ -3,13 +3,13 @@ package routes
 import (
 	"errors"
 	"sort"
-	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"schej.it/server/models"
 )
 
 var errActiveSlotOutsideEnabled = errors.New("active-slots-must-be-enabled")
+var errIncompleteTimedEventContract = errors.New("incomplete-timed-event-contract")
 
 type timedEventPayloadFields struct {
 	EnabledSlots    []primitive.DateTime    `json:"enabledSlots"`
@@ -42,53 +42,23 @@ func normalizeDateTimes(values []primitive.DateTime) []primitive.DateTime {
 	return normalized
 }
 
-func buildLegacyTimedSlots(
-	dates []primitive.DateTime,
-	durationHours *float32,
-	timeIncrementMinutes *int,
-) []primitive.DateTime {
-	if len(dates) == 0 || durationHours == nil {
-		return []primitive.DateTime{}
-	}
-
-	incrementMinutes := 15
-	if timeIncrementMinutes != nil && *timeIncrementMinutes > 0 {
-		incrementMinutes = *timeIncrementMinutes
-	}
-
-	durationMinutes := int(time.Duration(float64(*durationHours) * float64(time.Hour)).Minutes())
-	if durationMinutes <= 0 {
-		return []primitive.DateTime{}
-	}
-
-	slots := make([]primitive.DateTime, 0)
-	for _, date := range normalizeDateTimes(dates) {
-		current := date.Time().UTC()
-		end := current.Add(time.Duration(durationMinutes) * time.Minute)
-		for current.Before(end) {
-			slots = append(slots, primitive.NewDateTimeFromTime(current))
-			current = current.Add(time.Duration(incrementMinutes) * time.Minute)
-		}
-	}
-
-	return normalizeDateTimes(slots)
-}
-
 func normalizeTimedEventPayloadFields(
 	fields timedEventPayloadFields,
-	dates []primitive.DateTime,
-	durationHours *float32,
-	timeIncrementMinutes *int,
 ) (timedEventPayloadFields, error) {
-	enabledSlots := normalizeDateTimes(fields.EnabledSlots)
-	if len(enabledSlots) == 0 {
-		enabledSlots = buildLegacyTimedSlots(dates, durationHours, timeIncrementMinutes)
+	if fields.EnabledSlots == nil || fields.ActiveSlots == nil ||
+		fields.EventTimezone == nil || fields.SlotGeneration == nil ||
+		fields.TimedRecurrence == nil {
+		return timedEventPayloadFields{}, errIncompleteTimedEventContract
+	}
+	if *fields.EventTimezone == "" || fields.SlotGeneration.TimeIncrementMinutes <= 0 ||
+		fields.SlotGeneration.StartTimeLocal == "" || fields.SlotGeneration.EndTimeLocal == "" ||
+		(fields.TimedRecurrence.Kind != "specific_dates" && fields.TimedRecurrence.Kind != "weekly") ||
+		fields.TimedRecurrence.StartOnMonday == nil {
+		return timedEventPayloadFields{}, errIncompleteTimedEventContract
 	}
 
+	enabledSlots := normalizeDateTimes(fields.EnabledSlots)
 	activeSlots := normalizeDateTimes(fields.ActiveSlots)
-	if len(activeSlots) == 0 {
-		activeSlots = enabledSlots
-	}
 
 	enabledLookup := make(map[int64]struct{}, len(enabledSlots))
 	for _, slot := range enabledSlots {
@@ -102,11 +72,6 @@ func normalizeTimedEventPayloadFields(
 
 	fields.EnabledSlots = enabledSlots
 	fields.ActiveSlots = activeSlots
-
-	if fields.EventTimezone == nil && len(enabledSlots) > 0 {
-		defaultTimezone := "UTC"
-		fields.EventTimezone = &defaultTimezone
-	}
 
 	return fields, nil
 }

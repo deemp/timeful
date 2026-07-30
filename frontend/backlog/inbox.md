@@ -213,7 +213,19 @@ Semi-structured TODO list
 - [ ] event in +3,
 - [ ] specific times uses the default 9-18 after unselecting 9-18
 - [ ] when autofill is disabled, only manually should be enabled
-- [ ] default hours for new event shoul be 9-18
+- [ ] default hours for new event should be 9-18
+- [ ] RIIR
+  - [ ] switch to Postgres
+  - [ ] use dbfirst
+  - [ ] don't fix sign in functionality in the Go version
+  - [ ] keep the original code in comments for line-by-line rewriting
+- [x] On the event page without responses, there should be only Add availability and Show all hours, not very wide Add availability and More options
+
+      "Show all hours" should be under "Add availability", as before.
+      The toggle and "Show all hours" text should be centered vertically within their box
+
+- [x] "Best times" toggle should appear when there is at least one response, not more than one
+- [x] When Best times and More options are both visible, they should be side by side
 
 ## COULD
 

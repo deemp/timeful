@@ -342,7 +342,7 @@ describe("NewSignUp", () => {
 
     expect(postMock).toHaveBeenCalledTimes(1)
     expect(postMock.mock.calls[0]?.[0]).toBe("/events")
-    expect((postMock.mock.calls[0]?.[1] as { duration: number }).duration).toBe(1.5)
+    expect(postMock.mock.calls[0]?.[1]).not.toHaveProperty("duration")
   })
 
   it("treats equal start and end times as a 24-hour sign-up duration", async () => {
@@ -379,7 +379,7 @@ describe("NewSignUp", () => {
 
     expect(postMock).toHaveBeenCalledTimes(1)
     expect(postMock.mock.calls[0]?.[0]).toBe("/events")
-    expect((postMock.mock.calls[0]?.[1] as { duration: number }).duration).toBe(24)
+    expect(postMock.mock.calls[0]?.[1]).not.toHaveProperty("duration")
   })
 
   it("submits canonical timed fields for new timed sign-up events", async () => {
@@ -428,12 +428,6 @@ describe("NewSignUp", () => {
         "2026-05-28T09:30:00Z",
         "2026-05-28T09:45:00Z",
       ],
-      times: [
-        "2026-05-28T09:00:00Z",
-        "2026-05-28T09:15:00Z",
-        "2026-05-28T09:30:00Z",
-        "2026-05-28T09:45:00Z",
-      ],
       eventTimezone: "UTC",
       slotGeneration: {
         startTimeLocal: "09:00:00",
@@ -446,8 +440,6 @@ describe("NewSignUp", () => {
         selectedDaysOfWeek: [],
         startOnMonday: false,
       },
-      duration: 1,
-      dates: ["2026-05-28T09:00:00Z"],
       type: "specific_dates",
       isSignUpForm: true,
     })
@@ -506,12 +498,6 @@ describe("NewSignUp", () => {
         "2026-05-28T09:45:00Z",
       ],
       activeSlots: [
-        "2026-05-28T09:00:00Z",
-        "2026-05-28T09:15:00Z",
-        "2026-05-28T09:30:00Z",
-        "2026-05-28T09:45:00Z",
-      ],
-      times: [
         "2026-05-28T09:00:00Z",
         "2026-05-28T09:15:00Z",
         "2026-05-28T09:30:00Z",

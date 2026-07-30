@@ -280,7 +280,7 @@ describe("NewGroup", () => {
 
     expect(postMock).toHaveBeenCalledTimes(1)
     expect(postMock.mock.calls[0]?.[0]).toBe("/events")
-    expect((postMock.mock.calls[0]?.[1] as { duration: number }).duration).toBe(1.5)
+    expect(postMock.mock.calls[0]?.[1]).not.toHaveProperty("duration")
   })
 
   it("initializes parent-owned timezone state from the saved selection", async () => {
@@ -368,7 +368,7 @@ describe("NewGroup", () => {
     await Promise.resolve()
 
     expect(postMock).toHaveBeenCalledTimes(1)
-    expect((postMock.mock.calls[0]?.[1] as { duration: number }).duration).toBe(24)
+    expect(postMock.mock.calls[0]?.[1]).not.toHaveProperty("duration")
   })
 
   it("submits canonical timed fields for new groups", async () => {
@@ -422,12 +422,6 @@ describe("NewGroup", () => {
         expect.stringMatching(/^.+T09:30:00Z$/),
         expect.stringMatching(/^.+T09:45:00Z$/),
       ],
-      times: [
-        expect.stringMatching(/^.+T09:00:00Z$/),
-        expect.stringMatching(/^.+T09:15:00Z$/),
-        expect.stringMatching(/^.+T09:30:00Z$/),
-        expect.stringMatching(/^.+T09:45:00Z$/),
-      ],
       eventTimezone: "UTC",
       slotGeneration: {
         startTimeLocal: "09:00:00",
@@ -440,7 +434,6 @@ describe("NewGroup", () => {
         selectedDaysOfWeek: [1],
         startOnMonday: true,
       },
-      duration: 1,
       type: "group",
       attendees: [],
     })
@@ -494,10 +487,6 @@ describe("NewGroup", () => {
         expect.stringMatching(/^.+T09:30:00Z$/),
       ],
       activeSlots: [
-        expect.stringMatching(/^.+T09:00:00Z$/),
-        expect.stringMatching(/^.+T09:30:00Z$/),
-      ],
-      times: [
         expect.stringMatching(/^.+T09:00:00Z$/),
         expect.stringMatching(/^.+T09:30:00Z$/),
       ],

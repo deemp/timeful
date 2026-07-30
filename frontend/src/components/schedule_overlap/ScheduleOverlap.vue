@@ -63,7 +63,6 @@ import {
   ZdtSet,
   getTimezoneReferenceDateForEvent,
   normalizeOptionalTimezone,
-  zdtSetHas,
 } from "@/utils"
 import {
   availabilityTypes, eventTypes, UTC, type AvailabilityType
@@ -541,7 +540,7 @@ const {
   page, mobileNumDays, pageHasChanged, timeslot: _timeslot, calendarScrollLeft: _calendarScrollLeft, calendarMaxScroll: _calendarMaxScroll,
   timeType, startCalendarOnMonday, isSpecificDates, isWeekly, isSpecificTimes,
   daysOfWeek, timezoneOffset, timezoneReferenceDate, dayOffset: _dayOffset, timeslotDuration, timeslotHeight,
-  specificTimesSet: _specificTimesSet, splitTimes, times, allDays, days, monthDays, monthDayIncluded,
+  splitTimes, times, allDays, days, monthDays, monthDayIncluded,
   curMonthText, columnOffsets: _columnOffsets, showLeftZigZag: _showLeftZigZag, showRightZigZag: _showRightZigZag, hasNextPage, hasPrevPage, hasPages: _hasPages,
   maxDaysPerPage, isColConsecutive, getDateFromDayHoursOffset: _getDateFromDayHoursOffset, getDateFromDayTimeIndex: _getDateFromDayTimeIndex,
   getDisplayDateFromRowCol, getDateFromRowCol, setTimeslotSize, onResize, onCalendarScroll, getLocalTimezone: _getLocalTimezone,
@@ -735,8 +734,8 @@ const specificTimeAvailabilityByVisibleDay = computed<Map<number, ZdtSet>>(() =>
     const availableDates = new ZdtSet()
 
     for (let baseRowIndex = 0; baseRowIndex < totalBaseRows; baseRowIndex += 1) {
-      const date = getBaseRowScheduleDate(baseRowIndex, visibleDayIndex)
-      if (date && zdtSetHas(_specificTimesSet.value, date)) {
+      const date = getDateFromRowCol(baseRowIndex, visibleDayIndex)
+      if (date) {
         availableDates.add(date)
       }
     }

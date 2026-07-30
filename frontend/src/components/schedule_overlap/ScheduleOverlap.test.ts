@@ -312,9 +312,7 @@ describe("ScheduleOverlap", () => {
 
     expect(putMock).toHaveBeenCalledTimes(1)
     expect(putMock.mock.calls[0]?.[1]).toMatchObject({
-      dates: ["2026-05-29T00:00:00Z", "2026-05-30T00:00:00Z"],
-      duration: 4,
-      times: [
+      activeSlots: [
         "2026-05-29T00:00:00Z",
         "2026-05-29T00:15:00Z",
         "2026-05-29T00:30:00Z",
@@ -377,16 +375,14 @@ describe("ScheduleOverlap", () => {
       vm.days.map((day) => day.dateObject.withTimeZone("UTC").toPlainDate().toString())
     ).toEqual(["2026-05-29", "2026-05-30"])
     const renderedHourLabels = vm.splitTimes[0].map((time) => time.text).filter(Boolean)
-    expect(renderedHourLabels).toHaveLength(24)
-    expect(renderedHourLabels.slice(0, 4)).toEqual([
+    expect(renderedHourLabels).toEqual([
       "12 am",
       "1 am",
       "2 am",
       "3 am",
     ])
-    expect(renderedHourLabels.at(-1)).toBe("11 pm")
     expect(vm.splitTimes[0].map((time) => time.displayedMinutes)).toEqual(
-      Array.from({ length: 96 }, (_, index) => index * 15)
+      Array.from({ length: 16 }, (_, index) => index * 15)
     )
     expect(
       vm.renderedRows.filter((row) => row.kind === "collapsed")
@@ -449,8 +445,7 @@ describe("ScheduleOverlap", () => {
 
     expect(putMock).toHaveBeenCalledTimes(1)
     expect(putMock.mock.calls[0]?.[1]).toMatchObject({
-      dates: ["2026-05-28T00:00:00Z", "2026-05-29T00:00:00Z"],
-      times: [
+      activeSlots: [
         "2026-05-29T00:00:00Z",
         "2026-05-29T00:15:00Z",
         "2026-05-29T00:30:00Z",

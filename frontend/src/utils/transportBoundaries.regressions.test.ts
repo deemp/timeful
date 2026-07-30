@@ -208,6 +208,15 @@ describe("transport and timezone regression boundaries", () => {
     )
   })
 
+  it("rejects legacy null timed active slots", () => {
+    const raw = {
+      ...buildCanonicalSpecificDatesRawEvent(),
+      activeSlots: null,
+    } as unknown as RawEvent
+
+    expect(() => fromRawEvent(raw)).toThrow("Failed to decode event transport payload")
+  })
+
   it("drops malformed response instants instead of failing the whole availability decode", () => {
     const response = fromRawResponse(({
       availability: ["2026-05-15T08:00:00Z", ""],
@@ -731,7 +740,7 @@ describe("transport and timezone regression boundaries", () => {
     expect(() => fromRawEvent(rawEvent)).toThrow("Failed to decode event transport payload")
   })
 
-  it("round-trips canonical timed payloads while keeping compatibility dates and times on write", () => {
+  it("round-trips canonical timed payloads without legacy schedule fields", () => {
     const decoded = fromRawEvent(
       buildCanonicalSpecificDatesRawEvent({
         dates: undefined,
@@ -755,14 +764,10 @@ describe("transport and timezone regression boundaries", () => {
     )
     const payload = toRawEvent(decoded)
 
-    expect(payload.dates).toEqual([
-      epochMs("2026-05-28T09:00:00Z"),
-      epochMs("2026-05-29T09:00:00Z"),
-    ])
-    expect(payload.times).toEqual([
-      epochMs("2026-05-29T09:00:00Z"),
-      epochMs("2026-05-29T09:15:00Z"),
-    ])
+    expect(payload).not.toHaveProperty("dates")
+    expect(payload).not.toHaveProperty("times")
+    expect(payload).not.toHaveProperty("duration")
+    expect(payload).not.toHaveProperty("timeIncrement")
     expect(payload.enabledSlots).toEqual([
       "2026-05-28T09:00:00Z",
       "2026-05-28T09:15:00Z",
@@ -778,10 +783,8 @@ describe("transport and timezone regression boundaries", () => {
   it("encodes canonical event patch payloads at an explicit mutation boundary", () => {
     const payload = toEventPatchPayload({
       name: "Planning",
-      duration: Temporal.Duration.from({ hours: 2 }),
-      dates: [Temporal.PlainDate.from("2026-01-05")],
-      timeSeed: zdt("2026-01-05T09:00:00Z"),
       type: eventTypes.SPECIFIC_DATES,
+      dates: [Temporal.PlainDate.from("2026-01-05")],
       signUpBlocks: [
         {
           _id: "block-1",
@@ -791,7 +794,8 @@ describe("transport and timezone regression boundaries", () => {
           endDate: zdt("2026-01-05T10:00:00Z"),
         },
       ],
-      times: [zdt("2026-01-05T09:00:00Z")],
+      enabledSlots: [zdt("2026-01-05T09:00:00Z")],
+      activeSlots: [zdt("2026-01-05T09:00:00Z")],
       remindees: [{ email: "ada@example.com" }],
     })
 
@@ -801,7 +805,7 @@ describe("transport and timezone regression boundaries", () => {
       eventTimezone: "UTC",
       slotGeneration: {
         startTimeLocal: "09:00:00",
-        endTimeLocal: "17:00:00",
+        endTimeLocal: "09:15:00",
         timeIncrementMinutes: 15,
       },
       timedRecurrence: {
@@ -811,17 +815,12 @@ describe("transport and timezone regression boundaries", () => {
         startOnMonday: false,
       },
       name: "Planning",
-      duration: 2,
-      dates: ["2026-01-05T09:00:00Z"],
-      hasSpecificTimes: undefined,
       notificationsEnabled: undefined,
       blindAvailabilityEnabled: undefined,
       daysOnly: undefined,
       type: eventTypes.SPECIFIC_DATES,
       sendEmailAfterXResponses: undefined,
       collectEmails: undefined,
-      startOnMonday: undefined,
-      timeIncrement: undefined,
       creatorPosthogId: undefined,
       description: undefined,
       signUpBlocks: [
@@ -833,7 +832,6 @@ describe("transport and timezone regression boundaries", () => {
           endDate: epochMs("2026-01-05T10:00:00Z"),
         },
       ],
-      times: ["2026-01-05T09:00:00Z"],
       remindees: ["ada@example.com"],
       attendees: undefined,
     })
@@ -843,6 +841,7 @@ describe("transport and timezone regression boundaries", () => {
     const payload = toRawEvent({
       _id: "evt-1",
       type: eventTypes.SPECIFIC_DATES,
+      daysOnly: true,
       dates: [
         Temporal.PlainDate.from("2026-01-05"),
         Temporal.PlainDate.from("2026-01-06"),

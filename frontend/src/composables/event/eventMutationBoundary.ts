@@ -41,7 +41,7 @@ type EventPatchInput = Pick<
 }
 
 const toRemindeeEmails = (
-  remindees: EventPatchInput["remindees"]
+  remindees: EventPatchInput["remindees"],
 ): string[] | undefined => {
   if (!remindees) return undefined
 
@@ -55,49 +55,55 @@ const toRemindeeEmails = (
   })
 }
 
-export const toEventPatchPayload = (input: EventPatchInput) => ({
-  enabledSlots: (() => {
-    const activeSlots = sortAndUniqueSlots(input.activeSlots ?? input.times)
-    const enabledSlots = sortAndUniqueSlots(input.enabledSlots)
-    return toTransportDateTimeStrings(
-      enabledSlots.length > 0 ? enabledSlots : activeSlots
-    )
-  })(),
-  activeSlots: toTransportDateTimeStrings(sortAndUniqueSlots(input.activeSlots ?? input.times)),
-  eventTimezone: getTimedEventTimezone(input),
-  slotGeneration: (() => {
-    const slotGeneration = getTimedSlotGeneration(input)
-    return {
-      startTimeLocal: slotGeneration.startTimeLocal.toString(),
-      endTimeLocal: slotGeneration.endTimeLocal.toString(),
-      timeIncrementMinutes: slotGeneration.timeIncrement.total("minutes"),
-    }
-  })(),
-  timedRecurrence: (() => {
-    const timedRecurrence = getTimedRecurrence(input)
-    return {
-      kind: timedRecurrence.kind,
-      selectedDays: timedRecurrence.selectedDays.map((day) => day.toString()),
-      selectedDaysOfWeek: timedRecurrence.selectedDaysOfWeek,
-      startOnMonday: timedRecurrence.startOnMonday,
-    }
-  })(),
-  name: input.name,
-  duration: input.duration?.total("hours"),
-  dates: toEventDateStrings(input),
-  hasSpecificTimes: input.hasSpecificTimes,
-  notificationsEnabled: input.notificationsEnabled,
-  blindAvailabilityEnabled: input.blindAvailabilityEnabled,
-  daysOnly: input.daysOnly,
-  type: input.type,
-  sendEmailAfterXResponses: input.sendEmailAfterXResponses,
-  collectEmails: input.collectEmails,
-  startOnMonday: input.startOnMonday,
-  timeIncrement: input.timeIncrement?.total("minutes"),
-  creatorPosthogId: input.creatorPosthogId,
-  description: input.description,
-  signUpBlocks: input.signUpBlocks?.map((block) => toRawSignUpBlock(block)),
-  times: toTransportDateTimeStrings(input.times),
-  remindees: toRemindeeEmails(input.remindees),
-  attendees: input.attendees,
-})
+export const toEventPatchPayload = (input: EventPatchInput) => {
+  const common = {
+    name: input.name,
+    notificationsEnabled: input.notificationsEnabled,
+    blindAvailabilityEnabled: input.blindAvailabilityEnabled,
+    daysOnly: input.daysOnly,
+    type: input.type,
+    sendEmailAfterXResponses: input.sendEmailAfterXResponses,
+    collectEmails: input.collectEmails,
+    creatorPosthogId: input.creatorPosthogId,
+    description: input.description,
+    signUpBlocks: input.signUpBlocks?.map((block) => toRawSignUpBlock(block)),
+    remindees: toRemindeeEmails(input.remindees),
+    attendees: input.attendees,
+  }
+
+  if (input.daysOnly) {
+    return { ...common, dates: toEventDateStrings(input) }
+  }
+
+  return {
+    ...common,
+    enabledSlots: (() => {
+      const activeSlots = sortAndUniqueSlots(input.activeSlots)
+      const enabledSlots = sortAndUniqueSlots(input.enabledSlots)
+      return toTransportDateTimeStrings(
+        enabledSlots.length > 0 ? enabledSlots : activeSlots,
+      )
+    })(),
+    activeSlots: toTransportDateTimeStrings(
+      sortAndUniqueSlots(input.activeSlots),
+    ),
+    eventTimezone: getTimedEventTimezone(input),
+    slotGeneration: (() => {
+      const slotGeneration = getTimedSlotGeneration(input)
+      return {
+        startTimeLocal: slotGeneration.startTimeLocal.toString(),
+        endTimeLocal: slotGeneration.endTimeLocal.toString(),
+        timeIncrementMinutes: slotGeneration.timeIncrement.total("minutes"),
+      }
+    })(),
+    timedRecurrence: (() => {
+      const timedRecurrence = getTimedRecurrence(input)
+      return {
+        kind: timedRecurrence.kind,
+        selectedDays: timedRecurrence.selectedDays.map((day) => day.toString()),
+        selectedDaysOfWeek: timedRecurrence.selectedDaysOfWeek,
+        startOnMonday: timedRecurrence.startOnMonday,
+      }
+    })(),
+  }
+}

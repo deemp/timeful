@@ -301,7 +301,7 @@ describe("NewEvent", () => {
     })
   })
 
-  it("creates specific-times events with a full canonical active domain and routes into the handoff flow", async () => {
+  it("creates specific-times events with an empty canonical active subset and routes into the handoff flow", async () => {
     const wrapper = shallowMount(NewEvent, {
       global: {
         stubs: defaultStubs,
@@ -331,16 +331,12 @@ describe("NewEvent", () => {
     expect(postMock).toHaveBeenCalledWith(
       "/events",
       expect.objectContaining({
-        hasSpecificTimes: true,
-        activeSlots: expect.any(Array) as string[],
+        activeSlots: [],
         enabledSlots: expect.any(Array) as string[],
       })
     )
     expect(
       (postMock.mock.calls[0]?.[1] as { enabledSlots?: string[] }).enabledSlots?.length
-    ).toBeGreaterThan(0)
-    expect(
-      (postMock.mock.calls[0]?.[1] as { activeSlots?: string[] }).activeSlots?.length
     ).toBeGreaterThan(0)
     const pushedState = (routerPushMock.mock.calls[0]?.[0] as {
       state?: {
@@ -359,9 +355,7 @@ describe("NewEvent", () => {
       })
     )
     expect(pushedState?.timefulSpecificTimesEntry?.mode).toBe("create")
-    expect(pushedState?.timefulSpecificTimesEntry?.draft?.activeSlots?.length).toBeGreaterThan(
-      0
-    )
+    expect(pushedState?.timefulSpecificTimesEntry?.draft?.activeSlots).toEqual([])
     expect(pushedState?.timefulSpecificTimesEntry?.draft?.resetExistingTimes).toBe(
       true
     )
@@ -1232,12 +1226,8 @@ describe("NewEvent", () => {
     expect(postMock).toHaveBeenCalledTimes(1)
     expect(postMock.mock.calls[0]?.[0]).toBe("/events")
     expect(
-      (
-        postMock.mock.calls[0]?.[1] as {
-          duration: number
-        }
-      ).duration
-    ).toBe(0)
+      postMock.mock.calls[0]?.[1]
+    ).not.toHaveProperty("duration")
   })
 
   it("submits an overnight event with the next-day duration", async () => {
@@ -1274,22 +1264,12 @@ describe("NewEvent", () => {
 
     expect(postMock).toHaveBeenCalledTimes(1)
     expect(postMock.mock.calls[0]?.[0]).toBe("/events")
-    expect(
-      (
-        postMock.mock.calls[0]?.[1] as {
-          duration: number
-          dates: string[]
-        }
-      ).duration
-    ).toBe(1.5)
-    expect(
-      (
-        postMock.mock.calls[0]?.[1] as {
-          duration: number
-          dates: string[]
-        }
-      ).dates
-    ).toEqual(["2026-01-02T23:30:00Z"])
+    const payload = postMock.mock.calls[0]?.[1] as Record<string, unknown>
+    expect(payload).not.toHaveProperty("duration")
+    expect(payload).not.toHaveProperty("dates")
+    expect(payload.slotGeneration).toMatchObject({
+      startTimeLocal: "23:30:00", endTimeLocal: "01:00:00",
+    })
   })
 
   it("treats equal start and end times as a 24-hour event duration", async () => {
@@ -1326,12 +1306,6 @@ describe("NewEvent", () => {
 
     expect(postMock).toHaveBeenCalledTimes(1)
     expect(postMock.mock.calls[0]?.[0]).toBe("/events")
-    expect(
-      (
-        postMock.mock.calls[0]?.[1] as {
-          duration: number
-        }
-      ).duration
-    ).toBe(24)
+    expect(postMock.mock.calls[0]?.[1]).not.toHaveProperty("duration")
   })
 })

@@ -162,21 +162,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     return Math.floor(HOUR_HEIGHT / 4)
   })
 
-  const specificTimesActiveSlots = computed<Temporal.ZonedDateTime[]>(() => {
-    if (event.value.activeSlots != null) {
-      return sortAndUniqueSlots(event.value.activeSlots)
-    }
-
-    const times = (event.value as { times?: Temporal.ZonedDateTime[] }).times
-    if (times && times.length > 0) {
-      return sortAndUniqueSlots(times)
-    }
-
-    const enabledSlots = event.value.enabledSlots
-    if (enabledSlots && enabledSlots.length > 0) {
-      return sortAndUniqueSlots(enabledSlots)
-    }
-
+  const generatedSpecificTimesSlots = computed<Temporal.ZonedDateTime[]>(() => {
     if (!isSpecificTimes.value || event.value.daysOnly) {
       return []
     }
@@ -192,16 +178,64 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     )
   })
 
-  const specificTimesCoverageSlots = computed<Temporal.ZonedDateTime[]>(() => {
+  const specificTimesActiveSlots = computed<Temporal.ZonedDateTime[]>(() => {
+    if (event.value.activeSlots != null) {
+      return sortAndUniqueSlots(event.value.activeSlots)
+    }
+
+    const times = (event.value as { times?: Temporal.ZonedDateTime[] }).times
+    if (times && times.length > 0) {
+      return sortAndUniqueSlots(times)
+    }
+
     const enabledSlots = event.value.enabledSlots
     if (enabledSlots && enabledSlots.length > 0) {
       return sortAndUniqueSlots(enabledSlots)
     }
 
-    return specificTimesActiveSlots.value
+    return []
   })
 
-  /** Returns a set containing the active times for the event if it has specific times */
+  const specificTimesEnabledSlots = computed<Temporal.ZonedDateTime[]>(() => {
+    const enabledSlots = event.value.enabledSlots
+    if (enabledSlots && enabledSlots.length > 0) {
+      return sortAndUniqueSlots(enabledSlots)
+    }
+
+    if (specificTimesActiveSlots.value.length > 0) {
+      return specificTimesActiveSlots.value
+    }
+
+    return generatedSpecificTimesSlots.value
+  })
+
+  const specificTimesViewSlots = computed<Temporal.ZonedDateTime[]>(() => {
+    if (specificTimesActiveSlots.value.length > 0) {
+      return specificTimesActiveSlots.value
+    }
+
+    return specificTimesEnabledSlots.value
+  })
+
+  const specificTimesVisibleSlots = computed<Temporal.ZonedDateTime[]>(() =>
+    state.value === states.SET_SPECIFIC_TIMES
+      ? specificTimesEnabledSlots.value
+      : specificTimesViewSlots.value
+  )
+
+  const specificTimesCoverageSlots = computed<Temporal.ZonedDateTime[]>(() =>
+    specificTimesVisibleSlots.value
+  )
+
+  const specificTimesVisibleSet = computed<ZdtSet>(() => {
+    if (specificTimesVisibleSlots.value.length > 0) {
+      return new ZdtSet(specificTimesVisibleSlots.value)
+    }
+
+    return new ZdtSet([])
+  })
+
+  /** Returns a set containing the selected subset for specific-times events. */
   const specificTimesSet = computed<ZdtSet>(() => {
     if (specificTimesActiveSlots.value.length > 0) {
       return new ZdtSet(specificTimesActiveSlots.value)
@@ -505,18 +539,53 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
 
     const eventDates = getEventDateSeeds(event.value)
     if (isSpecificTimes.value) {
-      for (const day of getSpecificTimesEditDays(eventDates)) {
-        const { dayString, dateString } = getDateString(
-          day.dateObject,
-          day.membershipDate
-        )
-        days.push({
-          dayText: dayString,
-          dateString,
-          dateObject: day.dateObject,
-          membershipDate: day.membershipDate,
-          isConsecutive: day.isConsecutive,
-        })
+      if (state.value === states.SET_SPECIFIC_TIMES) {
+        for (const day of getSpecificTimesEditDays(eventDates)) {
+          const { dayString, dateString } = getDateString(
+            day.dateObject,
+            day.membershipDate
+          )
+          days.push({
+            dayText: dayString,
+            dateString,
+            dateObject: day.dateObject,
+            membershipDate: day.membershipDate,
+            isConsecutive: day.isConsecutive,
+          })
+        }
+      } else {
+        const daysByDate = new Map<
+          string,
+          { dateObject: Temporal.ZonedDateTime }
+        >()
+        for (const day of getSpecificTimesEditDays(eventDates)) {
+          daysByDate.set(day.dateObject.toPlainDate().toString(), {
+            dateObject: day.dateObject,
+          })
+        }
+        for (const day of getSpecificTimesDayStarts(
+          specificTimesVisibleSlots.value,
+          curTimezone.value
+        )) {
+          daysByDate.set(day.dateObject.toPlainDate().toString(), {
+            dateObject: day.dateObject,
+          })
+        }
+
+        let previousDay: Temporal.ZonedDateTime | null = null
+        for (const day of [...daysByDate.values()].sort((left, right) =>
+          Temporal.ZonedDateTime.compare(left.dateObject, right.dateObject)
+        )) {
+          const { dayString, dateString } = getDateString(day.dateObject)
+          days.push({
+            dayText: dayString,
+            dateString,
+            dateObject: day.dateObject,
+            isConsecutive:
+              previousDay == null || previousDay.add({ days: 1 }).equals(day.dateObject),
+          })
+          previousDay = day.dateObject
+        }
       }
       return days
     }
@@ -784,7 +853,6 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     if (
       isSpecificTimes.value &&
       state.value === states.SET_SPECIFIC_TIMES &&
-      ((event.value as { times?: Temporal.ZonedDateTime[] }).times?.length ?? 0) === 0 &&
       day.membershipDate != null
     ) {
       return getTimedSlotForMembershipDay({
@@ -828,7 +896,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
         : getDateHoursOffset(day.dateObject, time.hoursOffset)
     if (isSpecificTimes.value) {
       if (!includeSpecificTimesGaps) {
-        if (!zdtSetHas(specificTimesSet.value, date)) return null
+        if (!zdtSetHas(specificTimesVisibleSet.value, date)) return null
       }
     } else {
       const intervals = timedGridIntervalsByLocalDay.value.get(

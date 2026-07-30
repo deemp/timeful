@@ -2,6 +2,7 @@
 package routes
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -28,6 +29,35 @@ import (
 	"schej.it/server/services/listmonk"
 	"schej.it/server/utils"
 )
+
+func rejectLegacyTimedScheduleFields(c *gin.Context) error {
+	body, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		return err
+	}
+	c.Request.Body = io.NopCloser(bytes.NewReader(body))
+
+	var payload map[string]json.RawMessage
+	if err := json.Unmarshal(body, &payload); err != nil {
+		return err
+	}
+	daysOnly := false
+	if rawDaysOnly, exists := payload["daysOnly"]; exists {
+		if err := json.Unmarshal(rawDaysOnly, &daysOnly); err != nil {
+			return err
+		}
+	}
+	legacyFields := []string{"duration", "times", "timeIncrement", "hasSpecificTimes", "startOnMonday"}
+	if !daysOnly {
+		legacyFields = append(legacyFields, "dates")
+	}
+	for _, field := range legacyFields {
+		if _, exists := payload[field]; exists {
+			return fmt.Errorf("legacy-timed-event-field:%s", field)
+		}
+	}
+	return nil
+}
 
 func InitEvents(router *gin.RouterGroup) {
 	eventRouter := router.Group("/events")
@@ -83,15 +113,19 @@ func normalizeTimedResponseAvailabilitySlots(
 // @Tags events
 // @Accept json
 // @Produce json
-// @Param payload body object{name=string,duration=float32,dates=[]string,type=models.EventType,isSignUpForm=bool,signUpBlocks=[]models.SignUpBlock,notificationsEnabled=bool,blindAvailabilityEnabled=bool,daysOnly=bool,remindees=[]string,sendEmailAfterXResponses=int,when2meetHref=string,timeIncrement=int,enabledSlots=[]string,activeSlots=[]string,eventTimezone=string,slotGeneration=models.SlotGeneration,timedRecurrence=models.TimedRecurrence,attendees=[]string} true "Object containing info about the event to create"
+// @Param payload body object{name=string,type=models.EventType,isSignUpForm=bool,signUpBlocks=[]models.SignUpBlock,notificationsEnabled=bool,blindAvailabilityEnabled=bool,daysOnly=bool,dates=[]string,remindees=[]string,sendEmailAfterXResponses=int,when2meetHref=string,enabledSlots=[]string,activeSlots=[]string,eventTimezone=string,slotGeneration=models.SlotGeneration,timedRecurrence=models.TimedRecurrence,attendees=[]string} true "Timed events require the complete canonical slot contract; day-only events require dates"
 // @Success 201 {object} object{eventId=string}
 // @Router /events [post]
 func createEvent(c *gin.Context) {
+	if err := rejectLegacyTimedScheduleFields(c); err != nil {
+		c.JSON(http.StatusBadRequest, responses.Error{Error: err.Error()})
+		return
+	}
 	payload := struct {
 		// Required parameters
 		Name     string               `json:"name" binding:"required"`
-		Duration *float32             `json:"duration" binding:"required"`
-		Dates    []primitive.DateTime `json:"dates" binding:"required"`
+		Duration *float32             `json:"duration"`
+		Dates    []primitive.DateTime `json:"dates"`
 		Type     models.EventType     `json:"type" binding:"required"`
 
 		// Only for specific times for specific dates events
@@ -129,20 +163,20 @@ func createEvent(c *gin.Context) {
 		return
 	}
 	session := sessions.Default(c)
-	timedFields, err := normalizeTimedEventPayloadFields(
-		timedEventPayloadFields{
-			EnabledSlots:    payload.EnabledSlots,
-			ActiveSlots:     payload.ActiveSlots,
-			EventTimezone:   payload.EventTimezone,
-			SlotGeneration:  payload.SlotGeneration,
+	var timedFields timedEventPayloadFields
+	if payload.DaysOnly == nil || !*payload.DaysOnly {
+		var err error
+		timedFields, err = normalizeTimedEventPayloadFields(timedEventPayloadFields{
+			EnabledSlots: payload.EnabledSlots, ActiveSlots: payload.ActiveSlots,
+			EventTimezone: payload.EventTimezone, SlotGeneration: payload.SlotGeneration,
 			TimedRecurrence: payload.TimedRecurrence,
-		},
-		payload.Dates,
-		payload.Duration,
-		payload.TimeIncrement,
-	)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, responses.Error{Error: err.Error()})
+		})
+		if err != nil {
+			c.JSON(http.StatusBadRequest, responses.Error{Error: err.Error()})
+			return
+		}
+	} else if len(payload.Dates) == 0 {
+		c.JSON(http.StatusBadRequest, responses.Error{Error: "days-only-events-require-dates"})
 		return
 	}
 
@@ -170,25 +204,26 @@ func createEvent(c *gin.Context) {
 		OwnerId:                  ownerId,
 		CreatorPosthogId:         payload.CreatorPosthogId,
 		Name:                     payload.Name,
-		Duration:                 payload.Duration,
+		Duration:                 nil,
 		Dates:                    payload.Dates,
-		HasSpecificTimes:         payload.HasSpecificTimes,
-		Times:                    payload.Times,
+		HasSpecificTimes:         nil,
+		Times:                    nil,
 		IsSignUpForm:             payload.IsSignUpForm,
 		SignUpBlocks:             payload.SignUpBlocks,
-		StartOnMonday:            payload.StartOnMonday,
+		StartOnMonday:            nil,
 		NotificationsEnabled:     payload.NotificationsEnabled,
 		BlindAvailabilityEnabled: payload.BlindAvailabilityEnabled,
 		DaysOnly:                 payload.DaysOnly,
 		SendEmailAfterXResponses: payload.SendEmailAfterXResponses,
 		When2meetHref:            payload.When2meetHref,
 		CollectEmails:            payload.CollectEmails,
-		TimeIncrement:            payload.TimeIncrement,
+		TimeIncrement:            nil,
 		EnabledSlots:             timedFields.EnabledSlots,
 		ActiveSlots:              timedFields.ActiveSlots,
 		EventTimezone:            timedFields.EventTimezone,
 		SlotGeneration:           timedFields.SlotGeneration,
 		TimedRecurrence:          timedFields.TimedRecurrence,
+		ScheduleVersion:          1,
 		Type:                     payload.Type,
 		SignUpResponses:          make(map[string]*models.SignUpResponse),
 		NumResponses:             &numResponses,
@@ -300,15 +335,19 @@ func createEvent(c *gin.Context) {
 // @Tags events
 // @Produce json
 // @Param eventId path string true "Event ID"
-// @Param payload body object{name=string,description=string,duration=float32,dates=[]string,type=models.EventType,signUpBlocks=[]models.SignUpBlock,notificationsEnabled=bool,blindAvailabilityEnabled=bool,daysOnly=bool,remindees=[]string,sendEmailAfterXResponses=int,timeIncrement=int,enabledSlots=[]string,activeSlots=[]string,eventTimezone=string,slotGeneration=models.SlotGeneration,timedRecurrence=models.TimedRecurrence,attendees=[]string} true "Object containing info about the event to update"
+// @Param payload body object{name=string,description=string,dates=[]string,type=models.EventType,signUpBlocks=[]models.SignUpBlock,notificationsEnabled=bool,blindAvailabilityEnabled=bool,daysOnly=bool,remindees=[]string,sendEmailAfterXResponses=int,enabledSlots=[]string,activeSlots=[]string,eventTimezone=string,slotGeneration=models.SlotGeneration,timedRecurrence=models.TimedRecurrence,attendees=[]string} true "Timed events require the complete canonical slot contract; day-only events require dates"
 // @Success 200
 // @Router /events/{eventId} [put]
 func editEvent(c *gin.Context) {
+	if err := rejectLegacyTimedScheduleFields(c); err != nil {
+		c.JSON(http.StatusBadRequest, responses.Error{Error: err.Error()})
+		return
+	}
 	payload := struct {
 		// Required parameters
 		Name     string               `json:"name" binding:"required"`
-		Duration *float32             `json:"duration" binding:"required"`
-		Dates    []primitive.DateTime `json:"dates" binding:"required"`
+		Duration *float32             `json:"duration"`
+		Dates    []primitive.DateTime `json:"dates"`
 		Type     models.EventType     `json:"type" binding:"required"`
 
 		// Only for specific times for specific dates events
@@ -343,20 +382,20 @@ func editEvent(c *gin.Context) {
 		logger.StdErr.Println(err)
 		return
 	}
-	timedFields, err := normalizeTimedEventPayloadFields(
-		timedEventPayloadFields{
-			EnabledSlots:    payload.EnabledSlots,
-			ActiveSlots:     payload.ActiveSlots,
-			EventTimezone:   payload.EventTimezone,
-			SlotGeneration:  payload.SlotGeneration,
+	var err error
+	var timedFields timedEventPayloadFields
+	if payload.DaysOnly == nil || !*payload.DaysOnly {
+		timedFields, err = normalizeTimedEventPayloadFields(timedEventPayloadFields{
+			EnabledSlots: payload.EnabledSlots, ActiveSlots: payload.ActiveSlots,
+			EventTimezone: payload.EventTimezone, SlotGeneration: payload.SlotGeneration,
 			TimedRecurrence: payload.TimedRecurrence,
-		},
-		payload.Dates,
-		payload.Duration,
-		payload.TimeIncrement,
-	)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, responses.Error{Error: err.Error()})
+		})
+		if err != nil {
+			c.JSON(http.StatusBadRequest, responses.Error{Error: err.Error()})
+			return
+		}
+	} else if len(payload.Dates) == 0 {
+		c.JSON(http.StatusBadRequest, responses.Error{Error: "days-only-events-require-dates"})
 		return
 	}
 
@@ -389,23 +428,24 @@ func editEvent(c *gin.Context) {
 	// Update event
 	event.Name = payload.Name
 	event.Description = payload.Description
-	event.Duration = payload.Duration
+	event.Duration = nil
 	event.Dates = payload.Dates
-	event.Times = payload.Times
-	event.HasSpecificTimes = payload.HasSpecificTimes
+	event.Times = nil
+	event.HasSpecificTimes = nil
 	event.SignUpBlocks = payload.SignUpBlocks
-	event.StartOnMonday = payload.StartOnMonday
+	event.StartOnMonday = nil
 	event.NotificationsEnabled = payload.NotificationsEnabled
 	event.BlindAvailabilityEnabled = payload.BlindAvailabilityEnabled
 	event.DaysOnly = payload.DaysOnly
 	event.SendEmailAfterXResponses = payload.SendEmailAfterXResponses
 	event.CollectEmails = payload.CollectEmails
-	event.TimeIncrement = payload.TimeIncrement
+	event.TimeIncrement = nil
 	event.EnabledSlots = timedFields.EnabledSlots
 	event.ActiveSlots = timedFields.ActiveSlots
 	event.EventTimezone = timedFields.EventTimezone
 	event.SlotGeneration = timedFields.SlotGeneration
 	event.TimedRecurrence = timedFields.TimedRecurrence
+	event.ScheduleVersion = 1
 	event.Type = payload.Type
 
 	// Update remindees
@@ -524,14 +564,19 @@ func editEvent(c *gin.Context) {
 	}
 
 	// Update event object
+	update := bson.M{"$set": event}
+	if payload.DaysOnly == nil || !*payload.DaysOnly {
+		update["$unset"] = bson.M{
+			"duration": "", "dates": "", "timeIncrement": "",
+			"hasSpecificTimes": "", "times": "", "startOnMonday": "",
+		}
+	}
 	_, err = db.EventsCollection.UpdateOne(
 		context.Background(),
 		bson.M{
 			"_id": event.Id,
 		},
-		bson.M{
-			"$set": event,
-		},
+		update,
 	)
 
 	if err != nil {

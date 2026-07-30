@@ -178,6 +178,37 @@ describe("specificTimesEditDraft", () => {
     })
   })
 
+  it("starts with an empty active subset when specific-times edit state resets", () => {
+    const schedule = buildEventEditorSchedule({
+      daysOnly: false,
+      daysOnlyType: "specific_dates",
+      selectedDateOption: "Specific dates",
+      selectedDays: [
+        Temporal.PlainDate.from("2026-05-30"),
+        Temporal.PlainDate.from("2026-05-31"),
+      ],
+      selectedDaysOfWeek: [],
+      startOnMonday: true,
+      startTime: Temporal.PlainTime.from("09:00"),
+      endTime: Temporal.PlainTime.from("17:00"),
+      timezoneValue: UTC,
+      timeIncrementMinutes: 30,
+    })
+
+    expect(
+      buildSpecificTimesEditDraft({
+        event: buildEvent(),
+        schedule,
+        timeIncrementMinutes: 30,
+        specificTimesEnabled: true,
+      })
+    ).toMatchObject({
+      resetExistingTimes: true,
+      enabledSlots: schedule.enabledSlots,
+      activeSlots: [],
+    })
+  })
+
   it("filters the active subset down to remaining picked dates when membership shrinks", () => {
     const event = buildEvent()
     event.dates = [

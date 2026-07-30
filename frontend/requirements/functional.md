@@ -67,3 +67,7 @@ When sign in is disabled, all related functionality on the frontend must be gate
 ## FR-016
 
 When scheduling an event, the tooltip with the info about the time slot should follow the mouse cursor and not be above the slot where scheduling the event started
+
+## FR-017
+
+Default hours for a new event should be 9-18.

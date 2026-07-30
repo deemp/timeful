@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -75,6 +76,7 @@ type Event struct {
 	EventTimezone            *string              `json:"eventTimezone" bson:"eventTimezone,omitempty"`
 	SlotGeneration           *SlotGeneration      `json:"slotGeneration" bson:"slotGeneration,omitempty"`
 	TimedRecurrence          *TimedRecurrence     `json:"timedRecurrence" bson:"timedRecurrence,omitempty"`
+	ScheduleVersion          int                  `json:"-" bson:"scheduleVersion,omitempty"`
 
 	// Used for specific times for specific dates feature
 	HasSpecificTimes *bool                `json:"hasSpecificTimes" bson:"hasSpecificTimes,omitempty"`
@@ -117,6 +119,26 @@ type Event struct {
 
 	// Whether the user has responded to the availability group (fetched based on whether user is in Attendees)
 	HasResponded *bool `json:"hasResponded" bson:"-"`
+}
+
+// MarshalJSON keeps legacy schedule columns out of the timed-event API. They
+// remain in this persistence type only while the one-time data migration runs.
+func (event Event) MarshalJSON() ([]byte, error) {
+	if event.DaysOnly != nil && *event.DaysOnly {
+		type eventJSON Event
+		return json.Marshal(eventJSON(event))
+	}
+
+	type eventJSON Event
+	return json.Marshal(struct {
+		*eventJSON
+		Duration         *float32             `json:"duration,omitempty"`
+		Dates            []primitive.DateTime `json:"dates,omitempty"`
+		TimeIncrement    *int                 `json:"timeIncrement,omitempty"`
+		HasSpecificTimes *bool                `json:"hasSpecificTimes,omitempty"`
+		Times            []primitive.DateTime `json:"times,omitempty"`
+		StartOnMonday    *bool                `json:"startOnMonday,omitempty"`
+	}{eventJSON: (*eventJSON)(&event)})
 }
 
 func (e *Event) GetId() string {

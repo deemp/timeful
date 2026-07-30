@@ -106,7 +106,7 @@ export const buildSpecificTimesEditDraft = ({
     !hasCanonicalTimedState(event) ||
     !slotWindowMatches
   const nextActiveSlots = resetExistingTimes
-    ? schedule.enabledSlots
+    ? []
     : mergeActiveSlotsByMembershipDay({
         priorEnabledSlots: event.enabledSlots ?? event.activeSlots ?? event.times,
         priorActiveSlots: event.activeSlots ?? event.times ?? schedule.activeSlots,
@@ -158,7 +158,7 @@ export const buildSpecificTimesCreateDraft = ({
   timeSeed: schedule.dates[0]?.withTimeZone(UTC),
   duration: schedule.duration,
   enabledSlots: [...schedule.enabledSlots],
-  activeSlots: [...schedule.enabledSlots],
+  activeSlots: [],
   eventTimezone: schedule.eventTimezone,
   timedRecurrence: schedule.timedRecurrence,
   slotGeneration: schedule.slotGeneration,

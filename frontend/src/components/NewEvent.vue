@@ -913,25 +913,7 @@ const submit = async () => {
       : schedule.timedRecurrence
 
   const payload = {
-    enabledSlots: toTransportDateTimeStrings(canonicalEnabledSlots),
-    activeSlots: toTransportDateTimeStrings(canonicalActiveSlots),
-    times: toTransportDateTimeStrings(canonicalActiveSlots),
-    eventTimezone: canonicalEventTimezone,
-    slotGeneration: {
-      startTimeLocal: canonicalSlotGeneration.startTimeLocal.toString(),
-      endTimeLocal: canonicalSlotGeneration.endTimeLocal.toString(),
-      timeIncrementMinutes: canonicalSlotGeneration.timeIncrement.total("minutes"),
-    },
-    timedRecurrence: {
-      kind: canonicalTimedRecurrence.kind,
-      selectedDays: canonicalTimedRecurrence.selectedDays.map((day) => day.toString()),
-      selectedDaysOfWeek: canonicalTimedRecurrence.selectedDaysOfWeek,
-      startOnMonday: canonicalTimedRecurrence.startOnMonday,
-    },
     name: name.value,
-    duration: schedule.duration.total("hours"),
-    dates: toTransportDateTimeStrings(schedule.dates),
-    hasSpecificTimes: specificTimesEnabled.value,
     notificationsEnabled: !authUser.value ? false : notificationsEnabled.value,
     blindAvailabilityEnabled: blindAvailabilityEnabled.value,
     daysOnly: daysOnly.value,
@@ -941,9 +923,25 @@ const submit = async () => {
       ? sendEmailAfterXResponses.value
       : -1,
     collectEmails: collectEmails.value,
-    startOnMonday: startOnMonday.value,
-    timeIncrement: timeIncrement.value,
     creatorPosthogId: posthog.get_distinct_id(),
+    ...(daysOnly.value
+      ? { dates: toTransportDateTimeStrings(schedule.dates) }
+      : {
+          enabledSlots: toTransportDateTimeStrings(canonicalEnabledSlots),
+          activeSlots: toTransportDateTimeStrings(canonicalActiveSlots),
+          eventTimezone: canonicalEventTimezone,
+          slotGeneration: {
+            startTimeLocal: canonicalSlotGeneration.startTimeLocal.toString(),
+            endTimeLocal: canonicalSlotGeneration.endTimeLocal.toString(),
+            timeIncrementMinutes: canonicalSlotGeneration.timeIncrement.total("minutes"),
+          },
+          timedRecurrence: {
+            kind: canonicalTimedRecurrence.kind,
+            selectedDays: canonicalTimedRecurrence.selectedDays.map((day) => day.toString()),
+            selectedDaysOfWeek: canonicalTimedRecurrence.selectedDaysOfWeek,
+            startOnMonday: canonicalTimedRecurrence.startOnMonday,
+          },
+        }),
   }
 
   const posthogPayload: Record<string, unknown> = {

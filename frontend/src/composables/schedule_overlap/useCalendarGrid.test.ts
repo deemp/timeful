@@ -624,13 +624,16 @@ describe("useCalendarGrid", () => {
     ).toEqual(["2026-05-28", "2026-05-29"])
   })
 
-  it("uses activeSlots for specific-times cell occupancy while keeping the enabled domain for window coverage", () => {
+  it("uses activeSlots for normal-view specific-times cell occupancy while preserving the selected subset", () => {
     const event = ref<ScheduleOverlapEvent>({
       _id: "evt-5d-active-subset",
       shortId: "grid-specific-active-subset",
       name: "Specific times active subset",
       type: eventTypes.SPECIFIC_DATES,
-      dates: [Temporal.PlainDate.from("2026-05-28")],
+      dates: [
+        Temporal.PlainDate.from("2026-05-28"),
+        Temporal.PlainDate.from("2026-05-29"),
+      ],
       timeSeed: zdt("2026-05-28T09:00:00Z"),
       startTime: Temporal.PlainTime.from("09:00"),
       duration: Temporal.Duration.from({ hours: 1 }),
@@ -640,6 +643,8 @@ describe("useCalendarGrid", () => {
         zdt("2026-05-28T09:15:00Z"),
         zdt("2026-05-28T09:30:00Z"),
         zdt("2026-05-28T09:45:00Z"),
+        zdt("2026-05-29T09:00:00Z"),
+        zdt("2026-05-29T09:15:00Z"),
       ],
       activeSlots: [
         zdt("2026-05-28T09:30:00Z"),
@@ -676,6 +681,18 @@ describe("useCalendarGrid", () => {
     expect(
       grid.splitTimes.value[0].map((time) => time.displayedMinutes)
     ).toEqual([9 * 60, 9 * 60 + 15, 9 * 60 + 30, 9 * 60 + 45])
+    expect(grid.getDisplayDateFromRowCol(0, 0)?.toInstant().toString()).toBe(
+      "2026-05-28T09:00:00Z"
+    )
+    expect(grid.getDisplayDateFromRowCol(1, 0)?.toInstant().toString()).toBe(
+      "2026-05-28T09:15:00Z"
+    )
+    expect(grid.getDisplayDateFromRowCol(2, 0)?.toInstant().toString()).toBe(
+      "2026-05-28T09:30:00Z"
+    )
+    expect(grid.getDisplayDateFromRowCol(3, 0)?.toInstant().toString()).toBe(
+      "2026-05-28T09:45:00Z"
+    )
     expect(grid.getDateFromRowCol(0, 0)).toBeNull()
     expect(grid.getDateFromRowCol(1, 0)).toBeNull()
     expect(grid.getDateFromRowCol(2, 0)?.toInstant().toString()).toBe(
@@ -683,6 +700,103 @@ describe("useCalendarGrid", () => {
     )
     expect(grid.getDateFromRowCol(3, 0)?.toInstant().toString()).toBe(
       "2026-05-28T09:45:00Z"
+    )
+    const activeSlot = grid.getDateFromRowCol(2, 0)
+    expect(activeSlot).not.toBeNull()
+    if (!activeSlot) {
+      throw new Error("Expected selected specific-times grid cell")
+    }
+    expect(grid.specificTimesSet.value.has(activeSlot)).toBe(true)
+  })
+
+  it("rebuilds normal-view specific-times columns from active slots after a viewer timezone shift", () => {
+    const event = ref<ScheduleOverlapEvent>({
+      _id: "evt-gmt-boundary",
+      shortId: "grid-gmt-boundary",
+      name: "Specific times across viewer midnight",
+      type: eventTypes.SPECIFIC_DATES,
+      dates: [
+        Temporal.PlainDate.from("2026-06-11"),
+        Temporal.PlainDate.from("2026-06-12"),
+        Temporal.PlainDate.from("2026-06-14"),
+        Temporal.PlainDate.from("2026-06-17"),
+        Temporal.PlainDate.from("2026-06-18"),
+      ],
+      timeSeed: zdt("2026-06-11T03:00:00Z"),
+      startTime: Temporal.PlainTime.from("09:00"),
+      duration: Temporal.Duration.from({ hours: 11 }),
+      hasSpecificTimes: true,
+      enabledSlots: [
+        zdt("2026-06-11T06:00:00Z"),
+        zdt("2026-06-12T06:00:00Z"),
+        zdt("2026-06-14T06:00:00Z"),
+      ],
+      activeSlots: [
+        zdt("2026-06-11T06:00:00Z"),
+        zdt("2026-06-12T06:00:00Z"),
+        zdt("2026-06-14T06:00:00Z"),
+      ],
+      notificationsEnabled: false,
+      blindAvailabilityEnabled: false,
+      daysOnly: false,
+      sendEmailAfterXResponses: -1,
+      collectEmails: false,
+      startOnMonday: true,
+      timeIncrement: durations.FIFTEEN_MINUTES,
+      creatorPosthogId: "creator-gmt-boundary",
+      remindees: [],
+    })
+    const curTimezone = ref({
+      value: "Etc/GMT+6",
+      offset: Temporal.Duration.from({ hours: 6 }),
+      label: "GMT-6",
+      gmtString: "GMT-6",
+    })
+    const grid = useCalendarGrid({
+      event,
+      weekOffset: ref(0),
+      curTimezone,
+      state: ref(states.HEATMAP),
+      isPhone: ref(false),
+    })
+
+    expect(
+      grid.days.value.map((day) =>
+        day.dateObject.withTimeZone(curTimezone.value.value).toPlainDate().toString()
+      )
+    ).toEqual([
+      "2026-06-11",
+      "2026-06-12",
+      "2026-06-14",
+      "2026-06-17",
+      "2026-06-18",
+    ])
+
+    curTimezone.value = {
+      value: "Etc/GMT+7",
+      offset: Temporal.Duration.from({ hours: 7 }),
+      label: "GMT-7",
+      gmtString: "GMT-7",
+    }
+
+    expect(
+      grid.days.value.map((day) =>
+        day.dateObject.withTimeZone(curTimezone.value.value).toPlainDate().toString()
+      )
+    ).toEqual([
+      "2026-06-10",
+      "2026-06-11",
+      "2026-06-12",
+      "2026-06-13",
+      "2026-06-14",
+      "2026-06-17",
+      "2026-06-18",
+    ])
+    expect(grid.getDateFromRowCol(0, 1)?.toInstant().toString()).toBe(
+      "2026-06-12T06:00:00Z"
+    )
+    expect(grid.getDateFromRowCol(0, 3)?.toInstant().toString()).toBe(
+      "2026-06-14T06:00:00Z"
     )
   })
 
@@ -780,7 +894,7 @@ describe("useCalendarGrid", () => {
         day.dateObject.withTimeZone("Europe/Moscow").toPlainDate().toString()
       )
     ).toEqual(["2026-05-30", "2026-05-31"])
-    expect(grid.getDateFromRowCol(1, 1)?.toInstant().toString()).toBe(
+    expect(grid.getDateFromRowCol(85, 0)?.toInstant().toString()).toBe(
       "2026-05-30T21:15:00Z"
     )
   })
@@ -834,10 +948,10 @@ describe("useCalendarGrid", () => {
         day.dateObject.withTimeZone("Europe/Moscow").toPlainDate().toString()
       )
     ).toEqual(["2026-05-30", "2026-05-31"])
-    expect(grid.getDateFromRowCol(1, 1)?.toInstant().toString()).toBe(
+    expect(grid.getDateFromRowCol(85, 0)?.toInstant().toString()).toBe(
       "2026-05-30T21:15:00Z"
     )
-    expect(grid.getDateFromRowCol(2, 1)?.toInstant().toString()).toBe(
+    expect(grid.getDateFromRowCol(86, 0)?.toInstant().toString()).toBe(
       "2026-05-30T21:30:00Z"
     )
   })
@@ -1085,7 +1199,7 @@ describe("useCalendarGrid", () => {
     )
   })
 
-  it("maps create-flow specific-time cells into the seeded enabled-slot domain even when the viewer timezone differs", () => {
+  it("maps create-flow specific-time display cells into the seeded enabled-slot domain even when the viewer timezone differs", () => {
     const schedule = buildEventEditorSchedule({
       daysOnly: false,
       daysOnlyType: eventTypes.SPECIFIC_DATES,
@@ -1145,9 +1259,9 @@ describe("useCalendarGrid", () => {
     })
 
     const selectedSlots = [
-      grid.getDateFromRowCol(36, 0),
-      grid.getDateFromRowCol(37, 0),
-      grid.getDateFromRowCol(36, 1),
+      grid.getDisplayDateFromRowCol(36, 0),
+      grid.getDisplayDateFromRowCol(37, 0),
+      grid.getDisplayDateFromRowCol(36, 1),
     ]
 
     expect(selectedSlots.every((slot) => slot != null)).toBe(true)
@@ -1168,6 +1282,111 @@ describe("useCalendarGrid", () => {
       "2026-05-28T09:00:00Z",
       "2026-05-28T09:15:00Z",
       "2026-05-29T09:00:00Z",
+    ])
+    expect(grid.getDateFromRowCol(36, 0)?.toInstant().toString()).toBe(
+      "2026-05-28T09:00:00Z"
+    )
+  })
+
+  it("keeps specific-times edit rows anchored to membership dates in the event timezone while preserving enabled grey cells", () => {
+    const schedule = buildEventEditorSchedule({
+      daysOnly: false,
+      daysOnlyType: eventTypes.SPECIFIC_DATES,
+      selectedDateOption: "Specific dates",
+      selectedDays: [
+        Temporal.PlainDate.from("2026-06-24"),
+        Temporal.PlainDate.from("2026-06-25"),
+      ],
+      selectedDaysOfWeek: [],
+      startOnMonday: true,
+      startTime: Temporal.PlainTime.from("09:00"),
+      endTime: Temporal.PlainTime.from("17:00"),
+      timezoneValue: "America/Los_Angeles",
+      timeIncrementMinutes: 60,
+    })
+    const draft = buildSpecificTimesCreateDraft({
+      schedule,
+      timeIncrementMinutes: 60,
+    })
+    const activeSlots = (draft.enabledSlots ?? []).filter((slot) => {
+      const instant = slot.toInstant().toString()
+      return instant === "2026-06-24T16:00:00Z" || instant === "2026-06-25T23:00:00Z"
+    })
+    const event = ref<ScheduleOverlapEvent>({
+      _id: "evt-9",
+      shortId: "grid-edit-domain-membership-tz",
+      name: "Edit flow canonical domain",
+      type: eventTypes.SPECIFIC_DATES,
+      dates: draft.dates,
+      timeSeed: draft.timeSeed,
+      duration: draft.duration,
+      hasSpecificTimes: true,
+      notificationsEnabled: false,
+      blindAvailabilityEnabled: false,
+      daysOnly: false,
+      sendEmailAfterXResponses: -1,
+      collectEmails: false,
+      startOnMonday: true,
+      timeIncrement: Temporal.Duration.from({ minutes: draft.timeIncrementMinutes }),
+      creatorPosthogId: "creator-9",
+      remindees: [],
+      enabledSlots: draft.enabledSlots,
+      activeSlots,
+      eventTimezone: draft.eventTimezone,
+      slotGeneration: draft.slotGeneration,
+      timedRecurrence: draft.timedRecurrence,
+      times: [...activeSlots],
+    })
+
+    const grid = useCalendarGrid({
+      event,
+      weekOffset: ref(0),
+      curTimezone: ref({
+        value: "Europe/Belgrade",
+        offset: Temporal.Duration.from({ hours: -2 }),
+        label: "Europe/Belgrade",
+        gmtString: "GMT+2",
+      }),
+      state: ref(states.SET_SPECIFIC_TIMES),
+      isPhone: ref(false),
+    })
+
+    expect(
+      grid.days.value.map((day) => day.membershipDate?.toString())
+    ).toEqual(["2026-06-24", "2026-06-25"])
+    expect(grid.getDateFromRowCol(9, 0)?.toInstant().toString()).toBe(
+      "2026-06-24T16:00:00Z"
+    )
+    expect(grid.getDateFromRowCol(10, 0)?.toInstant().toString()).toBe(
+      "2026-06-24T17:00:00Z"
+    )
+    expect(grid.getDateFromRowCol(16, 1)?.toInstant().toString()).toBe(
+      "2026-06-25T23:00:00Z"
+    )
+    expect(grid.getDateFromRowCol(17, 0)).toBeNull()
+
+    const greySlot = grid.getDateFromRowCol(10, 0)
+    const selectedSlot = grid.getDateFromRowCol(9, 0)
+    expect(greySlot).not.toBeNull()
+    expect(selectedSlot).not.toBeNull()
+    if (!greySlot || !selectedSlot) {
+      throw new Error("Expected enabled and selected specific-times edit slots")
+    }
+    expect(grid.specificTimesSet.value.has(greySlot)).toBe(false)
+    expect(grid.specificTimesSet.value.has(selectedSlot)).toBe(true)
+
+    const normalized = normalizeActiveSlots({
+      enabledSlots: draft.enabledSlots,
+      activeSlots: [...activeSlots, greySlot],
+    })
+
+    expect(normalized.enabledSlots.map((slot) => slot.toInstant().toString())).toEqual(
+      draft.enabledSlots?.map((slot) => slot.toInstant().toString())
+    )
+    expect(normalized.activeSlots.map((slot) => slot.toInstant().toString())).toEqual([
+      "2026-06-24T16:00:00Z",
+      "2026-06-24T17:00:00Z",
+      "2026-06-25T23:00:00Z",
     ])
   })
 })
