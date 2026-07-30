@@ -474,6 +474,16 @@ describe("Event guest edit action", () => {
     )
   })
 
+  it("compacts the single-row mobile footer actions below the sm breakpoint", () => {
+    expect(eventViewSource).toContain(
+      "tw-flex tw-h-[4rem] tw-w-full tw-items-center tw-px-4 max-sm:tw-px-2"
+    )
+    expect(eventViewSource).toContain(
+      "tw-flex tw-min-w-0 tw-items-center tw-gap-2 max-sm:tw-gap-1"
+    )
+    expect(eventViewSource).toContain("max-sm:tw-px-1 max-sm:tw-text-xs")
+  })
+
   beforeEach(() => {
     vi.clearAllMocks()
     vi.useFakeTimers()

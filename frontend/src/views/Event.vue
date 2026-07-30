@@ -717,7 +717,7 @@
           </v-card>
         </v-menu>
         <div
-          class="tw-flex tw-h-[4rem] tw-w-full tw-items-center tw-px-4"
+          class="tw-flex tw-h-[4rem] tw-w-full tw-items-center tw-px-4 max-sm:tw-px-2"
           :class="`${isIOS ? 'tw-pb-2' : ''} ${
             isScheduling ? 'tw-bg-blue' : 'tw-bg-green'
           }`"
@@ -726,19 +726,19 @@
             <v-btn
               v-if="!event.daysOnly && numResponses > 0"
               variant="outlined"
-              class="tw-border-white tw-text-white"
+              class="tw-border-white tw-px-2 tw-text-[13px] tw-text-white max-sm:tw-px-1 max-sm:tw-text-xs"
               @click="scheduleEvent"
             >
               <v-icon>mdi-calendar-check</v-icon>
               <span class="tw-ml-1">Schedule</span>
             </v-btn>
             <v-spacer />
-            <div class="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
+            <div class="tw-flex tw-min-w-0 tw-items-center tw-gap-2 max-sm:tw-gap-1">
               <v-btn
                 v-if="showSecondaryAddAvailabilityAction"
                 id="mobile-secondary-availability-btn"
                 variant="outlined"
-                class="tw-min-w-0 tw-whitespace-nowrap tw-border-white tw-px-2 tw-text-[13px] tw-text-white"
+                class="tw-min-w-0 tw-whitespace-nowrap tw-border-white tw-px-2 tw-text-[13px] tw-text-white max-sm:tw-px-1 max-sm:tw-text-xs"
                 @click="triggerSecondaryAddAvailability"
               >
                 <v-icon>mdi-plus</v-icon>
@@ -746,7 +746,7 @@
               </v-btn>
               <v-btn
                 id="mobile-primary-availability-btn"
-                class="mobile-primary-availability-button tw-min-w-0 tw-whitespace-nowrap tw-bg-white tw-px-2 tw-text-[13px] tw-text-green tw-transition-opacity"
+                class="mobile-primary-availability-button tw-min-w-0 tw-whitespace-nowrap tw-bg-white tw-px-2 tw-text-[13px] tw-text-green tw-transition-opacity max-sm:tw-px-1 max-sm:tw-text-xs"
                 :class="[
                   mobilePrimaryAvailabilityButtonClass,
                   {
