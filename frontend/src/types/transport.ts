@@ -45,7 +45,7 @@ export type RawEvent = Omit<
   dates?: RawInstantValue[]
   times?: RawInstantValue[]
   enabledSlots?: RawInstantValue[]
-  activeSlots?: RawInstantValue[]
+  activeSlots?: RawInstantValue[] | null
   timedRecurrence?: {
     kind?: "specific_dates" | "weekly"
     selectedDays?: string[]
@@ -111,7 +111,7 @@ const fromRawInstantValue = (
 }
 
 const decodeRawInstantValues = (
-  values: RawInstantValue[] | undefined,
+  values: RawInstantValue[] | null | undefined,
 ): Temporal.ZonedDateTime[] | undefined => {
   if (!values) {
     return undefined

@@ -208,13 +208,34 @@ describe("transport and timezone regression boundaries", () => {
     )
   })
 
-  it("rejects legacy null timed active slots", () => {
-    const raw = {
-      ...buildCanonicalSpecificDatesRawEvent(),
+  it("normalizes null timed active slots to an empty selection", () => {
+    const event = fromRawEvent({
+      ...buildCanonicalSpecificDatesRawEvent({
+        eventTimezone: "Asia/Yekaterinburg",
+        enabledSlots: [
+          "2026-08-11T19:00:00Z",
+          "2026-08-11T19:15:00Z",
+          "2026-08-12T18:45:00Z",
+        ],
+        slotGeneration: {
+          startTimeLocal: "00:00:00",
+          endTimeLocal: "00:00:00",
+          timeIncrementMinutes: 15,
+        },
+        timedRecurrence: {
+          kind: "specific_dates",
+          selectedDays: ["2026-08-12"],
+          selectedDaysOfWeek: [],
+          startOnMonday: true,
+        },
+      }),
       activeSlots: null,
-    } as unknown as RawEvent
+    })
 
-    expect(() => fromRawEvent(raw)).toThrow("Failed to decode event transport payload")
+    expect(event.activeSlots).toEqual([])
+    expect(event.enabledSlots).toHaveLength(3)
+    expect(event.slotGeneration?.startTimeLocal?.toString()).toBe("00:00:00")
+    expect(event.slotGeneration?.endTimeLocal?.toString()).toBe("00:00:00")
   })
 
   it("drops malformed response instants instead of failing the whole availability decode", () => {
@@ -730,7 +751,6 @@ describe("transport and timezone regression boundaries", () => {
   it.each([
     "timedRecurrence",
     "enabledSlots",
-    "activeSlots",
     "eventTimezone",
     "slotGeneration",
   ] as const)("throws when canonical timed payload is missing %s", (missingField) => {

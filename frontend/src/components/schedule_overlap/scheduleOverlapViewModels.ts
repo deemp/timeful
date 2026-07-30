@@ -107,6 +107,8 @@ export interface ScheduleOverlapSidebarViewModel {
   signUpBlocks: SignUpBlockLite[]
   signUpBlocksToAdd: SignUpBlockLite[]
   numTempTimes: number
+  activeSlotsCount: number
+  responseCount: number
   curGuestId?: string
   userHasResponded: boolean
   addingAvailabilityAsGuest: boolean
@@ -196,6 +198,7 @@ export interface ScheduleOverlapTimeGridViewModel {
   splitTimes: TimeItem[][]
   times: TimeItem[]
   renderedRows: RenderedTimeGridRow[]
+  timeAxisEndText?: string
   timeslotHeight: number
   days: DayItem[]
   isSpecificDates: boolean

@@ -127,6 +127,8 @@ export const buildScheduleOverlapSidebarViewModel =
     signUpBlocks: [],
     signUpBlocksToAdd: [],
     numTempTimes: 0,
+    activeSlotsCount: 0,
+    responseCount: 0,
     curGuestId: "",
     userHasResponded: false,
     addingAvailabilityAsGuest: false,

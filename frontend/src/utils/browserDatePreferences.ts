@@ -94,13 +94,13 @@ export const getTimeOptions = (): {
         value: h + 12,
       })
     }
-    times.push({ text: "12 am", time: 0, value: 24 })
+    times.push({ text: "12 AM", time: 0, value: 24 })
     return times
   }
 
   for (let h = 0; h < 24; ++h) {
-    times.push({ text: `${String(h)}:00`, time: h, value: h })
+    times.push({ text: `${String(h).padStart(2, "0")}:00`, time: h, value: h })
   }
-  times.push({ text: "0:00", time: 0, value: 24 })
+  times.push({ text: "24:00", time: 0, value: 24 })
   return times
 }

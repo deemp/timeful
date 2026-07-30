@@ -71,3 +71,47 @@ When scheduling an event, the tooltip with the info about the time slot should f
 ## FR-017
 
 Default hours for a new event should be 9-18.
+
+## FR-018
+
+Grid colors shall use context-specific labels:
+
+- In the specific-times editor: white is `Selected for the event`, light grey is `Available to select`, and dark grey is `Unavailable, padding`.
+- In the event availability grid: pale red is `Unavailable, select in Edit availability`, light grey is `Unavailable, select in Edit event`, and dark grey is `Unavailable, padding`.
+- The event availability legend shall show light grey and dark grey when there are no active slots or responses; add pale red when there are active slots; show all colors while adding availability or after receiving a response.
+- Specific-times enabled inactive cells shall remain editable, while dark-grey padding cells outside the enabled domain shall be non-editable.
+
+## FR-019
+
+Collapsed hours rectangle height should be the same as half-hour line.
+
+## FR-020
+
+Each full-hour line in the grid should have a label on the left, including top of the collapsed hours rectangle.
+
+## FR-021
+
+Specific-times events shall preserve a separate enabled-slot domain and active-slot selection:
+
+- Entering specific-times while creating an event shall create a full-day enabled domain for every picked date.
+- Reopening a specific-times event shall retain its persisted enabled domain.
+- Specific-times edit columns shall be the ordered union of picked dates and enabled-slot dates projected into the displayed timezone.
+- A slot that projects across midnight shall appear in its display-local date column; the grid shall add that adjacent column when needed.
+- Picked-date columns shall remain visible even when they contain no projected enabled slots.
+
+## FR-022
+
+Time-range picker labels shall represent the end-of-day boundary clearly:
+
+- In 24-hour mode, labels shall be zero-padded from `00:00` through `23:00`, followed by `24:00`.
+- In 12-hour mode, the end-of-day option shall be `12 AM`.
+- Selecting the end-of-day boundary shall render as `00:00` in the next date column of the grid.
+
+## FR-023
+
+When `Show all hours` is disabled, the grid shall collapse inactive runs based on active-slot membership:
+
+- Leading, interior, and trailing inactive runs shall be eligible for collapse.
+- Collapse bands shall align to complete hours and require at least three consecutive inactive hours.
+- The left time axis shall show each collapsed band's start boundary and day-boundary labels such as `00:00`.
+- Wrapped overnight ranges shall retain their split-gap behavior and shall not receive same-day filler slots.

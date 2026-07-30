@@ -24,7 +24,6 @@ import {
   generateTimedSlotsForDay,
   getTimedEventTimezone,
   getTimedSlotGeneration,
-  getTimedSlotForMembershipDay,
   hasCanonicalTimedSlots,
   sortAndUniqueSlots,
 } from "@/utils/timedEventSlots"
@@ -80,7 +79,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
 
   const timeType = ref<TimeType>(
     (localStorage.getItem("timeType") as TimeType | null) ??
-      (userPrefers12h() ? timeTypes.HOUR12 : timeTypes.HOUR24)
+      (userPrefers12h() ? timeTypes.HOUR12 : timeTypes.HOUR24),
   )
   watch(timeType, (val) => {
     localStorage.timeType = val
@@ -94,7 +93,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
   const page = ref(0)
   const savedMobileNumDays = localStorage.getItem("mobileNumDays")
   const mobileNumDays = ref<number>(
-    savedMobileNumDays ? parseInt(savedMobileNumDays) : 3
+    savedMobileNumDays ? parseInt(savedMobileNumDays) : 3,
   )
   watch(mobileNumDays, (val) => {
     localStorage.mobileNumDays = String(val)
@@ -110,7 +109,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
   const calendarMaxScroll = ref(0)
 
   const isSpecificDates = computed(
-    () => event.value.type === eventTypes.SPECIFIC_DATES || !event.value.type
+    () => event.value.type === eventTypes.SPECIFIC_DATES || !event.value.type,
   )
   const isWeekly = computed(() => event.value.type === eventTypes.DOW)
   const isGroup = computed(() => event.value.type === eventTypes.GROUP)
@@ -126,14 +125,11 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
   })
 
   const timezoneOffset = computed<Temporal.Duration>(() =>
-    getScheduleTimezoneOffset(event.value, curTimezone.value, weekOffset.value)
+    getScheduleTimezoneOffset(event.value, curTimezone.value, weekOffset.value),
   )
 
   const timezoneReferenceDate = computed(() =>
-    getTimezoneReferenceDateForEvent(
-      event.value,
-      weekOffset.value
-    )
+    getTimezoneReferenceDateForEvent(event.value, weekOffset.value),
   )
 
   const dayOffset = computed(() => {
@@ -143,7 +139,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     // Convert Duration to minutes, then to hours for division
     return Temporal.Duration.from({
       days: Math.floor(
-        (startTimeNum - timezoneOffset.value.total("hours")) / 24
+        (startTimeNum - timezoneOffset.value.total("hours")) / 24,
       ),
     })
   })
@@ -151,13 +147,15 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
   const timeslotDuration = computed<Temporal.Duration>(
     () =>
       (event.value as { timeIncrement?: Temporal.Duration }).timeIncrement ??
-      durations.FIFTEEN_MINUTES
+      durations.FIFTEEN_MINUTES,
   )
 
   const timeslotHeight = computed(() => {
     const dur = timeslotDuration.value
-    if (compareDuration(dur, durations.FIFTEEN_MINUTES) === 0) return Math.floor(HOUR_HEIGHT / 4)
-    if (compareDuration(dur, durations.THIRTY_MINUTES) === 0) return Math.floor(HOUR_HEIGHT / 2)
+    if (compareDuration(dur, durations.FIFTEEN_MINUTES) === 0)
+      return Math.floor(HOUR_HEIGHT / 4)
+    if (compareDuration(dur, durations.THIRTY_MINUTES) === 0)
+      return Math.floor(HOUR_HEIGHT / 2)
     if (compareDuration(dur, durations.ONE_HOUR) === 0) return HOUR_HEIGHT
     return Math.floor(HOUR_HEIGHT / 4)
   })
@@ -174,7 +172,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
         day: seed.toPlainDate(),
         timeZone,
         slotGeneration,
-      })
+      }),
     )
   })
 
@@ -220,11 +218,11 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
   const specificTimesVisibleSlots = computed<Temporal.ZonedDateTime[]>(() =>
     state.value === states.SET_SPECIFIC_TIMES
       ? specificTimesEnabledSlots.value
-      : specificTimesViewSlots.value
+      : specificTimesViewSlots.value,
   )
 
-  const specificTimesCoverageSlots = computed<Temporal.ZonedDateTime[]>(() =>
-    specificTimesVisibleSlots.value
+  const specificTimesCoverageSlots = computed<Temporal.ZonedDateTime[]>(
+    () => specificTimesEnabledSlots.value,
   )
 
   const specificTimesVisibleSet = computed<ZdtSet>(() => {
@@ -233,6 +231,31 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     }
 
     return new ZdtSet([])
+  })
+
+  const specificTimesEnabledSet = computed<ZdtSet>(() =>
+    new ZdtSet(specificTimesEnabledSlots.value),
+  )
+
+  const specificTimesEditSlotByCell = computed<
+    Map<string, Temporal.ZonedDateTime>
+  >(() => {
+    const slotsByCell = new Map<string, Temporal.ZonedDateTime>()
+    if (state.value !== states.SET_SPECIFIC_TIMES) {
+      return slotsByCell
+    }
+
+    for (const slot of specificTimesVisibleSlots.value) {
+      const displayedDateTime = getDateInTimezone(slot, curTimezone.value)
+      const displayedTime = displayedDateTime.toPlainTime()
+      const displayedMinutes = displayedTime.hour * 60 + displayedTime.minute
+      slotsByCell.set(
+        `${displayedDateTime.toPlainDate().toString()}:${String(displayedMinutes)}`,
+        slot,
+      )
+    }
+
+    return slotsByCell
   })
 
   /** Returns a set containing the selected subset for specific-times events. */
@@ -259,12 +282,14 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     }
 
     const { minHours, maxHours } = computeMinMaxHoursFromTimes(
-      specificTimesCoverageSlots.value
+      specificTimesCoverageSlots.value,
     )
     const slotDuration = event.value.timeIncrement ?? timeslotDuration.value
     const localStartMinutes = minHours.hour * 60 + minHours.minute
     const localEndMinutes =
-      maxHours.hour * 60 + maxHours.minute + Math.round(slotDuration.total("minutes"))
+      maxHours.hour * 60 +
+      maxHours.minute +
+      Math.round(slotDuration.total("minutes"))
 
     return {
       startTime: minHours,
@@ -274,13 +299,15 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     }
   })
 
-  const specificTimesDisplaySeedTime = computed<Temporal.PlainTime | null>(() => {
-    if (!isSpecificTimes.value || state.value === states.SET_SPECIFIC_TIMES) {
-      return null
-    }
+  const specificTimesDisplaySeedTime = computed<Temporal.PlainTime | null>(
+    () => {
+      if (!isSpecificTimes.value || state.value === states.SET_SPECIFIC_TIMES) {
+        return null
+      }
 
-    return savedSpecificTimesWindow.value?.startTime ?? null
-  })
+      return savedSpecificTimesWindow.value?.startTime ?? null
+    },
+  )
 
   const canonicalTimedDuration = computed<Temporal.Duration | null>(() => {
     if (isSpecificTimes.value || !hasCanonicalTimedSlots(event.value)) {
@@ -290,26 +317,30 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     const slotGeneration = getTimedSlotGeneration(event.value)
     return getWrappedTimeRangeDuration(
       slotGeneration.startTimeLocal,
-      slotGeneration.endTimeLocal
+      slotGeneration.endTimeLocal,
     )
   })
 
   const computeMinMaxHoursFromTimes = (
-    timesArr: Temporal.ZonedDateTime[]
+    timesArr: Temporal.ZonedDateTime[],
   ): { minHours: Temporal.PlainTime; maxHours: Temporal.PlainTime } => {
     if (timesArr.length === 0) {
       const zeroHours = Temporal.PlainTime.from({ hour: 0 })
       return { minHours: zeroHours, maxHours: zeroHours }
     }
 
-    const firstLocalTime = getDateInTimezone(timesArr[0], curTimezone.value)
-      .toPlainTime()
+    const firstLocalTime = getDateInTimezone(
+      timesArr[0],
+      curTimezone.value,
+    ).toPlainTime()
     let minHours = firstLocalTime
     let maxHours = minHours
     for (const time of timesArr.slice(1)) {
       const localTime = getDateInTimezone(time, curTimezone.value).toPlainTime()
-      if (Temporal.PlainTime.compare(localTime, minHours) < 0) minHours = localTime
-      if (Temporal.PlainTime.compare(localTime, maxHours) > 0) maxHours = localTime
+      if (Temporal.PlainTime.compare(localTime, minHours) < 0)
+        minHours = localTime
+      if (Temporal.PlainTime.compare(localTime, maxHours) > 0)
+        maxHours = localTime
     }
     return { minHours, maxHours }
   }
@@ -324,73 +355,37 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     const durationHours =
       preferredSpecificTimesWindow?.duration ??
       canonicalTimedDuration.value ??
-      (event.value.duration ?? durations.ZERO)
+      event.value.duration ??
+      durations.ZERO
     const localStartMinutes =
       preferredSpecificTimesWindow?.localStartMinutes ??
       (() => {
         const localStartTime = utcTimeToLocalTime(
           utcStartTime ?? Temporal.PlainTime.from({ hour: 0 }),
-          timezoneOffset.value
+          timezoneOffset.value,
         )
         return localStartTime.hour * 60 + localStartTime.minute
       })()
     const localEndMinutes =
       preferredSpecificTimesWindow?.localEndMinutes ??
-      (localStartMinutes + Math.round(durationHours.total("minutes")))
+      localStartMinutes + Math.round(durationHours.total("minutes"))
     const timeslotDurationMinutes = Math.round(
-      timeslotDuration.value.total("minutes")
+      timeslotDuration.value.total("minutes"),
     )
 
-    const getExtraTimes = (
-      hoursOffset: Temporal.Duration,
-      baseAbsoluteMinutes = localStartMinutes
-    ): TimeItem[] => {
-      const absoluteMinutes = baseAbsoluteMinutes + hoursOffset.total("minutes")
-      const displayedMinutes =
-        ((absoluteMinutes % (24 * 60)) + 24 * 60) % (24 * 60)
-      if (compareDuration(timeslotDuration.value, durations.FIFTEEN_MINUTES) === 0) {
-        return [
-          {
-            hoursOffset: hoursOffset.add(durations.FIFTEEN_MINUTES),
-            absoluteMinutes: absoluteMinutes + 15,
-            displayedMinutes: (displayedMinutes + 15) % (24 * 60),
-          },
-          {
-            hoursOffset: hoursOffset.add(durations.THIRTY_MINUTES),
-            absoluteMinutes: absoluteMinutes + 30,
-            displayedMinutes: (displayedMinutes + 30) % (24 * 60),
-          },
-          {
-            hoursOffset: hoursOffset.add(durations.FORTY_FIVE_MINUTES),
-            absoluteMinutes: absoluteMinutes + 45,
-            displayedMinutes: (displayedMinutes + 45) % (24 * 60),
-          },
-        ]
-      }
-      if (compareDuration(timeslotDuration.value, durations.THIRTY_MINUTES) === 0) {
-        return [
-          {
-            hoursOffset: hoursOffset.add(durations.THIRTY_MINUTES),
-            absoluteMinutes: absoluteMinutes + 30,
-            displayedMinutes: (displayedMinutes + 30) % (24 * 60),
-          },
-        ]
-      }
-      return []
-    }
-
     const toLocalHourLabel = (absoluteMinutes: number): string | undefined => {
-      const normalizedMinutes = ((absoluteMinutes % (24 * 60)) + 24 * 60) % (24 * 60)
+      const normalizedMinutes =
+        ((absoluteMinutes % (24 * 60)) + 24 * 60) % (24 * 60)
       if (normalizedMinutes % 60 !== 0) return undefined
       return timeNumToTimeText(
         normalizedMinutes / 60,
-        timeType.value === timeTypes.HOUR12
+        timeType.value === timeTypes.HOUR12,
       )
     }
 
     const buildTimeRange = (
       startMinutes: number,
-      endMinutes: number
+      endMinutes: number,
     ): TimeItem[] => {
       const items: TimeItem[] = []
       for (
@@ -399,7 +394,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
         absoluteMinutes += timeslotDurationMinutes
       ) {
         const hoursOffset = durationFromMinutesNumber(
-          absoluteMinutes - localStartMinutes
+          absoluteMinutes - localStartMinutes,
         )
         items.push({
           hoursOffset,
@@ -413,29 +408,17 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     }
 
     if (state.value === states.SET_SPECIFIC_TIMES) {
-      for (let i = 0; i <= 23; ++i) {
-        const hoursOffset = Temporal.Duration.from({ hours: i })
-        const text = timeNumToTimeText(i, timeType.value === timeTypes.HOUR12)
-        const absoluteMinutes = i * 60
-        if (i === 9) {
-          split[0].push({
-            id: "time-9",
-            hoursOffset,
-            text,
-            absoluteMinutes,
-            displayedMinutes: absoluteMinutes,
-          })
-        } else {
-          split[0].push({
-            hoursOffset,
-            text,
-            absoluteMinutes,
-            displayedMinutes: absoluteMinutes,
-          })
-        }
-        split[0].push(...getExtraTimes(hoursOffset, 0))
+      if (specificTimesVisibleSlots.value.length === 0) {
+        return split
       }
-      return split
+
+      const { minHours, maxHours } = computeMinMaxHoursFromTimes(
+        specificTimesVisibleSlots.value,
+      )
+      const startMinutes = minHours.hour * 60 + minHours.minute
+      const endMinutes =
+        maxHours.hour * 60 + maxHours.minute + timeslotDurationMinutes
+      return [buildTimeRange(startMinutes, endMinutes), []]
     }
 
     const displayStartMinutes = Math.floor(localStartMinutes / 60) * 60
@@ -467,7 +450,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
   const times = computed<TimeItem[]>(() =>
     splitTimes.value[1].length > 0
       ? [...splitTimes.value[1], ...splitTimes.value[0]]
-      : displayedTimes.value
+      : displayedTimes.value,
   )
 
   const allDays = computed<DayItem[]>(() => {
@@ -476,28 +459,37 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     const displayTimezoneId = curTimezone.value.value
 
     const getSpecificTimesEditDays = (eventDates: Temporal.ZonedDateTime[]) => {
-      let previousDay: Temporal.ZonedDateTime | null = null
-      return eventDates.map((eventDate) => {
-        const membershipDate = eventDate.toPlainDate()
-        const dateObject = membershipDate.toZonedDateTime({
-          timeZone: curTimezone.value.value,
-          plainTime: "00:00",
-        })
-        const isConsecutive =
-          previousDay == null || previousDay.add({ days: 1 }).equals(dateObject)
+      const dates = new Map<string, Temporal.ZonedDateTime>()
+      const addDate = (date: Temporal.PlainDate) => {
+        dates.set(
+          date.toString(),
+          date.toZonedDateTime({
+            timeZone: curTimezone.value.value,
+            plainTime: "00:00",
+          }),
+        )
+      }
 
-        previousDay = dateObject
-        return {
-          dateObject,
-          membershipDate,
-          isConsecutive,
-        }
-      })
+      // Keep picked-date columns and add neighbouring display dates when slots
+      // cross midnight in the selected display timezone.
+      for (const eventDate of eventDates) addDate(eventDate.toPlainDate())
+      for (const slot of specificTimesCoverageSlots.value) {
+        addDate(getDateInTimezone(slot, curTimezone.value).toPlainDate())
+      }
+
+      let previousDay: Temporal.ZonedDateTime | null = null
+      return [...dates.values()]
+        .sort((left, right) => Temporal.ZonedDateTime.compare(left, right))
+        .map((dateObject) => {
+          const isConsecutive =
+            previousDay == null || previousDay.add({ days: 1 }).equals(dateObject)
+          previousDay = dateObject
+          return { dateObject, isConsecutive }
+        })
     }
 
     const getDateString = (
       date: Temporal.ZonedDateTime,
-      membershipDate?: Temporal.PlainDate
     ) => {
       let dateString = ""
       let dayString = ""
@@ -508,20 +500,16 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
         offsetZDT = date.add(dayOffset.value)
       }
       if (isSpecificDates.value) {
-        if (isSpecificTimes.value && membershipDate != null) {
-          dateString = `${months[membershipDate.month - 1]} ${String(membershipDate.day)}`
-          dayString = daysOfWeek.value[membershipDate.dayOfWeek % 7]
-          return { dateString, dayString }
-        }
         dateString =
-          isSpecificTimes.value && event.value.timedRecurrence?.kind === "weekly"
+          isSpecificTimes.value &&
+          event.value.timedRecurrence?.kind === "weekly"
             ? `${String(offsetZDT.month)}/${String(offsetZDT.day)}`
             : `${months[offsetZDT.month - 1]} ${String(offsetZDT.day)}`
         dayString = daysOfWeek.value[offsetZDT.dayOfWeek % 7] // Convert 1-7 (Mon-Sun) to 0-6 (Sun-Sat)
       } else if (isGroup.value || isWeekly.value) {
         const renderedWeekStart = getRenderedWeekStart(
           weekOffset.value,
-          event.value.startOnMonday
+          event.value.startOnMonday,
         )
         const tmpDate = dateToDowDate(
           getEventDateSeeds(event.value),
@@ -529,7 +517,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
           weekOffset.value,
           true,
           event.value.startOnMonday,
-          renderedWeekStart
+          renderedWeekStart,
         )
         dateString = `${months[tmpDate.month - 1]} ${String(tmpDate.day)}`
         dayString = daysOfWeek.value[tmpDate.dayOfWeek % 7]
@@ -541,15 +529,11 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     if (isSpecificTimes.value) {
       if (state.value === states.SET_SPECIFIC_TIMES) {
         for (const day of getSpecificTimesEditDays(eventDates)) {
-          const { dayString, dateString } = getDateString(
-            day.dateObject,
-            day.membershipDate
-          )
+          const { dayString, dateString } = getDateString(day.dateObject)
           days.push({
             dayText: dayString,
             dateString,
             dateObject: day.dateObject,
-            membershipDate: day.membershipDate,
             isConsecutive: day.isConsecutive,
           })
         }
@@ -565,7 +549,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
         }
         for (const day of getSpecificTimesDayStarts(
           specificTimesVisibleSlots.value,
-          curTimezone.value
+          curTimezone.value,
         )) {
           daysByDate.set(day.dateObject.toPlainDate().toString(), {
             dateObject: day.dateObject,
@@ -574,7 +558,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
 
         let previousDay: Temporal.ZonedDateTime | null = null
         for (const day of [...daysByDate.values()].sort((left, right) =>
-          Temporal.ZonedDateTime.compare(left.dateObject, right.dateObject)
+          Temporal.ZonedDateTime.compare(left.dateObject, right.dateObject),
         )) {
           const { dayString, dateString } = getDateString(day.dateObject)
           days.push({
@@ -582,7 +566,8 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
             dateString,
             dateObject: day.dateObject,
             isConsecutive:
-              previousDay == null || previousDay.add({ days: 1 }).equals(day.dateObject),
+              previousDay == null ||
+              previousDay.add({ days: 1 }).equals(day.dateObject),
           })
           previousDay = day.dateObject
         }
@@ -591,7 +576,10 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     }
 
     if (hasCanonicalTimedSlots(event.value)) {
-      for (const day of getSpecificTimesDayStarts(eventDates, curTimezone.value)) {
+      for (const day of getSpecificTimesDayStarts(
+        eventDates,
+        curTimezone.value,
+      )) {
         const { dayString, dateString } = getDateString(day.dateObject)
         days.push({
           dayText: dayString,
@@ -636,13 +624,13 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
   })
 
   const maxDaysPerPage = computed(() =>
-    isPhone.value ? mobileNumDays.value : 7
+    isPhone.value ? mobileNumDays.value : 7,
   )
 
   const days = computed<DayItem[]>(() => {
     const slice = allDays.value.slice(
       page.value * maxDaysPerPage.value,
-      (page.value + 1) * maxDaysPerPage.value
+      (page.value + 1) * maxDaysPerPage.value,
     )
     if (slice.length > 0) {
       slice[0] = { ...slice[0], isConsecutive: true }
@@ -652,9 +640,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
 
   const monthDays = computed<MonthDayItem[]>(() => {
     const monthDays: MonthDayItem[] = []
-    const allDaysSet = new ZdtSet(
-      allDays.value.map((d) => d.dateObject)
-    )
+    const allDaysSet = new ZdtSet(allDays.value.map((d) => d.dateObject))
     const eventDates = getEventDateSeeds(event.value)
     if (eventDates.length === 0) return monthDays
 
@@ -696,7 +682,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     let curZDT = curDate.toZonedDateTime({
       timeZone: UTC,
       plainTime: `${String(startTime.hour).padStart(2, "0")}:${String(
-        startTime.minute
+        startTime.minute,
       ).padStart(2, "0")}:00`,
     })
 
@@ -724,15 +710,13 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     return monthDays
   })
 
-  const monthDayIncluded = computed<ZdtMap<boolean>>(
-    () => {
-      const map = new ZdtMap<boolean>()
-      for (const md of monthDays.value) {
-        map.set(md.dateObject, md.included)
-      }
-      return map
+  const monthDayIncluded = computed<ZdtMap<boolean>>(() => {
+    const map = new ZdtMap<boolean>()
+    for (const md of monthDays.value) {
+      map.set(md.dateObject, md.included)
     }
-  )
+    return map
+  })
 
   const curMonthText = computed(() => {
     const eventDates = getEventDateSeeds(event.value)
@@ -759,7 +743,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
 
   const showLeftZigZag = computed(() => calendarScrollLeft.value > 0)
   const showRightZigZag = computed(
-    () => Math.ceil(calendarScrollLeft.value) < calendarMaxScroll.value
+    () => Math.ceil(calendarScrollLeft.value) < calendarMaxScroll.value,
   )
 
   const hasNextPage = computed(() => {
@@ -773,11 +757,10 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
         .with({ day: 1 })
         .add({ months: page.value + 1 })
         .subtract({ days: 1 })
-      const lastDayOfCurMonth = lastDayOfCurMonthPlain
-        .toZonedDateTime({ timeZone: UTC })
-      return (
-        Temporal.ZonedDateTime.compare(lastDayOfCurMonth, lastDay) < 0
-      )
+      const lastDayOfCurMonth = lastDayOfCurMonthPlain.toZonedDateTime({
+        timeZone: UTC,
+      })
+      return Temporal.ZonedDateTime.compare(lastDayOfCurMonth, lastDay) < 0
     }
     return (
       allDays.value.length - (page.value + 1) * maxDaysPerPage.value > 0 ||
@@ -785,7 +768,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     )
   })
   const hasPrevPage = computed(
-    () => page.value > 0 || event.value.type === eventTypes.GROUP
+    () => page.value > 0 || event.value.type === eventTypes.GROUP,
   )
   const hasPages = computed(() => hasNextPage.value || hasPrevPage.value)
 
@@ -794,7 +777,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
 
   const getDateFromDayHoursOffset = (
     dayIndex: number,
-    hoursOffset: Temporal.Duration
+    hoursOffset: Temporal.Duration,
   ): Temporal.ZonedDateTime | null => {
     const day = days.value[dayIndex]
     // Convert number to Duration for getDateHoursOffset
@@ -805,7 +788,10 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     getDateInTimezone(date, curTimezone.value).toPlainDate().toString()
 
   const timedGridIntervalsByLocalDay = computed<
-    Map<string, { start: Temporal.ZonedDateTime; end: Temporal.ZonedDateTime }[]>
+    Map<
+      string,
+      { start: Temporal.ZonedDateTime; end: Temporal.ZonedDateTime }[]
+    >
   >(() => {
     const intervalsByDay = new Map<
       string,
@@ -828,10 +814,13 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
 
       while (Temporal.ZonedDateTime.compare(segmentStart, localEnd) < 0) {
         const key = segmentStart.toPlainDate().toString()
-        const nextDayStart = segmentStart.toPlainDate().add({ days: 1 }).toZonedDateTime({
-          timeZone: curTimezone.value.value,
-          plainTime: hoursPlainTime.ZERO,
-        })
+        const nextDayStart = segmentStart
+          .toPlainDate()
+          .add({ days: 1 })
+          .toZonedDateTime({
+            timeZone: curTimezone.value.value,
+            plainTime: hoursPlainTime.ZERO,
+          })
         const segmentEnd =
           Temporal.ZonedDateTime.compare(localEnd, nextDayStart) < 0
             ? localEnd
@@ -848,23 +837,11 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
 
   const getDateFromDisplayedAbsoluteMinutes = (
     day: DayItem,
-    absoluteMinutes: number
+    absoluteMinutes: number,
   ): Temporal.ZonedDateTime => {
-    if (
-      isSpecificTimes.value &&
-      state.value === states.SET_SPECIFIC_TIMES &&
-      day.membershipDate != null
-    ) {
-      return getTimedSlotForMembershipDay({
-        day: day.membershipDate,
-        timeZone: getTimedEventTimezone(event.value),
-        absoluteMinutes,
-      })
-    }
-
     const localPlainDate = getDateInTimezone(
       day.dateObject,
-      curTimezone.value
+      curTimezone.value,
     ).toPlainDate()
     const normalizedMinutes =
       ((absoluteMinutes % (24 * 60)) + 24 * 60) % (24 * 60)
@@ -884,7 +861,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
   const getDateFromDayTimeIndexInternal = (
     dayIndex: number,
     timeIndex: number,
-    includeSpecificTimesGaps = false
+    specificTimesDomain: "active" | "enabled" | "unbounded" = "active",
   ): Temporal.ZonedDateTime | null => {
     const time = (displayedTimes.value as (TimeItem | undefined)[])[timeIndex]
     const day = (allDays.value as (DayItem | undefined)[])[dayIndex]
@@ -895,17 +872,31 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
         ? getDateFromDisplayedAbsoluteMinutes(day, time.absoluteMinutes)
         : getDateHoursOffset(day.dateObject, time.hoursOffset)
     if (isSpecificTimes.value) {
-      if (!includeSpecificTimesGaps) {
-        if (!zdtSetHas(specificTimesVisibleSet.value, date)) return null
+      if (
+        state.value === states.SET_SPECIFIC_TIMES &&
+        typeof time.absoluteMinutes === "number"
+      ) {
+        return (
+          specificTimesEditSlotByCell.value.get(
+            `${getLocalDayKey(day.dateObject)}:${String(time.absoluteMinutes)}`,
+          ) ?? null
+        )
+      }
+      if (specificTimesDomain !== "unbounded") {
+        const slotSet =
+          specificTimesDomain === "enabled"
+            ? specificTimesEnabledSet.value
+            : specificTimesVisibleSet.value
+        if (!zdtSetHas(slotSet, date)) return null
       }
     } else {
       const intervals = timedGridIntervalsByLocalDay.value.get(
-        getLocalDayKey(day.dateObject)
+        getLocalDayKey(day.dateObject),
       )
       const isInInterval = intervals?.some(
         ({ start, end }) =>
           Temporal.ZonedDateTime.compare(date, start) >= 0 &&
-          Temporal.ZonedDateTime.compare(date, end) < 0
+          Temporal.ZonedDateTime.compare(date, end) < 0,
       )
       if (!isInInterval) {
         return null
@@ -916,13 +907,13 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
 
   const getDateFromDayTimeIndex = (
     dayIndex: number,
-    timeIndex: number
+    timeIndex: number,
   ): Temporal.ZonedDateTime | null =>
     getDateFromDayTimeIndexInternal(dayIndex, timeIndex)
 
   const getDisplayDateFromRowCol = (
     row: number,
-    col: number
+    col: number,
   ): Temporal.ZonedDateTime | null => {
     if (event.value.daysOnly) {
       return getDateFromRowCol(row, col)
@@ -931,13 +922,28 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     return getDateFromDayTimeIndexInternal(
       maxDaysPerPage.value * page.value + col,
       row,
-      true
+      "unbounded",
+    )
+  }
+
+  const getEnabledDateFromRowCol = (
+    row: number,
+    col: number,
+  ): Temporal.ZonedDateTime | null => {
+    if (event.value.daysOnly) {
+      return getDateFromRowCol(row, col)
+    }
+
+    return getDateFromDayTimeIndexInternal(
+      maxDaysPerPage.value * page.value + col,
+      row,
+      "enabled",
     )
   }
 
   const getDateFromRowCol = (
     row: number,
-    col: number
+    col: number,
   ): Temporal.ZonedDateTime | null => {
     if (event.value.daysOnly) {
       const monthDay = (monthDays.value as (MonthDayItem | undefined)[])[
@@ -969,7 +975,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
 
   const nextPage = (
     e: globalThis.Event,
-    onWeekOffsetChange?: (n: number) => void
+    onWeekOffsetChange?: (n: number) => void,
   ) => {
     e.stopImmediatePropagation()
     if (event.value.type === eventTypes.GROUP) {
@@ -987,7 +993,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
 
   const prevPage = (
     e: globalThis.Event,
-    onWeekOffsetChange?: (n: number) => void
+    onWeekOffsetChange?: (n: number) => void,
   ) => {
     e.stopImmediatePropagation()
     if (event.value.type === eventTypes.GROUP) {
@@ -1011,7 +1017,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
   }
 
   const getMinMaxHoursFromTimes = (
-    timesArr: Temporal.ZonedDateTime[]
+    timesArr: Temporal.ZonedDateTime[],
     // TODO
   ): { minHours: Temporal.PlainTime; maxHours: Temporal.PlainTime } =>
     computeMinMaxHoursFromTimes(timesArr)
@@ -1063,6 +1069,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     getDateFromDayHoursOffset,
     getDateFromDayTimeIndex,
     getDisplayDateFromRowCol,
+    getEnabledDateFromRowCol,
     getDateFromRowCol,
     setTimeslotSize,
     onResize,

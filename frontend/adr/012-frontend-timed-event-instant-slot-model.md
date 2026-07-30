@@ -45,12 +45,12 @@ For all non-`daysOnly` timed events, the frontend treats timed-event state as a 
 - both concepts are canonical persisted instant-based concepts
 - the event timezone is persisted explicitly and used for projection and batch-edit operations
 - slot-generation settings are persisted explicitly and used to generate enabled slots for local-day additions or timed recurrence creation
-- timed specific-date picked dates are persisted explicitly and used for date-picker selections, specific-times columns, and regeneration of the enabled slot domain
+- timed specific-date picked dates are persisted explicitly and used for date-picker selections and regeneration of the enabled slot domain
 - display timezone only affects projection/rendering and does not change picked dates
 
 For timed specific-date events, the date picker is a direct view of picked dates. Picking a date adds that date to membership and regenerates the full enabled slot domain for that date.
 
-The specific-times toggle is an advanced editing affordance, not a different persisted event kind. By default, a timed event created from selected days and a start/end window persists a full generated slot window where `active slots = enabled slots`. Advanced slot editing allows the user to narrow `active slots` without changing the picked dates or full enabled domain.
+The specific-times toggle is an advanced editing affordance, not a different persisted event kind. A timed event created from selected days and a start/end window persists only that generated range where `active slots = enabled slots`. Entering specific-times during creation generates a full-day enabled domain for each picked date; advanced slot editing then narrows `active slots` without changing the picked dates or full enabled domain.
 
 `daysOnly` events remain outside this model and continue using date-only semantics.
 
@@ -86,7 +86,8 @@ The specific-times toggle is an advanced editing affordance, not a different per
 
 - Advanced slot editing does not switch a timed event into a different persistence model.
 - Advanced slot editing only exposes slot-level edits over the canonical enabled-slot and active-slot state.
-- Enabling advanced slot editing does not itself alter enabled slots or active slots.
+- Entering specific-times during creation replaces the ordinary range with a full-day enabled domain for each picked date and initializes an empty active subset for slot-level selection.
+- Reopening a persisted specific-times event preserves its enabled-slot domain, whether it is full-day or range-generated.
 - Disabling advanced slot editing for a timed event collapses back to the default full-window behavior by restoring `active slots = enabled slots` for the current picked-date domain.
 
 ### Picked-date semantics
@@ -104,9 +105,11 @@ The specific-times toggle is an advanced editing affordance, not a different per
 
 ### Rendering and summary semantics
 
-- Timed grids must derive rendered date columns for timed specific-date events from picked dates.
-- Timed grids must derive rendered slot existence from enabled slots after projection into the display timezone.
+- Timed grids outside specific-times editing must derive rendered date columns for timed specific-date events from picked dates.
+- Specific-times editing must derive rendered date columns from the ordered union of picked dates and enabled slots projected into the display timezone. A projected slot belongs to its display-local calendar-date column; an adjacent column must be created when that date is otherwise absent.
+- Timed grids must derive rendered slot existence from enabled slots after projection into the display timezone; they must not render synthetic out-of-domain slots.
 - Timed grids must derive participant-selectable cells from active slots.
+- Specific-times editing may render a full-height rectangular grid around projected slots. Cells without a mapped enabled slot are disabled padding cells: they are non-editable and use a visually distinct unavailable treatment. Enabled inactive cells remain editable and use a separate treatment.
 - When the grid already shows picked dates, duplicate date-summary UI should be hidden.
 - Projection from instants to rendered local slots must stay centralized at scheduling boundaries instead of being rebuilt ad hoc in views or route-local helpers.
 
@@ -129,13 +132,14 @@ The specific-times toggle is an advanced editing affordance, not a different per
 ## Required Acceptance Scenarios
 
 - Creating a normal timed event with selected days and a start/end window generates full-window enabled slots and matching active slots.
-- Enabling advanced slot editing does not change the persistence model; it only enables slot-level edits.
+- Entering specific-times during creation generates a full-day enabled domain for every picked date, then enables slot-level edits.
 - Disabling advanced slot editing restores `active slots = enabled slots` for the current enabled domain.
 - Changing only the display timezone can shift where active cells appear within a picked-date column without changing the picked date.
 - Adding a date in the picker adds that picked date's full enabled slot domain and matching active slots.
 - Removing a date removes its enabled slots and any active slots on that picked date.
 - Changing the event timezone preserves picked dates, regenerates the enabled slot domain for those dates, and filters active slots to the rebuilt enabled domain.
-- Cross-midnight enabled domains render the correct clipped slots for each picked date after display-timezone changes.
+- Cross-midnight enabled domains render slots in their display-local date columns after display-timezone changes, creating adjacent columns as needed.
+- Specific-times editing distinguishes selected active slots, editable enabled inactive slots, and non-editable disabled padding cells in its legend and grid treatment.
 - DST gap and overlap days generate the correct enabled slots in the event timezone.
 - DOW and group timed events derive displayed days and timed grids from the same slot-based state as timed specific-date events.
 - Legacy timed payloads without separate enabled-slot data decode with `enabled slots = active slots` until migrated data is available.

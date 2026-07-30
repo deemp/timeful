@@ -6,6 +6,7 @@ import type { Event } from "@/types"
 import { buildEventEditorSchedule } from "./eventEditorSchedule"
 import {
   applySpecificTimesEditDraft,
+  buildSpecificTimesCreateDraft,
   buildSpecificTimesEditDraft,
 } from "./specificTimesEditDraft"
 
@@ -29,7 +30,9 @@ const buildEvent = (): Event => ({
     Temporal.PlainDate.from("2026-05-30"),
     Temporal.PlainDate.from("2026-05-31"),
   ],
-  timeSeed: Temporal.Instant.from("2026-05-30T09:00:00Z").toZonedDateTimeISO(UTC),
+  timeSeed: Temporal.Instant.from("2026-05-30T09:00:00Z").toZonedDateTimeISO(
+    UTC,
+  ),
   duration: durations.ONE_HOUR,
   hasSpecificTimes: true,
   timeIncrement: durations.FIFTEEN_MINUTES,
@@ -72,7 +75,9 @@ const buildWeeklyEvent = (): Event => ({
     Temporal.PlainDate.from("2026-01-05"),
     Temporal.PlainDate.from("2026-01-07"),
   ],
-  timeSeed: Temporal.Instant.from("2026-01-05T17:00:00Z").toZonedDateTimeISO(UTC),
+  timeSeed: Temporal.Instant.from("2026-01-05T17:00:00Z").toZonedDateTimeISO(
+    UTC,
+  ),
   duration: durations.ONE_HOUR,
   hasSpecificTimes: false,
   timeIncrement: Temporal.Duration.from({ minutes: 30 }),
@@ -112,6 +117,39 @@ const buildWeeklyEvent = (): Event => ({
 })
 
 describe("specificTimesEditDraft", () => {
+  it("creates a full-day enabled domain when entering specific-times", () => {
+    const schedule = buildEventEditorSchedule({
+      daysOnly: false,
+      daysOnlyType: "specific_dates",
+      selectedDateOption: "Specific dates",
+      selectedDays: [Temporal.PlainDate.from("2026-05-30")],
+      selectedDaysOfWeek: [],
+      startOnMonday: true,
+      startTime: Temporal.PlainTime.from("09:00"),
+      endTime: Temporal.PlainTime.from("17:00"),
+      timezoneValue: UTC,
+      timeIncrementMinutes: 30,
+    })
+
+    const draft = buildSpecificTimesCreateDraft({
+      schedule,
+      timeIncrementMinutes: 30,
+    })
+
+    expect(draft.slotGeneration).toEqual({
+      startTimeLocal: Temporal.PlainTime.from("00:00"),
+      endTimeLocal: Temporal.PlainTime.from("00:00"),
+      timeIncrement: Temporal.Duration.from({ minutes: 30 }),
+    })
+    expect(draft.enabledSlots).toHaveLength(48)
+    expect(draft.enabledSlots?.[0]?.toInstant().toString()).toBe(
+      "2026-05-30T00:00:00Z",
+    )
+    expect(draft.enabledSlots?.at(-1)?.toInstant().toString()).toBe(
+      "2026-05-30T23:30:00Z",
+    )
+  })
+
   it("marks specific-time edits for reset when the slot window changes", () => {
     const schedule = buildEventEditorSchedule({
       daysOnly: false,
@@ -134,7 +172,7 @@ describe("specificTimesEditDraft", () => {
         schedule,
         timeIncrementMinutes: 15,
         specificTimesEnabled: true,
-      })
+      }),
     ).toMatchObject({
       dates: schedule.normalizedSelectedDays,
       timeIncrementMinutes: 15,
@@ -166,7 +204,7 @@ describe("specificTimesEditDraft", () => {
         schedule,
         timeIncrementMinutes: 15,
         specificTimesEnabled: true,
-      })
+      }),
     ).toMatchObject({
       resetExistingTimes: false,
       activeSlots: [
@@ -201,7 +239,7 @@ describe("specificTimesEditDraft", () => {
         schedule,
         timeIncrementMinutes: 30,
         specificTimesEnabled: true,
-      })
+      }),
     ).toMatchObject({
       resetExistingTimes: true,
       enabledSlots: schedule.enabledSlots,
@@ -261,7 +299,7 @@ describe("specificTimesEditDraft", () => {
         schedule,
         timeIncrementMinutes: 15,
         specificTimesEnabled: true,
-      })
+      }),
     ).toMatchObject({
       resetExistingTimes: false,
       activeSlots: [
@@ -294,7 +332,7 @@ describe("specificTimesEditDraft", () => {
         schedule,
         timeIncrementMinutes: 15,
         specificTimesEnabled: true,
-      })
+      }),
     ).toMatchObject({
       resetExistingTimes: false,
       activeSlots: [
@@ -333,7 +371,7 @@ describe("specificTimesEditDraft", () => {
         schedule,
         timeIncrementMinutes: 15,
         specificTimesEnabled: true,
-      })
+      }),
     ).toMatchObject({
       resetExistingTimes: false,
       activeSlots: [
@@ -366,7 +404,7 @@ describe("specificTimesEditDraft", () => {
         schedule,
         timeIncrementMinutes: 15,
         specificTimesEnabled: true,
-      })
+      }),
     ).toMatchObject({
       resetExistingTimes: false,
       enabledSlots: [
@@ -402,7 +440,7 @@ describe("specificTimesEditDraft", () => {
         schedule,
         timeIncrementMinutes: 15,
         specificTimesEnabled: false,
-      })
+      }),
     ).toMatchObject({
       resetExistingTimes: false,
       enabledSlots: [
@@ -465,18 +503,22 @@ describe("specificTimesEditDraft", () => {
       specificTimesEnabled: false,
     })
 
-    expect(draft?.enabledSlots?.map((slot) => slot.toInstant().toString())).toEqual(
-      schedule.enabledSlots.map((slot) => slot.toInstant().toString())
-    )
-    expect(draft?.activeSlots?.map((slot) => slot.toInstant().toString())).toEqual(
-      schedule.enabledSlots.map((slot) => slot.toInstant().toString())
-    )
-    expect(draft?.enabledSlots?.some((slot) => slot.toInstant().toString().includes("T08:"))).toBe(
-      false
-    )
-    expect(draft?.activeSlots?.some((slot) => slot.toInstant().toString().includes("T08:"))).toBe(
-      false
-    )
+    expect(
+      draft?.enabledSlots?.map((slot) => slot.toInstant().toString()),
+    ).toEqual(schedule.enabledSlots.map((slot) => slot.toInstant().toString()))
+    expect(
+      draft?.activeSlots?.map((slot) => slot.toInstant().toString()),
+    ).toEqual(schedule.enabledSlots.map((slot) => slot.toInstant().toString()))
+    expect(
+      draft?.enabledSlots?.some((slot) =>
+        slot.toInstant().toString().includes("T08:"),
+      ),
+    ).toBe(false)
+    expect(
+      draft?.activeSlots?.some((slot) =>
+        slot.toInstant().toString().includes("T08:"),
+      ),
+    ).toBe(false)
   })
 
   it("applies a reset draft by clearing stale times and updating local event seeds", () => {
@@ -488,9 +530,9 @@ describe("specificTimesEditDraft", () => {
           Temporal.PlainDate.from("2026-05-28"),
           Temporal.PlainDate.from("2026-05-29"),
         ],
-        timeSeed: Temporal.Instant.from("2026-05-28T09:00:00Z").toZonedDateTimeISO(
-          UTC
-        ),
+        timeSeed: Temporal.Instant.from(
+          "2026-05-28T09:00:00Z",
+        ).toZonedDateTimeISO(UTC),
         duration: Temporal.Duration.from({ hours: 8 }),
         timeIncrementMinutes: 30,
         resetExistingTimes: true,
@@ -501,7 +543,9 @@ describe("specificTimesEditDraft", () => {
       "2026-05-28",
       "2026-05-29",
     ])
-    expect(nextEvent.timeSeed?.toString()).toBe("2026-05-28T09:00:00+00:00[UTC]")
+    expect(nextEvent.timeSeed?.toString()).toBe(
+      "2026-05-28T09:00:00+00:00[UTC]",
+    )
     expect(nextEvent.timeIncrement?.total("minutes")).toBe(30)
     expect(nextEvent.times).toEqual([])
     expect(processEventMock).toHaveBeenCalledWith(nextEvent)
@@ -537,9 +581,9 @@ describe("specificTimesEditDraft", () => {
           Temporal.PlainDate.from("2026-05-30"),
           Temporal.PlainDate.from("2026-05-31"),
         ],
-        timeSeed: Temporal.Instant.from("2026-05-30T09:00:00Z").toZonedDateTimeISO(
-          UTC
-        ),
+        timeSeed: Temporal.Instant.from(
+          "2026-05-30T09:00:00Z",
+        ).toZonedDateTimeISO(UTC),
         duration: durations.ONE_HOUR,
         enabledSlots: [
           Temporal.Instant.from("2026-05-30T09:00:00Z").toZonedDateTimeISO(UTC),

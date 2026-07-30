@@ -131,7 +131,7 @@ export const getBaseTimeslotClassStyle = ({
       maxVal = max
     } else if (state === states.SUBSET_AVAILABILITY) {
       numRespondents = [...timeslotRespondents].filter((r) =>
-        curRespondentsSet.has(r)
+        curRespondentsSet.has(r),
       ).length
       maxVal = curRespondentsMax
     } else if (overlayAvailability) {
@@ -216,37 +216,27 @@ export const getBaseTimeslotClassStyle = ({
     (!overlayAvailability && state === states.EDIT_AVAILABILITY) ||
     state === states.SET_SPECIFIC_TIMES
   ) {
-    s.backgroundColor = UNAVAILABLE_BG
-    const inRange = inDragRange(row, col)
-    let selectedSpecificTime = false
-    if (inRange) {
-      if (dragType === DRAG_TYPES.ADD) {
-        if (state === states.SET_SPECIFIC_TIMES) {
-          c += "tw-bg-white "
-          selectedSpecificTime = true
-        } else if (availabilityType === availabilityTypes.AVAILABLE) {
-          s.backgroundColor = "#00994C77"
-        } else {
-          c += "tw-bg-yellow "
+    if (state === states.SET_SPECIFIC_TIMES) {
+      const selected = inDragRange(row, col)
+        ? dragType === DRAG_TYPES.ADD
+        : zdtSetHas(tempTimes, date)
+      c += selected ? "tw-bg-white " : "tw-bg-light-gray-stroke "
+    } else {
+      s.backgroundColor = UNAVAILABLE_BG
+      const inRange = inDragRange(row, col)
+      if (inRange) {
+        if (dragType === DRAG_TYPES.ADD) {
+          if (availabilityType === availabilityTypes.AVAILABLE) {
+            s.backgroundColor = "#00994C77"
+          } else {
+            c += "tw-bg-yellow "
+          }
         }
-      } else if (state === states.SET_SPECIFIC_TIMES) {
-        c += "tw-bg-gray "
+      } else if (zdtSetHas(availability, date)) {
+        s.backgroundColor = "#00994C77"
+      } else if (zdtSetHas(ifNeeded, date)) {
+        c += "tw-bg-yellow "
       }
-      } else if (state === states.SET_SPECIFIC_TIMES) {
-      if (zdtSetHas(tempTimes, date)) {
-        c += "tw-bg-white "
-        selectedSpecificTime = true
-      } else {
-        c += "tw-bg-gray "
-      }
-    } else if (zdtSetHas(availability, date)) {
-      s.backgroundColor = "#00994C77"
-    } else if (zdtSetHas(ifNeeded, date)) {
-      c += "tw-bg-yellow "
-    }
-
-    if (state === states.SET_SPECIFIC_TIMES && selectedSpecificTime) {
-      applyAggregateRespondentFill({ allowUnavailableFallback: false })
     }
   }
 
@@ -298,14 +288,17 @@ interface TimeGridTimeslotArgs extends TimeslotBaseArgs {
   lastRow: number
 }
 
-interface BuildTimeGridTimeslotClassStylesArgs
-  extends Omit<
-    TimeGridTimeslotArgs,
-    "date" | "row" | "col" | "isFirstSplit" | "isDisabled"
-  > {
+interface BuildTimeGridTimeslotClassStylesArgs extends Omit<
+  TimeGridTimeslotArgs,
+  "date" | "row" | "col" | "isFirstSplit" | "isDisabled"
+> {
   firstSplitTimes: TimeItem[]
   secondSplitTimes: TimeItem[]
   getDateFromRowCol: (row: number, col: number) => Temporal.ZonedDateTime | null
+  getEnabledDateFromRowCol?: (
+    row: number,
+    col: number,
+  ) => Temporal.ZonedDateTime | null
 }
 
 export const getTimeGridTimeslotClassStyle = ({
@@ -337,7 +330,8 @@ export const getTimeGridTimeslotClassStyle = ({
     cs.class += "animate-bg-color "
   }
   cs.style.height = `${String(timeslotHeight)}px`
-  const isLeftDateBoundary = baseArgs.col === 0 || !isColConsecutive(baseArgs.col)
+  const isLeftDateBoundary =
+    baseArgs.col === 0 || !isColConsecutive(baseArgs.col)
   const isRightDateBoundary =
     baseArgs.col === daysLength - 1 || !isColConsecutive(baseArgs.col + 1)
 
@@ -355,8 +349,7 @@ export const getTimeGridTimeslotClassStyle = ({
     cs.style.borderRightWidth = GRID_LINE_WIDTH
     cs.style.borderRightColor = GRID_LINE_COLOR
     cs.style.boxShadow = `inset 0 0 0 2px ${GRID_CURSOR_OUTLINE}`
-    cs.style.backgroundImage =
-      `repeating-linear-gradient(135deg, transparent 0 5px, ${GRID_CURSOR_OUTLINE} 5px 7px, transparent 7px 11px)`
+    cs.style.backgroundImage = `repeating-linear-gradient(135deg, transparent 0 5px, ${GRID_CURSOR_OUTLINE} 5px 7px, transparent 7px 11px)`
   } else {
     const splitStartOffsetMinutes = splitStartHoursOffset?.total("minutes")
     const offsetMinutes = timeHoursOffset?.total("minutes")
@@ -369,9 +362,10 @@ export const getTimeGridTimeslotClassStyle = ({
           : null
     const localMinute =
       typeof displayedMinutes === "number"
-        ? (((displayedMinutes % 60) + 60) % 60)
+        ? ((displayedMinutes % 60) + 60) % 60
         : baseArgs.date
-          ? baseArgs.date.subtract({ minutes: timezoneOffset.total("minutes") }).minute
+          ? baseArgs.date.subtract({ minutes: timezoneOffset.total("minutes") })
+              .minute
           : null
     if (isFirstSplit && baseArgs.row === 0) {
       cs.class += "tw-border-t "
@@ -422,7 +416,7 @@ export const getTimeGridTimeslotClassStyle = ({
   }
 
   if (isDisabled) {
-    cs.class += "tw-bg-light-gray-stroke "
+    cs.class += "tw-bg-gray "
   }
   if (cs.style.backgroundColor === UNAVAILABLE_BG) {
     cs.style.backgroundColor = UNAVAILABLE_BG_TIME_GRID
@@ -435,6 +429,7 @@ export const buildTimeGridTimeslotClassStyles = ({
   firstSplitTimes,
   secondSplitTimes,
   getDateFromRowCol,
+  getEnabledDateFromRowCol,
   ...sharedArgs
 }: BuildTimeGridTimeslotClassStylesArgs): ClassStyle[] => {
   const out: ClassStyle[] = []
@@ -445,19 +440,22 @@ export const buildTimeGridTimeslotClassStyles = ({
 
     for (let row = 0; row < firstSplitTimes.length; row += 1) {
       const date = getDateFromRowCol(row, col)
-      out.push(
-        getTimeGridTimeslotClassStyle({
-          ...sharedArgs,
-          date,
-          timeHoursOffset: firstSplitTimes[row]?.hoursOffset,
-          absoluteMinutes: firstSplitTimes[row]?.absoluteMinutes,
-          splitStartHoursOffset: firstSplitStartHoursOffset,
-          row,
-          col,
-          isFirstSplit: true,
-          isDisabled: !date,
-        })
-      )
+      const enabledDate = getEnabledDateFromRowCol?.(row, col) ?? date
+      const classStyle = getTimeGridTimeslotClassStyle({
+        ...sharedArgs,
+        date,
+        timeHoursOffset: firstSplitTimes[row]?.hoursOffset,
+        absoluteMinutes: firstSplitTimes[row]?.absoluteMinutes,
+        splitStartHoursOffset: firstSplitStartHoursOffset,
+        row,
+        col,
+        isFirstSplit: true,
+        isDisabled: !enabledDate,
+      })
+      if (!date && enabledDate) {
+        classStyle.class += "tw-bg-light-gray-stroke "
+      }
+      out.push(classStyle)
     }
 
     for (
@@ -467,19 +465,22 @@ export const buildTimeGridTimeslotClassStyles = ({
     ) {
       const row = secondSplitRow + firstSplitTimes.length
       const date = getDateFromRowCol(row, col)
-      out.push(
-        getTimeGridTimeslotClassStyle({
-          ...sharedArgs,
-          date,
-          timeHoursOffset: secondSplitTimes[secondSplitRow]?.hoursOffset,
-          absoluteMinutes: secondSplitTimes[secondSplitRow]?.absoluteMinutes,
-          splitStartHoursOffset: secondSplitStartHoursOffset,
-          row,
-          col,
-          isFirstSplit: false,
-          isDisabled: !date,
-        })
-      )
+      const enabledDate = getEnabledDateFromRowCol?.(row, col) ?? date
+      const classStyle = getTimeGridTimeslotClassStyle({
+        ...sharedArgs,
+        date,
+        timeHoursOffset: secondSplitTimes[secondSplitRow]?.hoursOffset,
+        absoluteMinutes: secondSplitTimes[secondSplitRow]?.absoluteMinutes,
+        splitStartHoursOffset: secondSplitStartHoursOffset,
+        row,
+        col,
+        isFirstSplit: false,
+        isDisabled: !enabledDate,
+      })
+      if (!date && enabledDate) {
+        classStyle.class += "tw-bg-light-gray-stroke "
+      }
+      out.push(classStyle)
     }
   }
 
@@ -574,7 +575,7 @@ export const buildDayGridTimeslotClassStyles = ({
       date,
       row: Math.floor(index / 7),
       col: index % 7,
-    })
+    }),
   )
 
 interface BuildOverlaidAvailabilityArgs {
@@ -620,9 +621,7 @@ export const buildOverlaidAvailability = ({
       const draggingAdd =
         dragging && inDragRange(row, dayIndex) && dragType === DRAG_TYPES.ADD
       const draggingRemove =
-        dragging &&
-        inDragRange(row, dayIndex) &&
-        dragType === DRAG_TYPES.REMOVE
+        dragging && inDragRange(row, dayIndex) && dragType === DRAG_TYPES.REMOVE
 
       if (
         draggingAdd ||
@@ -687,7 +686,11 @@ export const buildRenderedOverlayAvailability = ({
   isBaseRowVisibleOnDay?: (baseRowIndex: number, dayIndex: number) => boolean
 }): RenderedOverlayAvailabilityFragment[][] => {
   const renderedRowIndexesByBaseRow = new Map<number, number>()
-  for (let renderedIndex = 0; renderedIndex < renderedRows.length; renderedIndex += 1) {
+  for (
+    let renderedIndex = 0;
+    renderedIndex < renderedRows.length;
+    renderedIndex += 1
+  ) {
     const row = renderedRows[renderedIndex]
     if (row.kind === "timeslot" && typeof row.baseRowIndex === "number") {
       renderedRowIndexesByBaseRow.set(row.baseRowIndex, renderedIndex)
@@ -699,7 +702,7 @@ export const buildRenderedOverlayAvailability = ({
 
   const findBlockStartBaseRowIndex = (
     block: OverlaidAvailabilityBlock,
-    coveredBaseRowCount: number
+    coveredBaseRowCount: number,
   ): number | null => {
     if (typeof block.startBaseRowIndex === "number") {
       return block.startBaseRowIndex
@@ -719,7 +722,11 @@ export const buildRenderedOverlayAvailability = ({
 
     for (const splitRange of splitSearchRanges) {
       const latestStartIndex = splitRange.times.length - coveredBaseRowCount
-      for (let splitIndex = 0; splitIndex <= latestStartIndex; splitIndex += 1) {
+      for (
+        let splitIndex = 0;
+        splitIndex <= latestStartIndex;
+        splitIndex += 1
+      ) {
         if (
           splitRange.times[splitIndex]?.hoursOffset.total("minutes") ===
           blockStartMinutes
@@ -742,7 +749,10 @@ export const buildRenderedOverlayAvailability = ({
         return []
       }
 
-      const startBaseRowIndex = findBlockStartBaseRowIndex(block, coveredBaseRowCount)
+      const startBaseRowIndex = findBlockStartBaseRowIndex(
+        block,
+        coveredBaseRowCount,
+      )
 
       if (
         startBaseRowIndex == null ||
@@ -799,7 +809,7 @@ export const buildRenderedOverlayAvailability = ({
           }
         } else {
           currentFragment.height = `${String(
-            Number.parseFloat(currentFragment.height) + renderedRow.height
+            Number.parseFloat(currentFragment.height) + renderedRow.height,
           )}px`
         }
 
@@ -808,7 +818,7 @@ export const buildRenderedOverlayAvailability = ({
 
       flushFragment()
       return fragments
-    })
+    }),
   )
 }
 
@@ -846,13 +856,13 @@ export const formatTooltipContent = ({
 
 export const getIsTimeBlockInFirstSplit = (
   timeBlock: { hoursOffset: Temporal.Duration },
-  firstSplitTimes: TimeItem[]
+  firstSplitTimes: TimeItem[],
 ): boolean =>
   firstSplitTimes.length > 0 &&
   compareDuration(timeBlock.hoursOffset, firstSplitTimes[0].hoursOffset) >= 0 &&
   compareDuration(
     timeBlock.hoursOffset,
-    firstSplitTimes[firstSplitTimes.length - 1].hoursOffset
+    firstSplitTimes[firstSplitTimes.length - 1].hoursOffset,
   ) <= 0
 
 export const getTimeBlockStyle = ({
@@ -877,29 +887,29 @@ export const getTimeBlockStyle = ({
     secondSplitTimes.length === 0 ||
     getIsTimeBlockInFirstSplit(
       timeBlock as { hoursOffset: Temporal.Duration },
-      firstSplitTimes
+      firstSplitTimes,
     )
   ) {
     style.top = `calc(${String(
       hoursOffset
         .subtract(firstSplitTimes[0]?.hoursOffset ?? durations.ZERO)
-        .total("hours")
+        .total("hours"),
     )} * ${String(HOUR_HEIGHT)}px)`
     style.height = `calc(${String(hoursLength.total("hours"))} * ${String(
-      HOUR_HEIGHT
+      HOUR_HEIGHT,
     )}px)`
     return style
   }
 
   style.top = `calc(${String(firstSplitTimes.length)} * ${String(
-    timeslotHeight
+    timeslotHeight,
   )}px + ${String(SPLIT_GAP_HEIGHT)}px + ${String(
     hoursOffset
       .subtract(secondSplitTimes[0]?.hoursOffset ?? durations.ZERO)
-      .total("hours")
+      .total("hours"),
   )} * ${String(HOUR_HEIGHT)}px)`
   style.height = `calc(${String(hoursLength.total("hours"))} * ${String(
-    HOUR_HEIGHT
+    HOUR_HEIGHT,
   )}px)`
 
   return style

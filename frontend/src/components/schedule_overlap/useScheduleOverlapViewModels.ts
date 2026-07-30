@@ -116,6 +116,7 @@ interface UseScheduleOverlapViewModelsOptions {
   splitTimes: Ref<TimeItem[][]>
   timeslotHeight: Ref<number>
   renderedRows: ComputedRef<RenderedTimeGridRow[]>
+  timeAxisEndText: ComputedRef<string | undefined>
   days: Ref<DayItem[]>
   isSpecificDates: Ref<boolean>
   sampleCalendarEventsByDay: ComputedRef<CalendarEventsByDay>
@@ -199,6 +200,10 @@ export function useScheduleOverlapViewModels(
     signUpBlocks: opts.signUpBlocksByDay.value.flat(),
     signUpBlocksToAdd: opts.signUpBlocksToAddByDay.value.flat(),
     numTempTimes: opts.tempTimes.value.size,
+    activeSlotsCount: (
+      opts.event.value.activeSlots ?? opts.event.value.times ?? []
+    ).length,
+    responseCount: opts.respondents.value.length,
     curGuestId: opts.curGuestId.value,
     userHasResponded: opts.userHasResponded.value,
     addingAvailabilityAsGuest: opts.addingAvailabilityAsGuest.value,
@@ -291,6 +296,7 @@ export function useScheduleOverlapViewModels(
     splitTimes: opts.splitTimes.value,
     times: opts.times.value,
     renderedRows: opts.renderedRows.value,
+    timeAxisEndText: opts.timeAxisEndText.value,
     timeslotHeight: opts.timeslotHeight.value,
     days: opts.days.value,
     isSpecificDates: opts.isSpecificDates.value,

@@ -14,7 +14,11 @@ import {
   scheduleOverlapGlobalStubs,
 } from "./scheduleOverlapTestUtils"
 import { useCalendarGrid } from "@/composables/schedule_overlap/useCalendarGrid"
-import { states, type ScheduleOverlapEvent } from "@/composables/schedule_overlap/types"
+import {
+  MIN_COLLAPSIBLE_HIDDEN_SPAN_HOURS,
+  states,
+  type ScheduleOverlapEvent,
+} from "@/composables/schedule_overlap/types"
 import { formatTooltipContent } from "./scheduleOverlapRendering"
 import { ZdtMap } from "@/utils"
 import ScheduleOverlap from "./ScheduleOverlap.vue"
@@ -137,6 +141,10 @@ describe("ScheduleOverlap", () => {
 
   it("keeps the compact-desktop breakpoint constant at 640", () => {
     expect(SCHEDULE_OVERLAP_COMPACT_DESKTOP_BREAKPOINT).toBe(640)
+  })
+
+  it("collapses runs of three or more inactive hours", () => {
+    expect(MIN_COLLAPSIBLE_HIDDEN_SPAN_HOURS).toBe(3)
   })
 
   it("stretches timed and days-only grid columns across the compact desktop width helper", () => {
@@ -267,6 +275,7 @@ describe("ScheduleOverlap", () => {
       }
     )
     vi.stubGlobal("scrollTo", vi.fn())
+    localStorage.setItem("showAllHours", "false")
 
     const wrapper = mount(ScheduleOverlap, {
       props: {
@@ -375,18 +384,17 @@ describe("ScheduleOverlap", () => {
       vm.days.map((day) => day.dateObject.withTimeZone("UTC").toPlainDate().toString())
     ).toEqual(["2026-05-29", "2026-05-30"])
     const renderedHourLabels = vm.splitTimes[0].map((time) => time.text).filter(Boolean)
-    expect(renderedHourLabels).toEqual([
-      "12 am",
-      "1 am",
-      "2 am",
-      "3 am",
-    ])
+    expect(renderedHourLabels).toHaveLength(24)
+    expect(renderedHourLabels[0]).toBe("12 am")
+    expect(renderedHourLabels.at(-1)).toBe("11 pm")
     expect(vm.splitTimes[0].map((time) => time.displayedMinutes)).toEqual(
-      Array.from({ length: 16 }, (_, index) => index * 15)
+      Array.from({ length: 96 }, (_, index) => index * 15)
     )
     expect(
       vm.renderedRows.filter((row) => row.kind === "collapsed")
-    ).toEqual([])
+    ).toEqual([
+      expect.objectContaining({ startLabel: "04:00", endLabel: "00:00" }),
+    ])
   })
 
   it("keeps unselected membership dates editable after saving specific times on only one day", async () => {
@@ -1240,7 +1248,7 @@ describe("ScheduleOverlap", () => {
     )
   })
 
-  it("trims hidden edge hours by default and restores them when showing all hours", async () => {
+  it("keeps a fully active saved specific-times window expanded", async () => {
     const wrapper = mountScheduleOverlap({
       props: {
         event: {
@@ -1309,10 +1317,27 @@ describe("ScheduleOverlap", () => {
     expect(vm.showAllHours).toBe(false)
 
     const initialTimeslotRows = vm.renderedRows.filter((row) => row.kind === "timeslot")
-    expect(vm.renderedRows.some((row) => row.kind === "collapsed")).toBe(false)
-    expect(initialTimeslotRows.length).toBeLessThan(vm.splitTimes.flat().length)
-    expect(initialTimeslotRows[0]?.timeText).toBe("9 am")
-    expect(initialTimeslotRows.at(-1)?.timeText).toBe("8 pm")
+    expect(vm.renderedRows.some((row) => row.kind === "collapsed")).toBe(true)
+    expect(initialTimeslotRows.length).toBe(vm.splitTimes.flat().length)
+    expect(initialTimeslotRows[0]?.timeText).toBe("09:00")
+    expect(
+      initialTimeslotRows
+        .map((row) => row.timeText)
+        .filter((label): label is string => Boolean(label)),
+    ).toEqual([
+      "09:00",
+      "10:00",
+      "11:00",
+      "12:00",
+      "13:00",
+      "14:00",
+      "15:00",
+      "16:00",
+      "17:00",
+      "18:00",
+      "19:00",
+      "20:00",
+    ])
 
     vm.updateShowAllHours(true)
     await nextTick()
@@ -1321,7 +1346,7 @@ describe("ScheduleOverlap", () => {
     expect(vm.renderedRows.some((row) => row.kind === "collapsed")).toBe(false)
     const expandedTimeslotRows = vm.renderedRows.filter((row) => row.kind === "timeslot")
     expect(expandedTimeslotRows).toHaveLength(vm.splitTimes.flat().length)
-    expect(expandedTimeslotRows.length).toBeGreaterThan(initialTimeslotRows.length)
+    expect(expandedTimeslotRows).toHaveLength(initialTimeslotRows.length)
   })
 
   it("animates loaded availability when editing an existing respondent", async () => {
@@ -1439,10 +1464,15 @@ describe("ScheduleOverlap", () => {
       renderedRows: { kind: "timeslot" | "collapsed" | "filler" | "split-gap"; startLabel?: string; endLabel?: string }[]
     }
 
-    expect(vm.renderedRows.filter((row) => row.kind === "collapsed")).toEqual([])
+    expect(vm.renderedRows.filter((row) => row.kind === "collapsed")).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ startLabel: "00:00", endLabel: "11:00" }),
+      ])
+    )
   })
 
-  it("collapses interior gaps between discontiguous daily specific-time ranges", () => {
+  it("collapses enabled but inactive interior specific-time hours", () => {
+    localStorage.setItem("showAllHours", "false")
     const wrapper = mountScheduleOverlap({
       props: {
         event: {
@@ -1456,19 +1486,41 @@ describe("ScheduleOverlap", () => {
           startTime: Temporal.PlainTime.from("09:00"),
           duration: Temporal.Duration.from({ hours: 8 }),
           timeIncrement: Temporal.Duration.from({ hours: 1 }),
-          times: [
+          enabledSlots: [
             ...buildUtcSpecificTimes("2026-01-01", [
               "09:00:00",
               "10:00:00",
+              "11:00:00",
+              "12:00:00",
+              "13:00:00",
+              "14:00:00",
               "15:00:00",
               "16:00:00",
             ]),
             ...buildUtcSpecificTimes("2026-01-02", [
               "09:00:00",
               "10:00:00",
+              "11:00:00",
+              "12:00:00",
+              "13:00:00",
+              "14:00:00",
               "15:00:00",
               "16:00:00",
             ]),
+          ],
+          activeSlots: [
+            ...buildUtcSpecificTimes("2026-01-01", [
+              "09:00:00",
+              "16:00:00",
+            ]),
+            ...buildUtcSpecificTimes("2026-01-02", [
+              "09:00:00",
+              "16:00:00",
+            ]),
+          ],
+          times: [
+            ...buildUtcSpecificTimes("2026-01-01", ["09:00:00", "16:00:00"]),
+            ...buildUtcSpecificTimes("2026-01-02", ["09:00:00", "16:00:00"]),
           ],
         },
         alwaysShowCalendarEvents: false,
@@ -1479,17 +1531,21 @@ describe("ScheduleOverlap", () => {
 
     const vm = wrapper.vm as unknown as {
       renderedRows: { kind: "timeslot" | "collapsed" | "filler" | "split-gap"; startLabel?: string; endLabel?: string }[]
+      state: (typeof states)[keyof typeof states]
     }
 
-    expect(vm.renderedRows.filter((row) => row.kind === "collapsed")).toEqual([
-      expect.objectContaining({
-        startLabel: "11:00",
-        endLabel: "15:00",
-      }),
-    ])
+    expect(vm.state).toBe(states.HEATMAP)
+    expect(vm.renderedRows.filter((row) => row.kind === "collapsed")).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          startLabel: "10:00",
+          endLabel: "16:00",
+        }),
+      ])
+    )
   })
 
-  it("does not add leading or trailing collapsed bands outside the saved specific-times window", () => {
+  it("collapses the omitted day boundaries around a saved specific-times window", () => {
     const wrapper = mountScheduleOverlap({
       props: {
         event: {
@@ -1533,10 +1589,23 @@ describe("ScheduleOverlap", () => {
       }[]
     }
 
-    expect(vm.renderedRows.filter((row) => row.kind === "collapsed")).toEqual([])
+    expect(vm.renderedRows.filter((row) => row.kind === "collapsed")).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          timeText: "00:00",
+          startLabel: "00:00",
+          endLabel: "14:00",
+        }),
+        expect.objectContaining({
+          timeText: "18:00",
+          startLabel: "18:00",
+          endLabel: "00:00",
+        }),
+      ])
+    )
     const timeslotRows = vm.renderedRows.filter((row) => row.kind === "timeslot")
-    expect(timeslotRows[0]?.timeText).toBe("2 pm")
-    expect(timeslotRows.at(-1)?.timeText).toBe("5 pm")
+    expect(timeslotRows[0]?.timeText).toBe("14:00")
+    expect(timeslotRows.at(-1)?.timeText).toBe("17:00")
   })
 
   it("keeps a row expanded when any visible day allows that exact specific-time slot", () => {
@@ -1579,10 +1648,16 @@ describe("ScheduleOverlap", () => {
       renderedRows: { kind: "timeslot" | "collapsed" | "filler" | "split-gap"; startLabel?: string; endLabel?: string }[]
     }
 
-    expect(vm.renderedRows.filter((row) => row.kind === "collapsed")).toEqual([])
+    expect(vm.renderedRows.filter((row) => row.kind === "collapsed")).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ startLabel: "00:00", endLabel: "09:00" }),
+        expect.objectContaining({ startLabel: "18:00", endLabel: "00:00" }),
+      ])
+    )
   })
 
   it("collapses only whole interior hours for schedule-grey runs with partial-hour boundaries", () => {
+    localStorage.setItem("showAllHours", "false")
     const wrapper = mountScheduleOverlap({
       props: {
         event: {
@@ -1609,17 +1684,20 @@ describe("ScheduleOverlap", () => {
     })
 
     const vm = wrapper.vm as unknown as {
-      renderedRows: { kind: "timeslot" | "collapsed" | "filler" | "split-gap"; startLabel?: string; endLabel?: string }[]
+      renderedRows: { kind: "timeslot" | "collapsed" | "filler" | "split-gap"; startLabel?: string; endLabel?: string; timeText?: string }[]
     }
 
     const collapsedRows = vm.renderedRows.filter((row) => row.kind === "collapsed")
 
-    expect(collapsedRows).toEqual([
-      expect.objectContaining({
-        startLabel: "11:00",
-        endLabel: "18:00",
-      }),
-    ])
+    expect(collapsedRows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          startLabel: "11:00",
+          endLabel: "18:00",
+        }),
+      ])
+    )
+    expect(vm.renderedRows.find((row) => row.kind === "timeslot")?.timeText).toBe("08:00")
   })
 
   it("inserts a structural split gap between wrapped UTC+3:30 midnight rows", () => {
@@ -1663,8 +1741,8 @@ describe("ScheduleOverlap", () => {
 
     expect(splitGapIndex).toBe(vm.splitTimes[0].length)
     expect(vm.renderedRows[splitGapIndex - 1]?.timeText).toBeUndefined()
-    expect(vm.renderedRows[splitGapIndex + 1]?.timeText).toBe("11 pm")
-    expect(vm.renderedRows[0]?.timeText).toBe("12 am")
+    expect(vm.renderedRows[splitGapIndex + 1]?.timeText).toBe("23:00")
+    expect(vm.renderedRows[0]?.timeText).toBe("00:00")
     expect(vm.renderedRows[splitGapIndex]).toEqual(
       expect.objectContaining({
         kind: "split-gap",
@@ -1673,7 +1751,7 @@ describe("ScheduleOverlap", () => {
     )
     expect(vm.renderedRows[splitGapIndex - 1]?.kind).toBe("timeslot")
     expect(vm.renderedRows[splitGapIndex + 1]?.kind).toBe("timeslot")
-    expect(hourLabels.filter((label) => label === "2 am")).toHaveLength(1)
+    expect(hourLabels.filter((label) => label === "02:00")).toHaveLength(1)
 
     for (let col = 0; col < vm.days.length; col += 1) {
       const headerDate = vm.days[col]?.dateObject.withTimeZone("+03:30").toPlainDate().toString()
@@ -1714,6 +1792,7 @@ describe("ScheduleOverlap", () => {
         timeText?: string
       }[]
       splitTimes: { text?: string; displayedMinutes?: number }[][]
+      timeAxisEndText?: string
     }
 
     const hourLabels = vm.renderedRows
@@ -1722,10 +1801,11 @@ describe("ScheduleOverlap", () => {
 
     expect(vm.renderedRows.some((row) => row.kind === "split-gap")).toBe(false)
     expect(vm.splitTimes[1]).toEqual([])
-    expect(hourLabels.slice(0, 4)).toEqual(["12 am", "1 am", "2 am", "3 am"])
-    expect(hourLabels.at(-1)).toBe("11 pm")
-    expect(hourLabels.filter((label) => label === "12 am")).toHaveLength(1)
-    expect(hourLabels.filter((label) => label === "1 am")).toHaveLength(1)
+    expect(hourLabels.slice(0, 4)).toEqual(["00:00", "01:00", "02:00", "03:00"])
+    expect(hourLabels.at(-1)).toBe("23:00")
+    expect(vm.timeAxisEndText).toBe("00:00")
+    expect(hourLabels.filter((label) => label === "00:00")).toHaveLength(1)
+    expect(hourLabels.filter((label) => label === "01:00")).toHaveLength(1)
     expect(
       new Set(
         vm.splitTimes[0]
@@ -1772,9 +1852,9 @@ describe("ScheduleOverlap", () => {
 
     expect(vm.renderedRows.some((row) => row.kind === "split-gap")).toBe(false)
     expect(vm.splitTimes[1]).toEqual([])
-    expect(hourLabels.filter((label) => label === "12 am")).toHaveLength(1)
-    expect(hourLabels.filter((label) => label === "1 am")).toHaveLength(1)
-    expect(hourLabels.filter((label) => label === "2 am")).toHaveLength(1)
+    expect(hourLabels.filter((label) => label === "00:00")).toHaveLength(1)
+    expect(hourLabels.filter((label) => label === "01:00")).toHaveLength(1)
+    expect(hourLabels.filter((label) => label === "02:00")).toHaveLength(1)
     expect(
       new Set(
         vm.splitTimes[0]

@@ -205,6 +205,21 @@ Semi-structured TODO list
 - [x] add flag to enable privacy policy
 - [ ] should be able to edit specific times again
 - [ ] show all hours should show all hours, not trimmed. Currently, it trims wrong
+- [ ] not support recurring events to not bloat the localstorage with slots?
+- [x] use the same palette for event page
+  (enabled - light-grey, active -red; disabled - dark-grey)
+- [x] legend should be visible even if no responses. Show only enabled/active
+- [x] show all hours should work on the event page
+- [x] hide dates where there's nothing to pick?
+  - no, keep all dates
+- [x] the day ends at 24
+   No, at `00:00` for consistency with 12AM in 12-hour format
+- [x] there should be a label for each grid row that marks the start of an hour, even for collapsed
+- [x] get rid of 12-hour format?
+   No
+- [ ] When hover over collapsed stripe, don't show the pointer for selecting hours
+- [ ] editing availability as - add input field to write the name over Available
+- [ ] on the event page, "Show all hours" should be over "Hide if needed times"
 
 ## MUST
 
@@ -230,3 +245,5 @@ Semi-structured TODO list
 ## COULD
 
 - [ ] anon identity to save preferences, maybe sign in by password
+- [ ] use @dicebear/identicon for avatars, not generic head?
+      The downside is that after updating the name, the avatar will change too.

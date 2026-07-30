@@ -543,7 +543,7 @@ const {
   splitTimes, times, allDays, days, monthDays, monthDayIncluded,
   curMonthText, columnOffsets: _columnOffsets, showLeftZigZag: _showLeftZigZag, showRightZigZag: _showRightZigZag, hasNextPage, hasPrevPage, hasPages: _hasPages,
   maxDaysPerPage, isColConsecutive, getDateFromDayHoursOffset: _getDateFromDayHoursOffset, getDateFromDayTimeIndex: _getDateFromDayTimeIndex,
-  getDisplayDateFromRowCol, getDateFromRowCol, setTimeslotSize, onResize, onCalendarScroll, getLocalTimezone: _getLocalTimezone,
+  getDisplayDateFromRowCol, getEnabledDateFromRowCol, getDateFromRowCol, setTimeslotSize, onResize, onCalendarScroll, getLocalTimezone: _getLocalTimezone,
   getMinMaxHoursFromTimes: _getMinMaxHoursFromTimes,
 } = grid
 
@@ -722,32 +722,6 @@ interface CollapsedPageSegment {
   endMinutes: number
 }
 
-const specificTimeAvailabilityByVisibleDay = computed<Map<number, ZdtSet>>(() => {
-  const availabilityByVisibleDay = new Map<number, ZdtSet>()
-
-  if (!isSpecificTimes.value) {
-    return availabilityByVisibleDay
-  }
-
-  const totalBaseRows = splitTimes.value[0].length + splitTimes.value[1].length
-  for (let visibleDayIndex = 0; visibleDayIndex < days.value.length; visibleDayIndex += 1) {
-    const availableDates = new ZdtSet()
-
-    for (let baseRowIndex = 0; baseRowIndex < totalBaseRows; baseRowIndex += 1) {
-      const date = getDateFromRowCol(baseRowIndex, visibleDayIndex)
-      if (date) {
-        availableDates.add(date)
-      }
-    }
-
-    if (availableDates.size > 0) {
-      availabilityByVisibleDay.set(visibleDayIndex, availableDates)
-    }
-  }
-
-  return availabilityByVisibleDay
-})
-
 function getBaseRowTimeItem(baseRowIndex: number) {
   const firstSplitLength = splitTimes.value[0].length
   return baseRowIndex < firstSplitLength
@@ -755,31 +729,10 @@ function getBaseRowTimeItem(baseRowIndex: number) {
     : splitTimes.value[1][baseRowIndex - firstSplitLength]
 }
 
-function getBaseRowScheduleDate(
-  baseRowIndex: number,
-  visibleDayIndex: number
-): Temporal.ZonedDateTime | null {
-  return getDisplayDateFromRowCol(baseRowIndex, visibleDayIndex)
-}
-
-function isDateAvailableForSettingAvailability(
-  date: Temporal.ZonedDateTime,
-  visibleDayIndex: number
-): boolean {
-  if (!isSpecificTimes.value) {
-    return true
-  }
-
-  return (
-    specificTimeAvailabilityByVisibleDay.value.get(visibleDayIndex)?.has(date) ??
-    false
-  )
-}
-
-function isBaseRowUnavailableOnEveryVisibleDay(baseRowIndex: number): boolean {
+function isBaseRowInactiveOnEveryVisibleDay(baseRowIndex: number): boolean {
   for (let visibleDayIndex = 0; visibleDayIndex < days.value.length; visibleDayIndex += 1) {
-    const date = getBaseRowScheduleDate(baseRowIndex, visibleDayIndex)
-    if (date && isDateAvailableForSettingAvailability(date, visibleDayIndex)) {
+    const activeDate = getDateFromRowCol(baseRowIndex, visibleDayIndex)
+    if (activeDate) {
       return false
     }
   }
@@ -817,6 +770,41 @@ const pageSlots = computed<PageSlot[]>(() => {
     })
   }
 
+  const firstStartMinutes = slots[0]?.startMinutes
+  const lastEndMinutes = slots.at(-1)?.endMinutes
+  const fitsWithinSingleLocalDay =
+    splitTimes.value[1].length === 0 &&
+    typeof firstStartMinutes === "number" &&
+    typeof lastEndMinutes === "number" &&
+    firstStartMinutes >= 0 &&
+    lastEndMinutes <= 24 * 60
+
+  if (fitsWithinSingleLocalDay) {
+    const leadingSlots: PageSlot[] = []
+    for (let startMinutes = 0; startMinutes < firstStartMinutes; startMinutes += slotMinutes) {
+      leadingSlots.push({
+        id: `filler-${String(startMinutes)}`,
+        kind: "filler",
+        startMinutes,
+        endMinutes: startMinutes + slotMinutes,
+      })
+    }
+    slots.unshift(...leadingSlots)
+
+    for (
+      let startMinutes = lastEndMinutes;
+      startMinutes < 24 * 60;
+      startMinutes += slotMinutes
+    ) {
+      slots.push({
+        id: `filler-${String(startMinutes)}`,
+        kind: "filler",
+        startMinutes,
+        endMinutes: startMinutes + slotMinutes,
+      })
+    }
+  }
+
   return slots
 })
 
@@ -824,41 +812,9 @@ const pageGreyFlags = computed(() =>
   pageSlots.value.map((slot) =>
     slot.kind === "filler"
       ? true
-      : isBaseRowUnavailableOnEveryVisibleDay(slot.baseRowIndex ?? -1)
+      : isBaseRowInactiveOnEveryVisibleDay(slot.baseRowIndex ?? -1)
   )
 )
-
-const trimmedPageSlotRange = computed<{
-  startIndex: number
-  endIndex: number
-}>(() => {
-  const slots = pageSlots.value
-  if (!canCollapseTimes.value) {
-    return {
-      startIndex: 0,
-      endIndex: slots.length,
-    }
-  }
-
-  const greyFlags = pageGreyFlags.value
-  const firstVisibleIndex = greyFlags.findIndex((isGrey) => !isGrey)
-  if (firstVisibleIndex === -1) {
-    return {
-      startIndex: 0,
-      endIndex: slots.length,
-    }
-  }
-
-  let lastVisibleIndex = greyFlags.length - 1
-  while (lastVisibleIndex >= firstVisibleIndex && greyFlags[lastVisibleIndex]) {
-    lastVisibleIndex -= 1
-  }
-
-  return {
-    startIndex: firstVisibleIndex,
-    endIndex: lastVisibleIndex + 1,
-  }
-})
 
 const collapsedPageSegments = computed<CollapsedPageSegment[]>(() => {
   if (!canCollapseTimes.value) {
@@ -871,7 +827,8 @@ const collapsedPageSegments = computed<CollapsedPageSegment[]>(() => {
   )
   const slots = pageSlots.value
   const greyFlags = pageGreyFlags.value
-  const { startIndex, endIndex } = trimmedPageSlotRange.value
+  const startIndex = 0
+  const endIndex = slots.length
   const segments: CollapsedPageSegment[] = []
 
   const buildCollapsedSegmentFromRun = (
@@ -888,7 +845,8 @@ const collapsedPageSegments = computed<CollapsedPageSegment[]>(() => {
       return null
     }
 
-    const collapsedStartMinutes = ceilToHourMinutes(runStartMinutes)
+    const roundedRunStartMinutes = ceilToHourMinutes(runStartMinutes)
+    const collapsedStartMinutes = roundedRunStartMinutes
     const collapsedEndMinutes = floorToHourMinutes(runEndMinutes)
     if (collapsedEndMinutes <= collapsedStartMinutes) {
       return null
@@ -978,6 +936,7 @@ const baseTimeslotClassStyle = computed(() => {
     firstSplitTimes: splitTimes.value[0],
     secondSplitTimes: splitTimes.value[1],
     getDateFromRowCol,
+    getEnabledDateFromRowCol,
     state: state.value,
     overlayAvailability: overlayAvailability.value,
     dragType: dragType.value,
@@ -1081,7 +1040,11 @@ const renderedRows = computed<RenderedTimeGridRow[]>(() => {
       kind: "timeslot",
       height: timeslotHeight.value,
       rowTop,
-      timeText: timeItem.text,
+      timeText:
+        typeof timeItem.absoluteMinutes === "number" &&
+        timeItem.absoluteMinutes % 60 === 0
+          ? formatAbsoluteMinutes(timeItem.absoluteMinutes)
+          : timeItem.text,
       baseRowIndex,
       cells,
     })
@@ -1114,6 +1077,7 @@ const renderedRows = computed<RenderedTimeGridRow[]>(() => {
       kind: "collapsed",
       height: COLLAPSED_HOURS_ROW_HEIGHT,
       rowTop,
+      timeText: formatAbsoluteMinutes(startMinutes),
       startLabel: formatAbsoluteMinutes(startMinutes),
       endLabel: formatAbsoluteMinutes(endMinutes),
     })
@@ -1138,9 +1102,7 @@ const renderedRows = computed<RenderedTimeGridRow[]>(() => {
   }
 
   let rowTop = 0
-  const { startIndex, endIndex } = trimmedPageSlotRange.value
-
-  for (let slotIndex = startIndex; slotIndex < endIndex; slotIndex += 1) {
+  for (let slotIndex = 0; slotIndex < pageSlots.value.length; slotIndex += 1) {
     const collapsedSegment = collapsedSegmentByStartIndex.get(slotIndex)
     if (collapsedSegment) {
       rowTop = appendCollapsedRow(
@@ -1170,6 +1132,13 @@ const renderedRows = computed<RenderedTimeGridRow[]>(() => {
   }
 
   return rows
+})
+
+const timeAxisEndText = computed(() => {
+  const endMinutes = pageSlots.value.at(-1)?.endMinutes
+  return typeof endMinutes === "number" && endMinutes % 60 === 0
+    ? formatAbsoluteMinutes(endMinutes)
+    : undefined
 })
 
 const timeslotClassStyle = computed(() =>
@@ -1482,6 +1451,7 @@ const {
   splitTimes,
   timeslotHeight,
   renderedRows,
+  timeAxisEndText,
   days,
   isSpecificDates,
   sampleCalendarEventsByDay: computed(() => props.sampleCalendarEventsByDay),

@@ -44,4 +44,31 @@ describe("SpecificTimesInstructions", () => {
 
     expect(wrapper.get("button").attributes("disabled")).toBeDefined()
   })
+
+  it("describes editable, selected, and unavailable states", () => {
+    const wrapper = mount(SpecificTimesInstructions, {
+      props: { numTempTimes: 0 },
+    })
+
+    expect(wrapper.text()).toContain("Available to select")
+    expect(wrapper.text()).toContain("Selected for the event")
+    expect(wrapper.text()).toContain("Unavailable, padding")
+    expect(wrapper.find(".specific-times-instructions-swatch--enabled").exists()).toBe(true)
+    expect(
+      wrapper
+        .find(".specific-times-instructions-swatch--disabled-padding")
+        .exists(),
+    ).toBe(true)
+    expect(
+      wrapper.find(".specific-times-instructions-swatch--enabled").classes(),
+    ).toContain("tw-bg-light-gray-stroke")
+    expect(
+      wrapper.find(".specific-times-instructions-swatch--potential").classes(),
+    ).toContain("tw-bg-white")
+    expect(
+      wrapper
+        .find(".specific-times-instructions-swatch--disabled-padding")
+        .classes(),
+    ).toContain("tw-bg-gray")
+  })
 })

@@ -116,7 +116,6 @@
             class="tw-w-full"
             @update:model-value="onAvailabilityTypeUpdate"
           />
-          <ColorLegend />
         </div>
 
         <CalendarAccounts
@@ -253,6 +252,12 @@
           @refresh-event="emit('refreshEvent')"
         />
       </template>
+
+      <ColorLegend
+        :active-slots-count="sidebar.activeSlotsCount"
+        :response-count="sidebar.responseCount"
+        :is-adding-availability="sidebar.state === states.EDIT_AVAILABILITY"
+      />
     </template>
   </div>
 </template>

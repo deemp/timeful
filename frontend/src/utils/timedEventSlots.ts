@@ -47,7 +47,6 @@ export const hasCompleteTimedEventContract = (
   !event.daysOnly &&
   event.timedRecurrence != null &&
   event.enabledSlots != null &&
-  event.activeSlots != null &&
   event.eventTimezone != null &&
   event.slotGeneration != null
 

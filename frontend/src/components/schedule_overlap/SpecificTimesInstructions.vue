@@ -8,15 +8,21 @@
       <div class="tw-text-sm tw-font-medium">Legend:</div>
       <div class="tw-flex tw-items-center tw-gap-2">
         <div
-          class="specific-times-instructions-swatch tw-bg-gray"
+          class="specific-times-instructions-swatch specific-times-instructions-swatch--enabled tw-bg-light-gray-stroke"
         ></div>
-        <span class="tw-text-sm">Blocked off</span>
+        <span class="tw-text-sm">Available to select</span>
       </div>
       <div class="tw-flex tw-items-center tw-gap-2">
         <div
-          class="specific-times-instructions-swatch specific-times-instructions-swatch--potential"
+          class="specific-times-instructions-swatch specific-times-instructions-swatch--potential tw-bg-white"
         ></div>
-        <span class="tw-text-sm">Potential meeting times</span>
+        <span class="tw-text-sm">Selected for the event</span>
+      </div>
+      <div class="tw-flex tw-items-center tw-gap-2">
+        <div
+          class="specific-times-instructions-swatch specific-times-instructions-swatch--disabled-padding tw-bg-gray"
+        ></div>
+        <span class="tw-text-sm">Unavailable, padding</span>
       </div>
     </div>
     <v-btn
@@ -49,7 +55,14 @@ const emit = defineEmits<{
 }
 
 .specific-times-instructions-swatch--potential {
-  background-color: white;
+  box-shadow: inset 0 0 0 1px var(--timeful-grid-separator-strong);
+}
+
+.specific-times-instructions-swatch--enabled {
+  box-shadow: inset 0 0 0 1px var(--timeful-grid-separator-strong);
+}
+
+.specific-times-instructions-swatch--disabled-padding {
   box-shadow: inset 0 0 0 1px var(--timeful-grid-separator-strong);
 }
 </style>

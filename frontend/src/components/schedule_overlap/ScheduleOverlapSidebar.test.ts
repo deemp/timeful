@@ -4,6 +4,7 @@ import { mount, shallowMount } from "@vue/test-utils"
 import { h, nextTick, ref, type ComponentPublicInstance } from "vue"
 import { describe, expect, it, vi } from "vitest"
 import { states } from "@/composables/schedule_overlap/types"
+import ColorLegend from "./ColorLegend.vue"
 import ScheduleOverlapSidebar from "./ScheduleOverlapSidebar.vue"
 import type {
   ScheduleOverlapRespondentsPanelExposed,
@@ -105,6 +106,29 @@ describe("ScheduleOverlapSidebar", () => {
 
     expect(vm.respondentsPanelEl).toBeInstanceOf(HTMLElement)
     expect(vm.respondentsPanelEl?.className).toContain("respondents-panel-stub")
+  })
+
+  it("shows active-slot legend items in normal display mode without responses", () => {
+    const wrapper = mount(ScheduleOverlapSidebar, {
+      props: {
+        sidebar: {
+          ...buildScheduleOverlapSidebarViewModel(),
+          state: states.BEST_TIMES,
+          activeSlotsCount: 1,
+          responseCount: 0,
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+          ColorLegend,
+        },
+      },
+    })
+
+    expect(wrapper.text()).toContain("Unavailable, select in Edit availability")
+    expect(wrapper.text()).toContain("Unavailable, select in Edit event")
+    expect(wrapper.text()).toContain("Unavailable, padding")
   })
 
   it("renders the overlay availability switch with the compact switch styling", () => {

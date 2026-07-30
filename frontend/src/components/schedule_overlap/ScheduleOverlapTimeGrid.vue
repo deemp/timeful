@@ -21,15 +21,28 @@
         </div>
       </div>
 
-      <div :class="timedGrid.calendarOnly ? '' : '-tw-ml-3'" class="-tw-mt-[8px] sm:tw-ml-0">
+      <div :class="timedGrid.calendarOnly ? '' : '-tw-ml-3'" class="sm:tw-ml-0">
         <div
           v-for="row in timedGrid.renderedRows"
           :id="row.kind === 'timeslot' ? `time-row-${row.baseRowIndex ?? 0}` : row.id"
           :key="row.id"
-            class="tw-pr-1 tw-text-right tw-text-xs tw-font-light tw-uppercase sm:tw-pr-2"
+            class="tw-relative tw-pr-1 tw-text-right tw-text-xs tw-font-light tw-uppercase sm:tw-pr-2"
           :style="{ height: `${row.height}px` }"
         >
-            <span v-if="row.kind !== 'collapsed' && row.kind !== 'split-gap'">{{ row.timeText }}</span>
+            <span
+              v-if="row.kind !== 'split-gap' && row.timeText"
+              class="tw-absolute tw-right-1 tw-top-0 -tw-translate-y-1/2 sm:tw-right-2"
+            >
+              {{ row.timeText }}
+            </span>
+          </div>
+          <div
+            v-if="timedGrid.timeAxisEndText"
+            class="tw-relative tw-h-0 tw-pr-1 tw-text-right tw-text-xs tw-font-light tw-uppercase sm:tw-pr-2"
+          >
+            <span class="tw-absolute tw-right-1 tw-top-0 -tw-translate-y-1/2 sm:tw-right-2">
+              {{ timedGrid.timeAxisEndText }}
+            </span>
           </div>
       </div>
   </div>
@@ -68,9 +81,9 @@
         <div class="tw-flex tw-flex-col">
           <div class="tw-flex-1">
             <div
-              id="drag-section"
-              data-long-press-delay="500"
-              class="tw-relative"
+                id="drag-section"
+                data-long-press-delay="500"
+                class="tw-relative"
               style="touch-action: none"
               @pointerdown="timedGrid.actions.startDrag"
               @pointermove="timedGrid.actions.moveDrag"

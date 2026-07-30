@@ -2,7 +2,12 @@ import { describe, expect, it } from "vitest"
 import { Temporal } from "temporal-polyfill"
 import { availabilityTypes, timeTypes, UTC } from "@/constants"
 import { ZdtMap, ZdtSet } from "@/utils"
-import { DRAG_TYPES, HOUR_HEIGHT, SPLIT_GAP_HEIGHT, states } from "@/composables/schedule_overlap/types"
+import {
+  DRAG_TYPES,
+  HOUR_HEIGHT,
+  SPLIT_GAP_HEIGHT,
+  states,
+} from "@/composables/schedule_overlap/types"
 import {
   buildRenderedOverlayAvailability,
   buildTimeGridTimeslotClassStyles,
@@ -33,7 +38,8 @@ describe("scheduleOverlapRendering", () => {
       ],
       secondSplitTimes: [],
       timeslotDuration: Temporal.Duration.from({ minutes: 15 }),
-      getDateFromRowCol: (row, col) => slots.get(`${String(row)}-${String(col)}`) ?? null,
+      getDateFromRowCol: (row, col) =>
+        slots.get(`${String(row)}-${String(col)}`) ?? null,
       dragging: false,
       inDragRange: () => false,
       dragType: availabilityTypes.AVAILABLE,
@@ -64,7 +70,8 @@ describe("scheduleOverlapRendering", () => {
       ],
       secondSplitTimes: [],
       timeslotDuration: Temporal.Duration.from({ minutes: 30 }),
-      getDateFromRowCol: (row, col) => slots.get(`${String(row)}-${String(col)}`) ?? null,
+      getDateFromRowCol: (row, col) =>
+        slots.get(`${String(row)}-${String(col)}`) ?? null,
       dragging: false,
       inDragRange: () => false,
       dragType: availabilityTypes.AVAILABLE,
@@ -114,28 +121,35 @@ describe("scheduleOverlapRendering", () => {
           baseRowIndex: 1,
         },
       ],
-      overlaidAvailability: [[
-        {
-          hoursOffset: Temporal.Duration.from({ hours: 0 }),
-          hoursLength: Temporal.Duration.from({ hours: 1 }),
-          type: availabilityTypes.AVAILABLE,
-        },
-      ]],
-      splitTimes: [[
-        { hoursOffset: Temporal.Duration.from({ hours: 0 }) },
-        { hoursOffset: Temporal.Duration.from({ minutes: 30 }) },
-      ], []],
+      overlaidAvailability: [
+        [
+          {
+            hoursOffset: Temporal.Duration.from({ hours: 0 }),
+            hoursLength: Temporal.Duration.from({ hours: 1 }),
+            type: availabilityTypes.AVAILABLE,
+          },
+        ],
+      ],
+      splitTimes: [
+        [
+          { hoursOffset: Temporal.Duration.from({ hours: 0 }) },
+          { hoursOffset: Temporal.Duration.from({ minutes: 30 }) },
+        ],
+        [],
+      ],
       timeslotDuration: Temporal.Duration.from({ minutes: 30 }),
       isBaseRowVisibleOnDay: (baseRowIndex) => baseRowIndex !== 1,
     })
 
-    expect(fragments).toEqual([[
-      {
-        top: "0px",
-        height: "30px",
-        type: availabilityTypes.AVAILABLE,
-      },
-    ]])
+    expect(fragments).toEqual([
+      [
+        {
+          top: "0px",
+          height: "30px",
+          type: availabilityTypes.AVAILABLE,
+        },
+      ],
+    ])
   })
 
   it("projects overlay fragments from day-specific visible rows instead of a page-wide row set", () => {
@@ -151,15 +165,15 @@ describe("scheduleOverlapRendering", () => {
       ],
       overlaidAvailability: [
         [],
-        [{
-          hoursOffset: Temporal.Duration.from({ hours: 0 }),
-          hoursLength: Temporal.Duration.from({ minutes: 30 }),
-          type: availabilityTypes.AVAILABLE,
-        }],
+        [
+          {
+            hoursOffset: Temporal.Duration.from({ hours: 0 }),
+            hoursLength: Temporal.Duration.from({ minutes: 30 }),
+            type: availabilityTypes.AVAILABLE,
+          },
+        ],
       ],
-      splitTimes: [[
-        { hoursOffset: Temporal.Duration.from({ hours: 0 }) },
-      ], []],
+      splitTimes: [[{ hoursOffset: Temporal.Duration.from({ hours: 0 }) }], []],
       timeslotDuration: Temporal.Duration.from({ minutes: 30 }),
       isBaseRowVisibleOnDay: (baseRowIndex, dayIndex) =>
         dayIndex === 1 && baseRowIndex === 0,
@@ -167,11 +181,13 @@ describe("scheduleOverlapRendering", () => {
 
     expect(fragments).toEqual([
       [],
-      [{
-        top: "0px",
-        height: "30px",
-        type: availabilityTypes.AVAILABLE,
-      }],
+      [
+        {
+          top: "0px",
+          height: "30px",
+          type: availabilityTypes.AVAILABLE,
+        },
+      ],
     ])
   })
 
@@ -206,41 +222,46 @@ describe("scheduleOverlapRendering", () => {
           baseRowIndex: 2,
         },
       ],
-      overlaidAvailability: [[
-        {
-          hoursOffset: Temporal.Duration.from({ hours: 4 }),
-          hoursLength: Temporal.Duration.from({ minutes: 60 }),
-          type: availabilityTypes.AVAILABLE,
-          startBaseRowIndex: 0,
-        },
-        {
-          hoursOffset: Temporal.Duration.from({ hours: 4 }),
-          hoursLength: Temporal.Duration.from({ minutes: 30 }),
-          type: availabilityTypes.AVAILABLE,
-          startBaseRowIndex: 2,
-        },
-      ]],
-      splitTimes: [[
-        { hoursOffset: Temporal.Duration.from({ hours: 4 }) },
-        { hoursOffset: Temporal.Duration.from({ hours: 4, minutes: 30 }) },
-      ], [
-        { hoursOffset: Temporal.Duration.from({ hours: 4 }) },
-      ]],
+      overlaidAvailability: [
+        [
+          {
+            hoursOffset: Temporal.Duration.from({ hours: 4 }),
+            hoursLength: Temporal.Duration.from({ minutes: 60 }),
+            type: availabilityTypes.AVAILABLE,
+            startBaseRowIndex: 0,
+          },
+          {
+            hoursOffset: Temporal.Duration.from({ hours: 4 }),
+            hoursLength: Temporal.Duration.from({ minutes: 30 }),
+            type: availabilityTypes.AVAILABLE,
+            startBaseRowIndex: 2,
+          },
+        ],
+      ],
+      splitTimes: [
+        [
+          { hoursOffset: Temporal.Duration.from({ hours: 4 }) },
+          { hoursOffset: Temporal.Duration.from({ hours: 4, minutes: 30 }) },
+        ],
+        [{ hoursOffset: Temporal.Duration.from({ hours: 4 }) }],
+      ],
       timeslotDuration: Temporal.Duration.from({ minutes: 30 }),
     })
 
-    expect(fragments).toEqual([[
-      {
-        top: "0px",
-        height: "60px",
-        type: availabilityTypes.AVAILABLE,
-      },
-      {
-        top: "100px",
-        height: "30px",
-        type: availabilityTypes.AVAILABLE,
-      },
-    ]])
+    expect(fragments).toEqual([
+      [
+        {
+          top: "0px",
+          height: "60px",
+          type: availabilityTypes.AVAILABLE,
+        },
+        {
+          top: "100px",
+          height: "30px",
+          type: availabilityTypes.AVAILABLE,
+        },
+      ],
+    ])
   })
 
   it("builds timed-grid class styles across both splits and marks missing dates disabled", () => {
@@ -300,10 +321,67 @@ describe("scheduleOverlapRendering", () => {
     expect(styles[0].class).not.toContain("tw-border-l-gray")
     expect(styles[0].class).not.toContain("tw-border-r-gray")
     expect(styles[0].class).not.toContain("tw-border-b-gray")
-    expect(styles[0].style.borderLeftColor).toBe("var(--timeful-grid-line-color)")
-    expect(styles[0].style.borderRightColor).toBe("var(--timeful-grid-line-color)")
-    expect(styles[0].style.borderBottomColor).toBe("var(--timeful-grid-line-color)")
-    expect(styles[2].class).toContain("tw-bg-light-gray-stroke")
+    expect(styles[0].style.borderLeftColor).toBe(
+      "var(--timeful-grid-line-color)",
+    )
+    expect(styles[0].style.borderRightColor).toBe(
+      "var(--timeful-grid-line-color)",
+    )
+    expect(styles[0].style.borderBottomColor).toBe(
+      "var(--timeful-grid-line-color)",
+    )
+    expect(styles[2].class).toContain("tw-bg-gray")
+  })
+
+  it("uses light-grey for enabled inactive slots and dark-grey outside the enabled domain", () => {
+    const activeSlot = zdt("2026-01-01T09:00:00Z")
+    const enabledInactiveSlot = zdt("2026-01-01T09:15:00Z")
+
+    const styles = buildTimeGridTimeslotClassStyles({
+      firstSplitTimes: [
+        { hoursOffset: Temporal.Duration.from({ hours: 9 }) },
+        { hoursOffset: Temporal.Duration.from({ hours: 9, minutes: 15 }) },
+        { hoursOffset: Temporal.Duration.from({ hours: 9, minutes: 30 }) },
+      ],
+      secondSplitTimes: [],
+      getDateFromRowCol: (row) => (row === 0 ? activeSlot : null),
+      getEnabledDateFromRowCol: (row) =>
+        row === 0 ? activeSlot : row === 1 ? enabledInactiveSlot : null,
+      state: states.HEATMAP,
+      overlayAvailability: false,
+      dragType: DRAG_TYPES.ADD,
+      availabilityType: availabilityTypes.AVAILABLE,
+      availability: new ZdtSet(),
+      ifNeeded: new ZdtSet(),
+      tempTimes: new ZdtSet(),
+      responsesFormatted: new ZdtMap(),
+      parsedResponses: {},
+      curRespondent: "",
+      curRespondents: [],
+      curRespondentsSet: new Set<string>(),
+      respondents: [],
+      curRespondentsMax: 0,
+      max: 0,
+      defaultState: states.HEATMAP,
+      userHasResponded: false,
+      curGuestId: "",
+      authUserId: undefined,
+      inDragRange: () => false,
+      animateTimeslotAlways: false,
+      availabilityAnimEnabled: false,
+      timeslotHeight: 15,
+      timezoneOffset: Temporal.Duration.from({ minutes: 0 }),
+      curTimeslot: { row: -1, col: -1 },
+      editing: false,
+      isColConsecutive: () => true,
+      daysLength: 1,
+      firstSplitLength: 3,
+      lastRow: 2,
+    })
+
+    expect(styles[1].class).toContain("tw-bg-light-gray-stroke")
+    expect(styles[1].class).not.toContain("tw-bg-gray")
+    expect(styles[2].class).toContain("tw-bg-gray")
   })
 
   it("uses the dashed separator token for half-hour timed-grid rows", () => {
@@ -350,9 +428,13 @@ describe("scheduleOverlapRendering", () => {
       inDragRange: () => false,
     })
 
-    expect(classStyle.style.borderTopColor).toBe("var(--timeful-grid-line-color)")
+    expect(classStyle.style.borderTopColor).toBe(
+      "var(--timeful-grid-line-color)",
+    )
     expect(classStyle.style.borderTopStyle).toBe("dashed")
-    expect(classStyle.style.borderTopWidth).toBe("var(--timeful-grid-line-width)")
+    expect(classStyle.style.borderTopWidth).toBe(
+      "var(--timeful-grid-line-width)",
+    )
     expect(classStyle.class).not.toContain("tw-border-t-gray")
   })
 
@@ -398,10 +480,14 @@ describe("scheduleOverlapRendering", () => {
       inDragRange: () => false,
     })
 
-    expect(classStyle.class).toContain("tw-bg-light-gray-stroke")
+    expect(classStyle.class).toContain("tw-bg-gray")
     expect(classStyle.style.borderTopStyle).toBe("solid")
-    expect(classStyle.style.borderTopWidth).toBe("var(--timeful-grid-line-width)")
-    expect(classStyle.style.borderTopColor).toBe("var(--timeful-grid-line-color)")
+    expect(classStyle.style.borderTopWidth).toBe(
+      "var(--timeful-grid-line-width)",
+    )
+    expect(classStyle.style.borderTopColor).toBe(
+      "var(--timeful-grid-line-color)",
+    )
     expect(classStyle.class).not.toContain("tw-border-t-gray")
   })
 
@@ -447,9 +533,13 @@ describe("scheduleOverlapRendering", () => {
       inDragRange: () => false,
     })
 
-    expect(classStyle.style.borderTopColor).toBe("var(--timeful-grid-line-color)")
+    expect(classStyle.style.borderTopColor).toBe(
+      "var(--timeful-grid-line-color)",
+    )
     expect(classStyle.style.borderTopStyle).toBe("dashed")
-    expect(classStyle.style.borderTopWidth).toBe("var(--timeful-grid-line-width)")
+    expect(classStyle.style.borderTopWidth).toBe(
+      "var(--timeful-grid-line-width)",
+    )
   })
 
   it("anchors disabled timed-grid separators to the displayed split start", () => {
@@ -494,9 +584,13 @@ describe("scheduleOverlapRendering", () => {
       inDragRange: () => false,
     })
 
-    expect(classStyle.style.borderTopColor).toBe("var(--timeful-grid-line-color)")
+    expect(classStyle.style.borderTopColor).toBe(
+      "var(--timeful-grid-line-color)",
+    )
     expect(classStyle.style.borderTopStyle).toBe("dashed")
-    expect(classStyle.style.borderTopWidth).toBe("var(--timeful-grid-line-width)")
+    expect(classStyle.style.borderTopWidth).toBe(
+      "var(--timeful-grid-line-width)",
+    )
   })
 
   it("uses the same separator style for enabled and disabled Kathmandu rows with the same displayed time", () => {
@@ -584,8 +678,12 @@ describe("scheduleOverlapRendering", () => {
 
     expect(enabledClassStyle.style.borderTopStyle).toBe("dashed")
     expect(disabledClassStyle.style.borderTopStyle).toBe("dashed")
-    expect(enabledClassStyle.style.borderTopWidth).toBe(disabledClassStyle.style.borderTopWidth)
-    expect(enabledClassStyle.style.borderTopColor).toBe(disabledClassStyle.style.borderTopColor)
+    expect(enabledClassStyle.style.borderTopWidth).toBe(
+      disabledClassStyle.style.borderTopWidth,
+    )
+    expect(enabledClassStyle.style.borderTopColor).toBe(
+      disabledClassStyle.style.borderTopColor,
+    )
   })
 
   it("draws the top border on the first timed-grid row instead of relying on a shared overlay", () => {
@@ -633,8 +731,12 @@ describe("scheduleOverlapRendering", () => {
     })
 
     expect(classStyle.style.borderTopStyle).toBe("solid")
-    expect(classStyle.style.borderTopWidth).toBe("var(--timeful-grid-line-width)")
-    expect(classStyle.style.borderTopColor).toBe("var(--timeful-grid-line-color)")
+    expect(classStyle.style.borderTopWidth).toBe(
+      "var(--timeful-grid-line-width)",
+    )
+    expect(classStyle.style.borderTopColor).toBe(
+      "var(--timeful-grid-line-color)",
+    )
   })
 
   it("positions second-split blocks after the split gap", () => {
@@ -654,7 +756,7 @@ describe("scheduleOverlapRendering", () => {
     })
 
     expect(style.top).toBe(
-      `calc(2 * 15px + ${String(SPLIT_GAP_HEIGHT)}px + 0 * ${String(HOUR_HEIGHT)}px)`
+      `calc(2 * 15px + ${String(SPLIT_GAP_HEIGHT)}px + 0 * ${String(HOUR_HEIGHT)}px)`,
     )
     expect(style.height).toBe(`calc(0.5 * ${String(HOUR_HEIGHT)}px)`)
   })
@@ -715,12 +817,20 @@ describe("scheduleOverlapRendering", () => {
       inDragRange: () => false,
     })
 
-    expect(classStyle.style.backgroundColor).toBe("var(--timeful-unavailable-bg-time-grid)")
+    expect(classStyle.style.backgroundColor).toBe(
+      "var(--timeful-unavailable-bg-time-grid)",
+    )
     expect(classStyle.style.borderLeftStyle).toBe("solid")
     expect(classStyle.style.borderRightStyle).toBe("solid")
-    expect(classStyle.style.borderLeftColor).toBe("var(--timeful-grid-line-color)")
-    expect(classStyle.style.borderRightColor).toBe("var(--timeful-grid-line-color)")
-    expect(classStyle.style.borderBottomColor).toBe("var(--timeful-grid-line-color)")
+    expect(classStyle.style.borderLeftColor).toBe(
+      "var(--timeful-grid-line-color)",
+    )
+    expect(classStyle.style.borderRightColor).toBe(
+      "var(--timeful-grid-line-color)",
+    )
+    expect(classStyle.style.borderBottomColor).toBe(
+      "var(--timeful-grid-line-color)",
+    )
   })
 
   it("uses the timed-grid unavailable token for zero-response heatmap slots", () => {
@@ -766,7 +876,9 @@ describe("scheduleOverlapRendering", () => {
       inDragRange: () => false,
     })
 
-    expect(classStyle.style.backgroundColor).toBe("var(--timeful-unavailable-bg-time-grid)")
+    expect(classStyle.style.backgroundColor).toBe(
+      "var(--timeful-unavailable-bg-time-grid)",
+    )
   })
 
   it("uses the lighter legacy heatmap tint for a single respondent when multiple guests never overlap", () => {
@@ -844,9 +956,7 @@ describe("scheduleOverlapRendering", () => {
     const slot = zdt("2026-01-01T09:00:00Z")
 
     const [classStyle] = buildTimeGridTimeslotClassStyles({
-      firstSplitTimes: [
-        { hoursOffset: Temporal.Duration.from({ hours: 9 }) },
-      ],
+      firstSplitTimes: [{ hoursOffset: Temporal.Duration.from({ hours: 9 }) }],
       secondSplitTimes: [],
       getDateFromRowCol: () => slot,
       state: states.HEATMAP,
@@ -881,10 +991,12 @@ describe("scheduleOverlapRendering", () => {
       lastRow: 0,
     })
 
-    expect(classStyle.style.backgroundColor).toBe("var(--timeful-unavailable-bg-time-grid)")
+    expect(classStyle.style.backgroundColor).toBe(
+      "var(--timeful-unavailable-bg-time-grid)",
+    )
   })
 
-  it("keeps responded specific-times slots tinted while preserving the selected edit state", () => {
+  it("keeps selected specific-times slots white when respondents are available", () => {
     const slot = zdt("2026-01-01T09:00:00Z")
     const responsesFormatted = new ZdtMap<Set<string>>()
     responsesFormatted.set(slot, new Set(["guest-1"]))
@@ -942,7 +1054,54 @@ describe("scheduleOverlapRendering", () => {
     })
 
     expect(classStyle.class).toContain("tw-bg-white")
-    expect(classStyle.style.backgroundColor).toBe("#00994C88")
+    expect(classStyle.style.backgroundColor).toBeUndefined()
+  })
+
+  it("renders enabled but inactive specific-times slots light-grey", () => {
+    const slot = zdt("2026-01-01T09:00:00Z")
+
+    const classStyle = getTimeGridTimeslotClassStyle({
+      date: slot,
+      row: 0,
+      col: 0,
+      isFirstSplit: true,
+      isDisabled: false,
+      animateTimeslotAlways: false,
+      availabilityAnimEnabled: false,
+      timeslotHeight: 15,
+      timeHoursOffset: Temporal.Duration.from({ hours: 9 }),
+      splitStartHoursOffset: Temporal.Duration.from({ hours: 9 }),
+      timezoneOffset: Temporal.Duration.from({ minutes: 0 }),
+      curTimeslot: { row: -1, col: -1 },
+      editing: false,
+      isColConsecutive: () => true,
+      daysLength: 1,
+      firstSplitLength: 1,
+      lastRow: 0,
+      state: states.SET_SPECIFIC_TIMES,
+      overlayAvailability: false,
+      dragType: DRAG_TYPES.ADD,
+      availabilityType: availabilityTypes.AVAILABLE,
+      availability: new ZdtSet(),
+      ifNeeded: new ZdtSet(),
+      tempTimes: new ZdtSet(),
+      responsesFormatted: new ZdtMap(),
+      parsedResponses: {},
+      curRespondent: "",
+      curRespondents: [],
+      curRespondentsSet: new Set<string>(),
+      respondents: [],
+      curRespondentsMax: 0,
+      max: 0,
+      defaultState: states.HEATMAP,
+      userHasResponded: false,
+      curGuestId: "",
+      authUserId: undefined,
+      inDragRange: () => false,
+    })
+
+    expect(classStyle.class).toContain("tw-bg-light-gray-stroke")
+    expect(classStyle.class).not.toContain("tw-bg-gray")
   })
 
   it("draws an inset solid selection stroke for zero-response timed-grid slots in heatmap view", () => {
@@ -992,11 +1151,19 @@ describe("scheduleOverlapRendering", () => {
     expect(classStyle.class).not.toContain("tw-border-dashed")
     expect(classStyle.class).not.toContain("tw-border-black")
     expect(classStyle.style.borderRightStyle).toBe("solid")
-    expect(classStyle.style.borderRightColor).toBe("var(--timeful-grid-line-color)")
-    expect(classStyle.style.boxShadow).toBe("inset 0 0 0 2px var(--timeful-grid-cursor-outline)")
-    expect(classStyle.style.backgroundImage).toContain("repeating-linear-gradient")
+    expect(classStyle.style.borderRightColor).toBe(
+      "var(--timeful-grid-line-color)",
+    )
+    expect(classStyle.style.boxShadow).toBe(
+      "inset 0 0 0 2px var(--timeful-grid-cursor-outline)",
+    )
+    expect(classStyle.style.backgroundImage).toContain(
+      "repeating-linear-gradient",
+    )
     expect(classStyle.style.backgroundImage).toContain("5px 7px")
-    expect(classStyle.style.backgroundImage).toContain("var(--timeful-grid-cursor-outline)")
+    expect(classStyle.style.backgroundImage).toContain(
+      "var(--timeful-grid-cursor-outline)",
+    )
   })
 
   it("does not draw the selection border for disabled grey gap cells", () => {
@@ -1082,7 +1249,9 @@ describe("scheduleOverlapRendering", () => {
     expect(classStyle.class).toContain("tw-outline-solid")
     expect(classStyle.class).not.toContain("tw-outline-dashed")
     expect(classStyle.class).not.toContain("tw-outline-black")
-    expect(classStyle.style.outlineColor).toBe("var(--timeful-grid-cursor-outline)")
+    expect(classStyle.style.outlineColor).toBe(
+      "var(--timeful-grid-cursor-outline)",
+    )
   })
 
   it("uses the timed-grid unavailable token for zero-availability best-times slots", () => {
@@ -1128,12 +1297,20 @@ describe("scheduleOverlapRendering", () => {
       inDragRange: () => false,
     })
 
-    expect(classStyle.style.backgroundColor).toBe("var(--timeful-unavailable-bg-time-grid)")
+    expect(classStyle.style.backgroundColor).toBe(
+      "var(--timeful-unavailable-bg-time-grid)",
+    )
     expect(classStyle.style.borderLeftStyle).toBe("solid")
     expect(classStyle.style.borderRightStyle).toBe("solid")
-    expect(classStyle.style.borderLeftColor).toBe("var(--timeful-grid-line-color)")
-    expect(classStyle.style.borderRightColor).toBe("var(--timeful-grid-line-color)")
-    expect(classStyle.style.borderBottomColor).toBe("var(--timeful-grid-line-color)")
+    expect(classStyle.style.borderLeftColor).toBe(
+      "var(--timeful-grid-line-color)",
+    )
+    expect(classStyle.style.borderRightColor).toBe(
+      "var(--timeful-grid-line-color)",
+    )
+    expect(classStyle.style.borderBottomColor).toBe(
+      "var(--timeful-grid-line-color)",
+    )
   })
 
   it("uses the timed-grid unavailable token for zero-response best-times slots", () => {
@@ -1179,16 +1356,16 @@ describe("scheduleOverlapRendering", () => {
       inDragRange: () => false,
     })
 
-    expect(classStyle.style.backgroundColor).toBe("var(--timeful-unavailable-bg-time-grid)")
+    expect(classStyle.style.backgroundColor).toBe(
+      "var(--timeful-unavailable-bg-time-grid)",
+    )
   })
 
   it("renders specific-times best-times slots with the normal unavailable token before any responses exist", () => {
     const slot = zdt("2026-01-01T09:00:00Z")
 
     const [classStyle] = buildTimeGridTimeslotClassStyles({
-      firstSplitTimes: [
-        { hoursOffset: Temporal.Duration.from({ hours: 9 }) },
-      ],
+      firstSplitTimes: [{ hoursOffset: Temporal.Duration.from({ hours: 9 }) }],
       secondSplitTimes: [],
       getDateFromRowCol: () => slot,
       state: states.BEST_TIMES,
@@ -1223,7 +1400,9 @@ describe("scheduleOverlapRendering", () => {
       lastRow: 0,
     })
 
-    expect(classStyle.style.backgroundColor).toBe("var(--timeful-unavailable-bg-time-grid)")
+    expect(classStyle.style.backgroundColor).toBe(
+      "var(--timeful-unavailable-bg-time-grid)",
+    )
   })
 
   it("keeps standalone day-grid cells framed when Tailwind preflight is disabled", () => {
@@ -1316,8 +1495,14 @@ describe("scheduleOverlapRendering", () => {
       inDragRange: () => false,
     })
 
-    expect(classStyle.style.borderLeftColor).toBe("var(--timeful-grid-line-color)")
-    expect(classStyle.style.borderRightColor).toBe("var(--timeful-grid-line-color)")
-    expect(classStyle.style.borderBottomColor).toBe("var(--timeful-grid-line-color)")
+    expect(classStyle.style.borderLeftColor).toBe(
+      "var(--timeful-grid-line-color)",
+    )
+    expect(classStyle.style.borderRightColor).toBe(
+      "var(--timeful-grid-line-color)",
+    )
+    expect(classStyle.style.borderBottomColor).toBe(
+      "var(--timeful-grid-line-color)",
+    )
   })
 })

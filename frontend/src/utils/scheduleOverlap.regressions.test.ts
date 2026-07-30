@@ -209,6 +209,25 @@ describe("schedule-overlap Temporal regressions", () => {
     expect(availability.has(insideSlot)).toBe(true)
   })
 
+  it("treats a midnight working-hours end as the next day's boundary", () => {
+    const lastSlotOfDay = zdt("2026-01-01T23:00:00Z")
+    const calendarEvents = makeCalendarEventsHarness({
+      slotStart: lastSlotOfDay,
+    })
+
+    calendarEvents.workingHours.value = {
+      enabled: true,
+      startTime: 9,
+      endTime: 0,
+    }
+
+    const availability = calendarEvents.getAvailabilityFromCalendarEvents({
+      calendarEventsByDay: [[]],
+    })
+
+    expect(availability.has(lastSlotOfDay)).toBe(true)
+  })
+
   it("applies working-hours boundaries in the selected schedule timezone", () => {
     localStorage.setItem(
       "timezone",

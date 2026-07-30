@@ -73,7 +73,7 @@ describe("browserDatePreferences", () => {
     const options = getTimeOptions()
     expect(options[0]).toEqual({ text: "12 am", time: 0, value: 0 })
     expect(options[12]).toEqual({ text: "12 pm", time: 12, value: 12 })
-    expect(options[24]).toEqual({ text: "12 am", time: 0, value: 24 })
+    expect(options[24]).toEqual({ text: "12 AM", time: 0, value: 24 })
   })
 
   it("lets the saved timeType override browser locale preferences", () => {
@@ -90,8 +90,9 @@ describe("browserDatePreferences", () => {
 
     const options = getTimeOptions()
 
-    expect(options[0]).toEqual({ text: "0:00", time: 0, value: 0 })
+    expect(options[0]).toEqual({ text: "00:00", time: 0, value: 0 })
+    expect(options[1]).toEqual({ text: "01:00", time: 1, value: 1 })
     expect(options[23]).toEqual({ text: "23:00", time: 23, value: 23 })
-    expect(options[24]).toEqual({ text: "0:00", time: 0, value: 24 })
+    expect(options[24]).toEqual({ text: "24:00", time: 0, value: 24 })
   })
 })

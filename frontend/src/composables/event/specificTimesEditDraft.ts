@@ -3,6 +3,7 @@ import { UTC } from "@/constants"
 import { getWrappedTimeRangeDuration, processEvent } from "@/utils"
 import type { Event } from "@/types"
 import {
+  generateTimedSlotsForDay,
   getTimedRecurrence,
   getTimedSlotGeneration,
   hasCanonicalTimedSlots,
@@ -27,21 +28,23 @@ export interface SpecificTimesEditDraft {
 
 const timeIncrementMatches = (
   event: Event,
-  timeIncrementMinutes: number
+  timeIncrementMinutes: number,
 ): boolean =>
   Math.round(getTimedSlotGeneration(event).timeIncrement.total("minutes")) ===
   timeIncrementMinutes
 
 const slotGenerationMatches = (
   event: Event,
-  schedule: EventEditorScheduleResult
+  schedule: EventEditorScheduleResult,
 ): boolean => {
   const eventSlotGeneration = getTimedSlotGeneration(event)
   return (
     eventSlotGeneration.startTimeLocal.equals(
-      schedule.slotGeneration.startTimeLocal
+      schedule.slotGeneration.startTimeLocal,
     ) &&
-    eventSlotGeneration.endTimeLocal.equals(schedule.slotGeneration.endTimeLocal) &&
+    eventSlotGeneration.endTimeLocal.equals(
+      schedule.slotGeneration.endTimeLocal,
+    ) &&
     eventSlotGeneration.timeIncrement.total("minutes") ===
       schedule.slotGeneration.timeIncrement.total("minutes")
   )
@@ -49,12 +52,42 @@ const slotGenerationMatches = (
 
 const hasCanonicalTimedState = (event: Event): boolean =>
   !event.daysOnly &&
-  (
-    hasCanonicalTimedSlots(event) ||
+  (hasCanonicalTimedSlots(event) ||
     event.eventTimezone != null ||
     event.slotGeneration != null ||
-    event.timedRecurrence != null
+    event.timedRecurrence != null)
+
+const fullDaySpecificTimesSchedule = (
+  schedule: EventEditorScheduleResult,
+  timeIncrementMinutes: number,
+) => {
+  const slotGeneration = {
+    startTimeLocal: Temporal.PlainTime.from("00:00"),
+    endTimeLocal: Temporal.PlainTime.from("00:00"),
+    timeIncrement: Temporal.Duration.from({ minutes: timeIncrementMinutes }),
+  }
+  const membershipDays =
+    schedule.timedRecurrence.kind === "specific_dates"
+      ? schedule.normalizedSelectedDays
+      : schedule.dates.map((date) =>
+          date.withTimeZone(schedule.eventTimezone).toPlainDate(),
+        )
+  const enabledSlots = membershipDays.flatMap((day) =>
+    generateTimedSlotsForDay({
+      day,
+      timeZone: schedule.eventTimezone,
+      slotGeneration,
+    }),
   )
+
+  return {
+    ...schedule,
+    duration: Temporal.Duration.from({ days: 1 }),
+    enabledSlots,
+    activeSlots: enabledSlots,
+    slotGeneration,
+  }
+}
 
 export const buildSpecificTimesEditDraft = ({
   event,
@@ -103,13 +136,14 @@ export const buildSpecificTimesEditDraft = ({
   }
 
   const resetExistingTimes =
-    !hasCanonicalTimedState(event) ||
-    !slotWindowMatches
+    !hasCanonicalTimedState(event) || !slotWindowMatches
   const nextActiveSlots = resetExistingTimes
     ? []
     : mergeActiveSlotsByMembershipDay({
-        priorEnabledSlots: event.enabledSlots ?? event.activeSlots ?? event.times,
-        priorActiveSlots: event.activeSlots ?? event.times ?? schedule.activeSlots,
+        priorEnabledSlots:
+          event.enabledSlots ?? event.activeSlots ?? event.times,
+        priorActiveSlots:
+          event.activeSlots ?? event.times ?? schedule.activeSlots,
         nextEnabledSlots: schedule.enabledSlots,
         timeZone: schedule.eventTimezone,
         slotGeneration: schedule.slotGeneration,
@@ -153,18 +187,25 @@ export const buildSpecificTimesCreateDraft = ({
 }: {
   schedule: EventEditorScheduleResult
   timeIncrementMinutes: number
-}): SpecificTimesEditDraft => ({
-  dates: [...schedule.normalizedSelectedDays],
-  timeSeed: schedule.dates[0]?.withTimeZone(UTC),
-  duration: schedule.duration,
-  enabledSlots: [...schedule.enabledSlots],
-  activeSlots: [],
-  eventTimezone: schedule.eventTimezone,
-  timedRecurrence: schedule.timedRecurrence,
-  slotGeneration: schedule.slotGeneration,
-  timeIncrementMinutes,
-  resetExistingTimes: true,
-})
+}): SpecificTimesEditDraft => {
+  const specificTimesSchedule = fullDaySpecificTimesSchedule(
+    schedule,
+    timeIncrementMinutes,
+  )
+
+  return {
+    dates: [...specificTimesSchedule.normalizedSelectedDays],
+    timeSeed: specificTimesSchedule.dates[0]?.withTimeZone(UTC),
+    duration: specificTimesSchedule.duration,
+    enabledSlots: [...specificTimesSchedule.enabledSlots],
+    activeSlots: [],
+    eventTimezone: specificTimesSchedule.eventTimezone,
+    timedRecurrence: specificTimesSchedule.timedRecurrence,
+    slotGeneration: specificTimesSchedule.slotGeneration,
+    timeIncrementMinutes,
+    resetExistingTimes: true,
+  }
+}
 
 export const applySpecificTimesEditDraft = ({
   event,
@@ -185,7 +226,9 @@ export const applySpecificTimesEditDraft = ({
         : event.type,
     dates: draft.timedRecurrence?.selectedDays ?? draft.dates,
     timeSeed:
-      draft.enabledSlots?.[0]?.withTimeZone(UTC) ?? draft.timeSeed ?? event.timeSeed,
+      draft.enabledSlots?.[0]?.withTimeZone(UTC) ??
+      draft.timeSeed ??
+      event.timeSeed,
     duration:
       scheduleDurationFromSlotGeneration(draft.slotGeneration) ??
       draft.duration ??
@@ -198,10 +241,7 @@ export const applySpecificTimesEditDraft = ({
     eventTimezone: draft.eventTimezone ?? event.eventTimezone,
     slotGeneration: draft.slotGeneration ?? event.slotGeneration,
     timedRecurrence: draft.timedRecurrence ?? event.timedRecurrence,
-    times:
-      draft.resetExistingTimes === true
-        ? []
-        : normalizedSlots.activeSlots,
+    times: draft.resetExistingTimes === true ? [] : normalizedSlots.activeSlots,
   }
 
   processEvent(nextEvent)
@@ -210,12 +250,11 @@ export const applySpecificTimesEditDraft = ({
 }
 
 const scheduleDurationFromSlotGeneration = (
-  slotGeneration: Event["slotGeneration"]
+  slotGeneration: Event["slotGeneration"],
 ): Temporal.Duration | undefined =>
-  slotGeneration?.startTimeLocal != null &&
-  slotGeneration.endTimeLocal != null
+  slotGeneration?.startTimeLocal != null && slotGeneration.endTimeLocal != null
     ? getWrappedTimeRangeDuration(
         slotGeneration.startTimeLocal,
-        slotGeneration.endTimeLocal
+        slotGeneration.endTimeLocal,
       )
     : undefined
