@@ -42,7 +42,7 @@ describe("ColorLegend", () => {
 
     expectStructuralColors(wrapper)
     expect(labels(wrapper)).toEqual([
-      "Unavailable, select in Edit availability",
+      "Unavailable, select in Add/Edit availability",
       "Unavailable, select in Edit event",
       "Unavailable, padding",
     ])
@@ -57,7 +57,7 @@ describe("ColorLegend", () => {
     expect(wrapper.html()).toContain("tw-bg-[#00994C77]")
     expect(wrapper.text()).toContain("If needed")
     expect(wrapper.html()).toContain("tw-bg-yellow")
-    expect(wrapper.text()).toContain("Unavailable, select in Edit availability")
+    expect(wrapper.text()).toContain("Unavailable, select in Add/Edit availability")
     expect(wrapper.html()).toContain("tw-bg-[#F9CCCC]")
     expect(labels(wrapper)).toHaveLength(5)
   })
@@ -67,7 +67,7 @@ describe("ColorLegend", () => {
 
     expect(wrapper.text()).toContain("Available")
     expect(wrapper.text()).toContain("If needed")
-    expect(wrapper.text()).toContain("Unavailable, select in Edit availability")
+    expect(wrapper.text()).toContain("Unavailable, select in Add/Edit availability")
     expect(labels(wrapper)).toHaveLength(5)
   })
 

@@ -27,7 +27,7 @@
         ></div>
       </div>
       <span class="tw-text-sm"
-        >Unavailable, select in <br class="tw-hidden md:tw-block" />Edit availability</span
+        >Unavailable, select in <br class="tw-hidden md:tw-block" />Add/Edit availability</span
       >
     </div>
     <div class="tw-flex tw-items-start">

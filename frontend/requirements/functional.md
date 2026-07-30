@@ -77,7 +77,7 @@ Default hours for a new event should be 9-18.
 Grid colors shall use context-specific labels:
 
 - In the specific-times editor: white is `Selected for the event`, light grey is `Available to select`, and dark grey is `Unavailable, padding`.
-- In the event availability grid: pale red is `Unavailable, select in Edit availability`, light grey is `Unavailable, select in Edit event`, and dark grey is `Unavailable, padding`.
+- In the event availability grid: pale red is `Unavailable, select in Add/Edit availability`, light grey is `Unavailable, select in Edit event`, and dark grey is `Unavailable, padding`.
 - The event availability legend shall show light grey and dark grey when there are no active slots or responses; add pale red when there are active slots; show all colors while adding availability or after receiving a response.
 - Specific-times enabled inactive cells shall remain editable, while dark-grey padding cells outside the enabled domain shall be non-editable.
 
