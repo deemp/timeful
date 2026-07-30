@@ -53,6 +53,7 @@ Frontend build-time variables:
 - `VITE_ENABLE_THIRD_PARTY_SHELL`
 - `VITE_SHOW_FORMERLY_KNOWN_AS_SCHEJ`
 - `VITE_FEEDBACK_URL`
+- `VITE_GITHUB_REPO_URL`
 
 Compose-to-frontend build arg mappings:
 
@@ -76,6 +77,8 @@ Compose-to-frontend build arg mappings:
   section, testimonials, the FAQ, and the footer.
 - **`VITE_FEEDBACK_URL`** — Controls where frontend “Give feedback” links point.
   Defaults to `https://github.com/deemp/timeful/issues` when unset or blank.
+- **`VITE_GITHUB_REPO_URL`** — Controls where frontend GitHub links point. This value
+  is required for Docker-built frontend artifacts.
 
 Backend runtime variables:
 

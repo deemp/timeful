@@ -29,6 +29,7 @@ services:
         VITE_SHOW_FORMERLY_KNOWN_AS_SCHEJ: ${VITE_SHOW_FORMERLY_KNOWN_AS_SCHEJ:-}
         VITE_ENABLE_PRIVACY_POLICY: ${VITE_ENABLE_PRIVACY_POLICY:-}
         VITE_FEEDBACK_URL: ${VITE_FEEDBACK_URL:-}
+        VITE_GITHUB_REPO_URL: ${VITE_GITHUB_REPO_URL:-}
     volumes:
       - frontend_dist:/app/dist
     command:
