@@ -317,7 +317,7 @@ describe("ScheduleOverlap grid drag bindings", () => {
     }
   })
 
-  it("renders timed-grid navigation buttons at a 36px box size", () => {
+  it("keeps timed-grid navigation buttons within the phone navigation slot", () => {
     const { timedGrid } = createTimeGridViewModel()
     timedGrid.hasPrevPage = true
     timedGrid.hasNextPage = true
@@ -337,11 +337,15 @@ describe("ScheduleOverlap grid drag bindings", () => {
     const navButtons = wrapper.findAll("button")
 
     expect(navButtons).toHaveLength(2)
-    for (const button of navButtons) {
-      expect(button.classes()).toContain("tw-h-[36px]")
-      expect(button.classes()).toContain("tw-w-[36px]")
-      expect(button.classes()).toContain("tw-min-w-[36px]")
-    }
+    const nextButton = navButtons[1]
+    const nextButtonClasses = nextButton.classes()
+    expect(nextButtonClasses).toContain("tw-h-8")
+    expect(nextButtonClasses).toContain("tw-w-8")
+    expect(nextButtonClasses).toContain("tw-min-w-8")
+    expect(nextButtonClasses).toContain("sm:tw-h-[36px]")
+    expect(nextButtonClasses).toContain("sm:tw-w-[36px]")
+    expect(nextButtonClasses).toContain("sm:tw-min-w-[36px]")
+    expect(nextButton.element.parentElement?.parentElement?.classList).toContain("tw-w-10")
   })
 
   it("renders owned overlay availability frame classes for available and if-needed blocks", () => {
