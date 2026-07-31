@@ -21,6 +21,10 @@ describe("ColorLegend", () => {
     expect(wrapper.html()).toContain("tw-bg-light-gray-stroke")
     expect(wrapper.text()).toContain("Unavailable, padding")
     expect(wrapper.html()).toContain("tw-bg-gray")
+    expect(wrapper.text()).toContain("Scheduled event")
+    expect(wrapper.find(".scheduled-event-legend-indicator").classes()).toEqual(
+      expect.arrayContaining(["tw-border-blue", "tw-bg-blue"]),
+    )
   }
 
   const labels = (wrapper: ReturnType<typeof mountLegend>) =>
@@ -33,6 +37,7 @@ describe("ColorLegend", () => {
     expect(labels(wrapper)).toEqual([
       "Unavailable, select in Edit event",
       "Unavailable, padding",
+      "Scheduled event",
     ])
     expect(wrapper.html()).not.toContain("tw-bg-[#F9CCCC]")
   })
@@ -45,6 +50,7 @@ describe("ColorLegend", () => {
       "Unavailable, select in Add/Edit availability",
       "Unavailable, select in Edit event",
       "Unavailable, padding",
+      "Scheduled event",
     ])
     expect(wrapper.html()).toContain("tw-bg-[#F9CCCC]")
   })
@@ -59,7 +65,7 @@ describe("ColorLegend", () => {
     expect(wrapper.html()).toContain("tw-bg-yellow")
     expect(wrapper.text()).toContain("Unavailable, select in Add/Edit availability")
     expect(wrapper.html()).toContain("tw-bg-[#F9CCCC]")
-    expect(labels(wrapper)).toHaveLength(5)
+    expect(labels(wrapper)).toHaveLength(6)
   })
 
   it("shows the full palette while adding availability", () => {
@@ -68,14 +74,14 @@ describe("ColorLegend", () => {
     expect(wrapper.text()).toContain("Available")
     expect(wrapper.text()).toContain("If needed")
     expect(wrapper.text()).toContain("Unavailable, select in Add/Edit availability")
-    expect(labels(wrapper)).toHaveLength(5)
+    expect(labels(wrapper)).toHaveLength(6)
   })
 
   it("uses the respondent checkbox control geometry for each indicator", () => {
     const wrapper = mountLegend({ responseCount: 1 })
 
     const indicatorSlots = wrapper.findAll(".color-legend__indicator-slot")
-    expect(indicatorSlots).toHaveLength(5)
+    expect(indicatorSlots).toHaveLength(6)
 
     for (const indicatorSlot of indicatorSlots) {
       expect(indicatorSlot.find(".tw-h-4.tw-w-4").exists()).toBe(true)

@@ -9,8 +9,10 @@ import { applySpecificTimesEditDraft } from "@/composables/event/specificTimesEd
 import { states, type ScheduleOverlapEvent } from "./types"
 import { useEventScheduling } from "./useEventScheduling"
 
-const { putMock, showErrorMock, captureMock } = vi.hoisted(() => ({
+const { putMock, saveTimefulScheduleMock, clearTimefulScheduleMock, showErrorMock, captureMock } = vi.hoisted(() => ({
   putMock: vi.fn(),
+  saveTimefulScheduleMock: vi.fn(),
+  clearTimefulScheduleMock: vi.fn(),
   showErrorMock: vi.fn(),
   captureMock: vi.fn(),
 }))
@@ -29,6 +31,11 @@ vi.mock("@/stores/main", () => ({
   }),
 }))
 
+vi.mock("@/composables/event/eventTransportBoundary", () => ({
+  saveTimefulSchedule: saveTimefulScheduleMock,
+  clearTimefulSchedule: clearTimefulScheduleMock,
+}))
+
 vi.mock("@/plugins/posthog", () => ({
   posthog: {
     capture: captureMock,
@@ -42,9 +49,13 @@ const plainTimeInZone = (time: Temporal.ZonedDateTime, timeZone: string) =>
 describe("useEventScheduling", () => {
   beforeEach(() => {
     putMock.mockReset()
+    saveTimefulScheduleMock.mockReset()
+    clearTimefulScheduleMock.mockReset()
     showErrorMock.mockReset()
     captureMock.mockReset()
     putMock.mockResolvedValue(undefined)
+    saveTimefulScheduleMock.mockResolvedValue(undefined)
+    clearTimefulScheduleMock.mockResolvedValue(undefined)
   })
 
   it("saves specific-time selections that start at midnight without building an invalid time string", async () => {
@@ -836,5 +847,50 @@ describe("useEventScheduling", () => {
     expect(putMock).not.toHaveBeenCalled()
     expect(showErrorMock).toHaveBeenCalledWith("Select at least one time before saving.")
     expect(state.value).toBe(states.SET_SPECIFIC_TIMES)
+  })
+
+  it("persists a selected range to Timeful and returns to the event grid", async () => {
+    const state = ref(states.SCHEDULE_EVENT)
+    const event = ref<ScheduleOverlapEvent>({
+      _id: "evt-6",
+      shortId: "public123",
+      name: "Public planning",
+      type: eventTypes.SPECIFIC_DATES,
+      daysOnly: false,
+    })
+    const refreshEvent = vi.fn().mockResolvedValue(undefined)
+    const scheduling = useEventScheduling({
+      event,
+      weekOffset: ref(0),
+      curTimezone: ref({ value: UTC, offset: durations.ZERO, label: "UTC", gmtString: "GMT" }),
+      state,
+      defaultState: computed(() => states.HEATMAP),
+      splitTimes: computed(() => [[{ hoursOffset: durations.ZERO, text: "slot" }, { hoursOffset: durations.ONE_HOUR, text: "slot" }], []]),
+      timeslotDuration: computed(() => durations.ONE_HOUR),
+      timeslotHeight: computed(() => 16),
+      timezoneOffset: computed(() => durations.ZERO),
+      isWeekly: computed(() => false),
+      isGroup: computed(() => false),
+      isSpecificTimes: computed(() => false),
+      getDateFromRowCol: (row) => zdt(`2026-06-01T${row === 0 ? "09" : "10"}:00:00Z`),
+      dragging: ref(false),
+      dragStart: ref(null),
+      dragCur: ref(null),
+      tempTimes: shallowRef(new ZdtSet()),
+      respondents: computed(() => []),
+      getMinMaxHoursFromTimes: vi.fn(),
+      refreshEvent,
+    })
+    scheduling.curScheduledEvent.value = { row: 0, col: 0, numRows: 1 }
+
+    await scheduling.confirmScheduleEvent("timeful")
+
+    expect(saveTimefulScheduleMock).toHaveBeenCalledWith("public123", {
+      startDate: zdt("2026-06-01T09:00:00Z"),
+      endDate: zdt("2026-06-01T10:00:00Z"),
+    })
+    expect(refreshEvent).toHaveBeenCalledOnce()
+    expect(scheduling.curScheduledEvent.value).toBeNull()
+    expect(state.value).toBe(states.HEATMAP)
   })
 })

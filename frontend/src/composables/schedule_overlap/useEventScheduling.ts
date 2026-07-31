@@ -11,6 +11,10 @@ import {
 import { useMainStore } from "@/stores/main"
 import { posthog } from "@/plugins/posthog"
 import { toEventPatchPayload } from "@/composables/event/eventMutationBoundary"
+import {
+  clearTimefulSchedule,
+  saveTimefulSchedule,
+} from "@/composables/event/eventTransportBoundary"
 import type { Event, Location } from "@/types"
 import type { ZdtSet } from "@/utils"
 import {
@@ -65,6 +69,7 @@ export interface UseEventSchedulingOptions {
   isGroup: ComputedRef<boolean>
   isSpecificTimes: ComputedRef<boolean>
   getDateFromRowCol: (row: number, col: number) => Temporal.ZonedDateTime | null
+  numDisplayedDays?: ComputedRef<number>
   getMinMaxHoursFromTimes: (times: Temporal.ZonedDateTime[]) => {
     minHours: Temporal.PlainTime
     maxHours: Temporal.PlainTime
@@ -100,6 +105,25 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
   }
 
   const allowScheduleEvent = computed(() => Boolean(curScheduledEvent.value))
+  const savedScheduledEvent = computed<ScheduledEvent | null>(() => {
+    const saved = opts.event.value.scheduledEvent
+    if (!saved?.startDate || !saved.endDate) return null
+
+    const durationMinutes = saved.endDate.since(saved.startDate).total("minutes")
+    const numRows = durationMinutes / opts.timeslotDuration.value.total("minutes")
+    if (!Number.isInteger(numRows) || numRows <= 0) return null
+
+    const rowCount = opts.splitTimes.value[0].length + opts.splitTimes.value[1].length
+    for (let col = 0; col < (opts.numDisplayedDays?.value ?? 0); col += 1) {
+      for (let row = 0; row < rowCount; row += 1) {
+        const date = opts.getDateFromRowCol(row, col)
+        if (date?.toInstant().equals(saved.startDate.toInstant())) {
+          return { col, row, numRows }
+        }
+      }
+    }
+    return null
+  })
 
   const scheduledEventStyle = computed<Record<string, string>>(() => {
     const style: Record<string, string> = {}
@@ -118,11 +142,13 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
       top = scheduledEvent.row
       height = scheduledEvent.numRows
       isSecondSplit = scheduledEvent.row >= opts.splitTimes.value[0].length
-    } else if (curScheduledEvent.value) {
-      top = curScheduledEvent.value.row
-      height = curScheduledEvent.value.numRows
+    } else if (curScheduledEvent.value ?? savedScheduledEvent.value) {
+      const scheduledEvent = curScheduledEvent.value ?? savedScheduledEvent.value
+      if (!scheduledEvent) return style
+      top = scheduledEvent.row
+      height = scheduledEvent.numRows
       isSecondSplit =
-        curScheduledEvent.value.row >= opts.splitTimes.value[0].length
+        scheduledEvent.row >= opts.splitTimes.value[0].length
     } else {
       return style
     }
@@ -162,12 +188,11 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
 
   const cancelScheduleEvent = () => {
     opts.state.value = opts.defaultState.value
+    curScheduledEvent.value = null
   }
 
-  const confirmScheduleEvent = (googleCalendar = true) => {
+  const getSelectedScheduleRange = () => {
     if (!curScheduledEvent.value) return
-
-    posthog.capture("schedule_event_confirmed")
     const { col, row, numRows } = curScheduledEvent.value
     let startDate = opts.getDateFromRowCol(row, col)
     if (!startDate) return
@@ -199,6 +224,37 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
       )
     }
 
+    return { startDate, endDate }
+  }
+
+  const confirmScheduleEvent = async (
+    destination: "timeful" | "google" | "outlook" | boolean = "google"
+  ) => {
+    const selectedRange = getSelectedScheduleRange()
+    if (!selectedRange) return
+
+    const scheduleDestination =
+      typeof destination === "boolean"
+        ? destination
+          ? "google"
+          : "outlook"
+        : destination
+    posthog.capture("schedule_event_confirmed", { destination: scheduleDestination })
+    const { startDate, endDate } = selectedRange
+
+    if (scheduleDestination === "timeful") {
+      const eventId = opts.event.value.shortId ?? opts.event.value._id ?? ""
+      try {
+        await saveTimefulSchedule(eventId, { startDate, endDate })
+        await opts.refreshEvent?.()
+        opts.state.value = opts.defaultState.value
+        curScheduledEvent.value = null
+      } catch (err: unknown) {
+        mainStore.showError(typeof err === "string" ? err : String(err))
+      }
+      return
+    }
+
     const emails = opts.respondents.value.map((r) =>
       r.email && r.email.length > 0 ? r.email : null
     )
@@ -209,7 +265,7 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
     const appOrigin = getCurrentOrigin()
 
     let url: string
-    if (googleCalendar) {
+    if (scheduleDestination === "google") {
       const start = startDate
         .toInstant()
         .toString()
@@ -238,6 +294,18 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
 
     window.open(url, "_blank")
     opts.state.value = opts.defaultState.value
+  }
+
+  const clearScheduledEvent = async () => {
+    const eventId = opts.event.value.shortId ?? opts.event.value._id ?? ""
+    try {
+      await clearTimefulSchedule(eventId)
+      await opts.refreshEvent?.()
+      curScheduledEvent.value = null
+      opts.state.value = opts.defaultState.value
+    } catch (err: unknown) {
+      mainStore.showError(typeof err === "string" ? err : String(err))
+    }
   }
 
   const saveTempTimes = async () => {
@@ -335,12 +403,14 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
 
   return {
     curScheduledEvent,
+    savedScheduledEvent,
     allowScheduleEvent,
     scheduledEventStyle,
     signUpBlockBeingDraggedStyle,
     scheduleEvent,
     cancelScheduleEvent,
     confirmScheduleEvent,
+    clearScheduledEvent,
     saveTempTimes,
     HOUR_HEIGHT,
   }

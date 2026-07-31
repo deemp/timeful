@@ -10,7 +10,7 @@ import { useDragPaint } from "./useDragPaint"
 
 const zdt = (iso: string) => Temporal.Instant.from(iso).toZonedDateTimeISO(UTC)
 
-function createScheduleEventDragPaint() {
+function createScheduleEventDragPaint(activeRows = [0]) {
   const event = ref({
     _id: "evt-1",
     ownerId: "owner-1",
@@ -37,8 +37,17 @@ function createScheduleEventDragPaint() {
       dragStart,
       dragCur,
       curTimeslot: ref({ row: -1, col: -1 }),
-      splitTimes: computed(() => [[{ hoursOffset: Temporal.Duration.from({ hours: 9 }) }], []]),
-      times: computed(() => [{ hoursOffset: Temporal.Duration.from({ hours: 9 }) }]),
+      splitTimes: computed(() => [
+        Array.from({ length: 4 }, (_, row) => ({
+          hoursOffset: Temporal.Duration.from({ hours: 9 + row }),
+        })),
+        [],
+      ]),
+      times: computed(() =>
+        Array.from({ length: 4 }, (_, row) => ({
+          hoursOffset: Temporal.Duration.from({ hours: 9 + row }),
+        }))
+      ),
       days: computed(() => [{ dateObject: zdt("2026-01-01T09:00:00Z") }]),
       monthDays: computed(() => []),
       monthDayIncluded: computed(() => new ZdtMap<boolean>()),
@@ -55,7 +64,9 @@ function createScheduleEventDragPaint() {
       maxSignUpBlockRowSize: computed(() => null),
       allowDrag: computed(() => true),
       getDateFromRowCol: (row, col) =>
-        zdt(`2026-01-01T0${String(9 + row)}:00:00Z`).add({ days: col }),
+        activeRows.includes(row)
+          ? zdt(`2026-01-01T${String(9 + row).padStart(2, "0")}:00:00Z`).add({ days: col })
+          : null,
       getAvailabilityForColumn: () => new ZdtSet(),
       createSignUpBlock: () => {
         throw new Error("not used in schedule-event tests")
@@ -286,6 +297,26 @@ describe("useDragPaint pointer capture", () => {
       row: 0,
       numRows: 1,
     })
+  })
+
+  it("keeps schedule-event drags within active specific-time slots", () => {
+    const { dragPaint, curScheduledEvent } = createScheduleEventDragPaint([0, 1])
+    const target = document.createElement("div")
+
+    Object.defineProperty(target, "getBoundingClientRect", {
+      configurable: true,
+      value: () => ({ left: 0, top: 0, width: 10, height: 10 }),
+    })
+    target.setPointerCapture = vi.fn()
+    target.releasePointerCapture = vi.fn()
+    target.hasPointerCapture = vi.fn(() => true)
+
+    dragPaint.startDrag(createPointerEvent("pointerdown", target, 7, 5))
+    dragPaint.moveDrag(createPointerEvent("pointermove", target, 7, 15))
+    dragPaint.moveDrag(createPointerEvent("pointermove", target, 7, 25))
+    dragPaint.endDrag(createPointerEvent("pointerup", target, 7, 25))
+
+    expect(curScheduledEvent.value).toEqual({ col: 0, row: 0, numRows: 2 })
   })
 
   it("keeps the current timeslot aligned with the drag pointer while editing availability", () => {

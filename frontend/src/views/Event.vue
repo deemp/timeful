@@ -386,7 +386,23 @@
                               <v-list density="compact">
                                 <v-list-item
                                   class="schedule-event-menu__item"
-                                  @click="scheduleOverlap?.confirmScheduleEvent(true)"
+                                  @click="scheduleOverlap?.confirmScheduleEvent('timeful')"
+                                >
+                                  <div class="schedule-event-menu__content">
+                                    <img
+                                      src="/favicon-32x32.png"
+                                      alt=""
+                                      aria-hidden="true"
+                                      class="schedule-event-menu__icon tw-mr-2 tw-flex-none"
+                                    />
+                                    <div class="tw-flex tw-min-w-0 tw-flex-col">
+                                      <v-list-item-title>Timeful</v-list-item-title>
+                                    </div>
+                                  </div>
+                                </v-list-item>
+                                <v-list-item
+                                  class="schedule-event-menu__item"
+                                  @click="scheduleOverlap?.confirmScheduleEvent('google')"
                                 >
                                   <div class="schedule-event-menu__content">
                                     <img
@@ -402,7 +418,7 @@
                                 </v-list-item>
                                 <v-list-item
                                   class="schedule-event-menu__item"
-                                  @click="scheduleOverlap?.confirmScheduleEvent(false)"
+                                  @click="scheduleOverlap?.confirmScheduleEvent('outlook')"
                                 >
                                   <div class="schedule-event-menu__content">
                                     <img
@@ -431,8 +447,14 @@
                           @click="scheduleEvent"
                         >
                           <v-icon small>mdi-calendar-check</v-icon>
-                          <span class="tw-ml-2">Schedule event</span>
+                          <span class="tw-ml-2">{{ hasSavedTimefulSchedule ? 'Reschedule event' : 'Schedule event' }}</span>
                         </v-btn>
+                        <v-btn
+                          v-if="hasSavedTimefulSchedule"
+                          variant="text"
+                          class="desktop-event-header-control tw-flex-1 tw-text-blue"
+                          @click="clearScheduledEvent"
+                        >Clear</v-btn>
                       </div>
                     </template>
                     <template v-else>
@@ -720,15 +742,22 @@
           }`"
         >
           <template v-if="!isEditing && !isScheduling">
-            <v-btn
-              v-if="!event.daysOnly && numResponses > 0"
-              variant="outlined"
-              class="tw-border-white tw-px-2 tw-text-[13px] tw-text-white max-sm:tw-px-1 max-sm:tw-text-xs"
-              @click="scheduleEvent"
-            >
-              <v-icon>mdi-calendar-check</v-icon>
-              <span class="tw-ml-1">Schedule</span>
-            </v-btn>
+            <div v-if="showScheduleEventButton" class="tw-flex tw-items-center tw-gap-1">
+              <v-btn
+                variant="outlined"
+                class="tw-border-white tw-px-2 tw-text-[13px] tw-text-white max-sm:tw-px-1 max-sm:tw-text-xs"
+                @click="scheduleEvent"
+              >
+                <v-icon>mdi-calendar-check</v-icon>
+                <span class="tw-ml-1">{{ hasSavedTimefulSchedule ? 'Reschedule' : 'Schedule' }}</span>
+              </v-btn>
+              <v-btn
+                v-if="hasSavedTimefulSchedule"
+                variant="text"
+                class="tw-px-1 tw-text-xs tw-text-white"
+                @click="clearScheduledEvent"
+              >Clear</v-btn>
+            </div>
             <v-spacer />
             <div class="tw-flex tw-min-w-0 tw-items-center tw-gap-2 max-sm:tw-gap-1">
               <v-btn
@@ -829,15 +858,39 @@
               Cancel
             </v-btn>
             <v-spacer />
-            <v-btn
-              :disabled="!allowScheduleEvent"
-              class="mobile-schedule-button"
-              :style="mobileScheduleButtonStyle"
-              @click="confirmScheduleEvent"
-            >
-              <v-icon>mdi-calendar-check</v-icon>
-              <span class="tw-ml-1">Schedule</span>
-            </v-btn>
+            <v-menu location="top end" offset="8">
+              <template #activator="{ props: activatorProps }">
+                <v-btn
+                  :disabled="!allowScheduleEvent"
+                  class="mobile-schedule-button"
+                  :style="mobileScheduleButtonStyle"
+                  v-bind="activatorProps"
+                >
+                  <v-icon>mdi-calendar-check</v-icon>
+                  <span class="tw-ml-1">Schedule</span>
+                </v-btn>
+              </template>
+              <v-list density="compact">
+                <v-list-item class="schedule-event-menu__item" @click="confirmScheduleEvent('timeful')">
+                  <div class="schedule-event-menu__content">
+                    <img src="/favicon-32x32.png" alt="" aria-hidden="true" class="schedule-event-menu__icon tw-mr-2 tw-flex-none" />
+                    <v-list-item-title>Timeful</v-list-item-title>
+                  </div>
+                </v-list-item>
+                <v-list-item class="schedule-event-menu__item" @click="confirmScheduleEvent('google')">
+                  <div class="schedule-event-menu__content">
+                    <img src="@/assets/gcal_logo.png" alt="" aria-hidden="true" class="schedule-event-menu__icon tw-mr-2 tw-flex-none" />
+                    <v-list-item-title>Google Calendar</v-list-item-title>
+                  </div>
+                </v-list-item>
+                <v-list-item class="schedule-event-menu__item" @click="confirmScheduleEvent('outlook')">
+                  <div class="schedule-event-menu__content">
+                    <img src="@/assets/outlook_logo.svg" alt="" aria-hidden="true" class="schedule-event-menu__icon tw-mr-2 tw-flex-none" />
+                    <v-list-item-title>Outlook</v-list-item-title>
+                  </div>
+                </v-list-item>
+              </v-list>
+            </v-menu>
           </template>
         </div>
         <AsyncPubliftAd
@@ -979,7 +1032,6 @@ import { toQueryInstantString } from "@/utils/temporalQuery"
 import {
   canEditAvailabilityAsCurrentViewer,
   canEditEventMetadata,
-  isAnonymousOwnerEvent,
   isSignedInOwner,
 } from "@/composables/event/eventOwnership"
 
@@ -1208,13 +1260,14 @@ const showSecondaryAddAvailabilityAction = computed(() => {
   if (!event) return false
   return !event.blindAvailabilityEnabled || isOwner.value
 })
-const guestEvent = computed(() => isAnonymousOwnerEvent(event.value))
 const showScheduleEventButton = computed(
   () =>
     !scheduleOverlapEvent.value.daysOnly &&
-    numResponses.value > 0 &&
     !isEditing.value &&
-    (guestEvent.value || isOwner.value)
+    !isSignUp.value
+)
+const hasSavedTimefulSchedule = computed(
+  () => Boolean(loader.event.value?.scheduledEvent)
 )
 const primaryAvailabilityButtonText = computed(() => {
   if (showDisabledEditAvailabilityPrimary.value) return "Edit availability"
@@ -1609,8 +1662,11 @@ const scheduleEvent = () => {
 const cancelScheduleEvent = () => {
   scheduleOverlap.value?.cancelScheduleEvent()
 }
-const confirmScheduleEvent = () => {
-  scheduleOverlap.value?.confirmScheduleEvent()
+const confirmScheduleEvent = (destination: "timeful" | "google" | "outlook") => {
+  scheduleOverlap.value?.confirmScheduleEvent(destination)
+}
+const clearScheduledEvent = () => {
+  scheduleOverlap.value?.clearScheduledEvent?.()
 }
 
 function onBeforeUnload(e: BeforeUnloadEvent) {

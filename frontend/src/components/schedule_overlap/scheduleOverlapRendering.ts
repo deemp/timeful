@@ -49,6 +49,12 @@ export interface RenderedOverlayAvailabilityFragment {
   type: AvailabilityType
 }
 
+export interface RenderedTimeBlockFragment {
+  [key: string]: string
+  top: string
+  height: string
+}
+
 const UNAVAILABLE_BG = "var(--timeful-unavailable-bg)"
 const UNAVAILABLE_BG_TIME_GRID = "var(--timeful-unavailable-bg-time-grid)"
 const UNAVAILABLE_BG_DAY_GRID = "var(--timeful-unavailable-bg-day-grid)"
@@ -820,6 +826,58 @@ export const buildRenderedOverlayAvailability = ({
       return fragments
     }),
   )
+}
+
+export const buildRenderedTimeBlockFragments = ({
+  renderedRows,
+  startBaseRowIndex,
+  coveredBaseRowCount,
+}: {
+  renderedRows: RenderedTimeGridRow[]
+  startBaseRowIndex: number
+  coveredBaseRowCount: number
+}): RenderedTimeBlockFragment[] => {
+  if (coveredBaseRowCount <= 0) return []
+
+  const renderedRowsByBaseRow = new Map<number, RenderedTimeGridRow>()
+  for (const row of renderedRows) {
+    if (row.kind === "timeslot" && typeof row.baseRowIndex === "number") {
+      renderedRowsByBaseRow.set(row.baseRowIndex, row)
+    }
+  }
+
+  const fragments: RenderedTimeBlockFragment[] = []
+  let currentFragment: RenderedTimeBlockFragment | null = null
+  let previousRowBottom: number | null = null
+
+  for (let offset = 0; offset < coveredBaseRowCount; offset += 1) {
+    const renderedRow = renderedRowsByBaseRow.get(startBaseRowIndex + offset)
+    if (!renderedRow) {
+      currentFragment = null
+      previousRowBottom = null
+      continue
+    }
+
+    if (
+      !currentFragment ||
+      previousRowBottom == null ||
+      renderedRow.rowTop !== previousRowBottom
+    ) {
+      currentFragment = {
+        top: `${String(renderedRow.rowTop)}px`,
+        height: `${String(renderedRow.height)}px`,
+      }
+      fragments.push(currentFragment)
+    } else {
+      currentFragment.height = `${String(
+        Number.parseFloat(currentFragment.height) + renderedRow.height,
+      )}px`
+    }
+
+    previousRowBottom = renderedRow.rowTop + renderedRow.height
+  }
+
+  return fragments
 }
 
 export const formatTooltipContent = ({

@@ -77,6 +77,7 @@ function createTimeGridViewModel() {
     dragStart: null,
     curScheduledEvent: null,
     scheduledEventStyle: {},
+    scheduledEventStyles: [],
     signUpBlockBeingDraggedStyle: {},
     newSignUpBlockName: "Slot #1",
     isSignUp: false,
@@ -132,6 +133,7 @@ function createTimeGridViewModel() {
       allowScheduleEvent: true,
       timeType: "12h",
     },
+    getRenderedTimeBlockStyles: vi.fn(() => []),
     getRenderedTimeBlockStyle: vi.fn(() => ({})),
     getSignUpBlockStyle: vi.fn(() => ({})),
   }
@@ -378,6 +380,25 @@ describe("ScheduleOverlap grid drag bindings", () => {
     expect(availableBlock.classes()).toContain("overlay-avail-shadow-green")
     expect(ifNeededBlock.classes()).toContain("time-grid-overlay-block")
     expect(ifNeededBlock.classes()).toContain("overlay-avail-shadow-yellow")
+  })
+
+  it("renders scheduled events as centered, solid blocks without names", () => {
+    const { timedGrid } = createTimeGridViewModel()
+    timedGrid.dragStart = { row: 0, col: 0 }
+    timedGrid.scheduledEventStyles = [{ top: "0px", height: "60px" }]
+
+    const wrapper = mount(ScheduleOverlapTimeGrid, {
+      props: { timedGrid },
+      global,
+    })
+
+    const scheduledEvent = wrapper.get(".scheduled-event-block")
+
+    expect(scheduledEvent.classes()).toContain("tw-border-blue")
+    expect(scheduledEvent.classes()).toContain("tw-bg-blue")
+    expect(scheduledEvent.text()).toBe("")
+    expect(scheduledEvent.element.parentElement?.classList).toContain("tw-left-[15%]")
+    expect(scheduledEvent.element.parentElement?.classList).toContain("tw-w-[70%]")
   })
 
   it("renders one structural interior collapsed-hours row and forwards expansion clicks", async () => {

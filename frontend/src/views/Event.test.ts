@@ -118,6 +118,7 @@ const scheduleOverlapMethodMocks: Record<string, ReturnType<typeof vi.fn>> = {
   scheduleEvent: vi.fn(),
   cancelScheduleEvent: vi.fn(),
   confirmScheduleEvent: vi.fn(),
+  clearScheduledEvent: vi.fn(),
   editOwnedGuestAvailability: editOwnedGuestAvailabilityMock,
 }
 
@@ -260,6 +261,7 @@ const ScheduleOverlapStub = {
     scheduleEvent: scheduleOverlapMethodMocks.scheduleEvent,
     cancelScheduleEvent: scheduleOverlapMethodMocks.cancelScheduleEvent,
     confirmScheduleEvent: scheduleOverlapMethodMocks.confirmScheduleEvent,
+    clearScheduledEvent: scheduleOverlapMethodMocks.clearScheduledEvent,
     editOwnedGuestAvailability: scheduleOverlapMethodMocks.editOwnedGuestAvailability,
     updateShowBestTimes(this: Record<string, boolean>, value: boolean) {
       this.showBestTimes = value
@@ -453,7 +455,7 @@ const menuStub = {
       default: false,
     },
   },
-  template: '<div v-if="modelValue"><slot /></div>',
+  template: '<div><slot name="activator" :props="{}" /><slot v-if="modelValue" /></div>',
 }
 
 const iconTextStub = {
@@ -591,6 +593,7 @@ describe("Event guest edit action", () => {
           "v-card-actions": true,
           "v-dialog": true,
           "v-spacer": true,
+          "v-menu": menuStub,
           "v-btn": buttonSemanticStub,
         },
       },
@@ -1846,6 +1849,7 @@ describe("Event guest edit action", () => {
           "v-card-actions": true,
           "v-dialog": true,
           "v-spacer": true,
+          "v-menu": menuStub,
           "v-btn": buttonSemanticStub,
         },
       },
@@ -2527,6 +2531,7 @@ describe("Event guest edit action", () => {
           "v-card-actions": true,
           "v-dialog": true,
           "v-spacer": true,
+          "v-menu": menuStub,
           "v-btn": buttonSemanticStub,
         },
       },
@@ -2579,6 +2584,7 @@ describe("Event guest edit action", () => {
           "v-card-actions": true,
           "v-dialog": true,
           "v-spacer": true,
+          "v-menu": menuStub,
           "v-btn": buttonSemanticStub,
         },
       },

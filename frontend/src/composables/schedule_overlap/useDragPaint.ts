@@ -282,6 +282,10 @@ export function useDragPaint(opts: UseDragPaintOptions) {
     return getRowColFromXY(x, y)
   }
 
+  const isScheduleEventSlot = (rowCol: RowCol): boolean =>
+    opts.state.value !== states.SCHEDULE_EVENT ||
+    Boolean(opts.getDateFromRowCol(rowCol.row, rowCol.col))
+
   const inDragRange = (row: number, col: number): boolean => {
     if (!dragging.value || !dragStart.value || !dragCur.value) return false
 
@@ -399,7 +403,10 @@ export function useDragPaint(opts: UseDragPaintOptions) {
       }
     }
 
-    dragCur.value = { row, col }
+    const nextRowCol = { row, col }
+    if (!isScheduleEventSlot(nextRowCol)) return
+
+    dragCur.value = nextRowCol
     updateCurTimeslot(row, col)
   }
 
@@ -412,7 +419,7 @@ export function useDragPaint(opts: UseDragPaintOptions) {
     let dc = dragCur.value
     if (e) {
       const resolved = resolveTimedGridRowCol(e)
-      if (resolved) {
+      if (resolved && isScheduleEventSlot(resolved)) {
         dragCur.value = resolved
         dc = resolved
       }

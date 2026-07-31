@@ -1608,6 +1608,65 @@ describe("ScheduleOverlap", () => {
     expect(timeslotRows.at(-1)?.timeText).toBe("17:00")
   })
 
+  it("draws grid separators in full-day filler rows around a saved specific-times window", () => {
+    localStorage.setItem("showAllHours", "true")
+    const wrapper = mountScheduleOverlap({
+      props: {
+        event: {
+          ...buildScheduleOverlapProps().event,
+          dates: [Temporal.PlainDate.from("2026-01-01")],
+          timeSeed: zdt("2026-01-01T14:00:00Z"),
+          hasSpecificTimes: true,
+          startTime: Temporal.PlainTime.from("14:00"),
+          duration: Temporal.Duration.from({ hours: 4 }),
+          timeIncrement: Temporal.Duration.from({ minutes: 30 }),
+          times: buildUtcSpecificTimes("2026-01-01", [
+            "14:00:00",
+            "14:30:00",
+            "15:00:00",
+            "15:30:00",
+            "16:00:00",
+            "16:30:00",
+            "17:00:00",
+            "17:30:00",
+          ]),
+        },
+        alwaysShowCalendarEvents: false,
+        sampleCalendarEventsByDay: [],
+        initialTimezone: utcTimezone,
+      },
+    })
+
+    const vm = wrapper.vm as unknown as {
+      renderedRows: {
+        kind: "timeslot" | "collapsed" | "filler" | "split-gap"
+        timeText?: string
+        cells?: { class: string; style: Record<string, string> }[]
+      }[]
+    }
+
+    const midnightFiller = vm.renderedRows.find(
+      (row) => row.kind === "filler" && row.timeText === "00:00"
+    )
+    const halfHourFiller = vm.renderedRows.find(
+      (row) => row.kind === "filler" && row.timeText === undefined
+    )
+    const finalTimeslotIndex = vm.renderedRows
+      .map((row) => row.kind)
+      .lastIndexOf("timeslot")
+    const finalTimeslot = vm.renderedRows[finalTimeslotIndex]
+    const trailingFiller = vm.renderedRows[finalTimeslotIndex + 1]
+
+    expect(midnightFiller?.cells?.[0]?.class).toContain("tw-bg-light-gray-stroke")
+    expect(midnightFiller?.cells?.[0]?.style.borderTopStyle).toBe("solid")
+    expect(midnightFiller?.cells?.[0]?.style.borderLeftStyle).toBe("solid")
+    expect(midnightFiller?.cells?.[0]?.style.borderRightStyle).toBe("solid")
+    expect(halfHourFiller?.cells?.[0]?.style.borderTopStyle).toBe("dashed")
+    expect(finalTimeslot.cells?.[0]?.style.borderBottomStyle).toBe("solid")
+    expect(trailingFiller.kind).toBe("filler")
+    expect(trailingFiller.cells?.[0]?.style.borderTopStyle).toBeUndefined()
+  })
+
   it("keeps a row expanded when any visible day allows that exact specific-time slot", () => {
     const wrapper = mountScheduleOverlap({
       props: {

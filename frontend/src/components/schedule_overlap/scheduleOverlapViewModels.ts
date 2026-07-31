@@ -37,7 +37,7 @@ export interface ScheduleOverlapToolRowActions {
   updateWeekOffset: (value: number) => void
   scheduleEvent: (e?: MouseEvent) => void
   cancelScheduleEvent: (e?: MouseEvent) => void
-  confirmScheduleEvent: (useGcal: boolean) => void
+  confirmScheduleEvent: (destination?: "timeful" | "google" | "outlook" | boolean) => void
 }
 
 export interface ScheduleOverlapDaysOnlyGridActions {
@@ -216,7 +216,9 @@ export interface ScheduleOverlapTimeGridViewModel {
   maxDaysPerPage: number
   dragStart: RowCol | null
   curScheduledEvent: ScheduledEvent | null
+  savedScheduledEvent?: ScheduledEvent | null
   scheduledEventStyle: Record<string, string>
+  scheduledEventStyles: Record<string, string>[]
   signUpBlockBeingDraggedStyle: Record<string, string>
   newSignUpBlockName: string
   isSignUp: boolean
@@ -235,6 +237,9 @@ export interface ScheduleOverlapTimeGridViewModel {
   fetchedResponses: Record<string, FetchedResponse | undefined>
   loadingResponsesLoading: boolean
   toolRow: ScheduleOverlapToolRowViewModel
+  getRenderedTimeBlockStyles: (
+    block: NormalizedCalendarEvent | OverlaidAvailabilityBlock
+  ) => Record<string, string>[]
   getRenderedTimeBlockStyle: (
     block: NormalizedCalendarEvent | OverlaidAvailabilityBlock
   ) => Record<string, string>

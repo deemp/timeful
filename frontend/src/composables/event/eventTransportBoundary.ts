@@ -1,4 +1,5 @@
-import { get } from "@/utils"
+import { _delete, get, put } from "@/utils"
+import type { Temporal } from "temporal-polyfill"
 import type { Event, Response } from "@/types"
 import type { RawEvent, RawResponse } from "@/types/transport"
 import { fromRawEvent, fromRawResponse } from "@/types/transport"
@@ -24,4 +25,18 @@ export async function fetchEventResponses(
       fromRawResponse(rawResponse),
     ])
   )
+}
+
+export async function saveTimefulSchedule(
+  eventId: string,
+  range: { startDate: Temporal.ZonedDateTime; endDate: Temporal.ZonedDateTime }
+): Promise<void> {
+  await put(`/events/${eventId}/schedule`, {
+    startDate: range.startDate.toInstant().toString(),
+    endDate: range.endDate.toInstant().toString(),
+  })
+}
+
+export async function clearTimefulSchedule(eventId: string): Promise<void> {
+  await _delete(`/events/${eventId}/schedule`)
 }

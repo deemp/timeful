@@ -45,7 +45,8 @@ export interface ScheduleOverlapInstance {
   resetSignUpForm(): void
   scheduleEvent(): void
   cancelScheduleEvent(): void
-  confirmScheduleEvent(googleCalendar?: boolean): void
+  confirmScheduleEvent(destination?: "timeful" | "google" | "outlook" | boolean): void
+  clearScheduledEvent?(): void
   getAllValidTimeRanges(): Map<
     number,
     {

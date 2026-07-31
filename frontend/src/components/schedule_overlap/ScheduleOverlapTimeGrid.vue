@@ -175,7 +175,9 @@
                           :key="String(calendarEvent.id)"
                         >
                           <CalendarEventBlock
-                            :block-style="timedGrid.getRenderedTimeBlockStyle(calendarEvent)"
+                            v-for="(blockStyle, blockIndex) in timedGrid.getRenderedTimeBlockStyles(calendarEvent)"
+                            :key="`${String(calendarEvent.id)}-${blockIndex}`"
+                            :block-style="blockStyle"
                             :calendar-event="calendarEvent"
                             :is-group="timedGrid.isGroup"
                             :is-editing-availability="timedGrid.state === timedGrid.states.EDIT_AVAILABILITY"
@@ -185,24 +187,28 @@
                         </template>
                       </template>
 
-                      <div v-if="timedGrid.state === timedGrid.states.SCHEDULE_EVENT">
-                        <div
+                      <div
+                        v-if="timedGrid.state === timedGrid.states.SCHEDULE_EVENT || timedGrid.savedScheduledEvent"
+                      >
+                        <template
                           v-if="
                             (timedGrid.dragStart && timedGrid.dragStart.col === d) ||
-                            (!timedGrid.dragStart && timedGrid.curScheduledEvent && timedGrid.curScheduledEvent.col === d)
+                            (!timedGrid.dragStart && timedGrid.curScheduledEvent && timedGrid.curScheduledEvent.col === d) ||
+                            (timedGrid.state !== timedGrid.states.SCHEDULE_EVENT && timedGrid.savedScheduledEvent?.col === d)
                           "
-                          class="tw-absolute tw-w-full tw-select-none tw-p-px"
-                          :style="timedGrid.scheduledEventStyle"
-                          style="pointer-events: none"
                         >
                           <div
-                            class="tw-h-full tw-w-full tw-overflow-hidden tw-text-ellipsis tw-rounded tw-border tw-border-solid tw-border-blue tw-bg-blue tw-p-px tw-text-xs"
-                          >
-                            <div class="tw-font-medium tw-text-white">
-                              {{ timedGrid.event.name }}
-                            </div>
-                          </div>
+                            v-for="(blockStyle, blockIndex) in timedGrid.scheduledEventStyles"
+                            :key="`scheduled-event-${blockIndex}`"
+                           class="tw-absolute tw-left-[15%] tw-w-[70%] tw-select-none tw-p-px"
+                           :style="blockStyle"
+                           style="pointer-events: none"
+                         >
+                          <div
+                            class="scheduled-event-block tw-h-full tw-w-full tw-overflow-hidden tw-text-ellipsis tw-rounded tw-border tw-border-solid tw-border-blue tw-bg-blue tw-p-px tw-text-xs"
+                          ></div>
                         </div>
+                        </template>
                       </div>
 
                       <div v-if="timedGrid.state === timedGrid.states.EDIT_SIGN_UP_BLOCKS">

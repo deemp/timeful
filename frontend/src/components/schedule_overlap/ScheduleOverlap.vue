@@ -82,6 +82,7 @@ import Tooltip from "../Tooltip.vue"
 import {
   buildDayGridTimeslotClassStyles,
   buildOverlaidAvailability,
+  buildRenderedTimeBlockFragments,
   buildTimeGridTimeslotClassStyles,
   formatTooltipContent,
   getSignUpBlockStyle,
@@ -107,6 +108,7 @@ import {
   COLLAPSED_HOURS_ROW_HEIGHT,
   MIN_COLLAPSIBLE_HIDDEN_SPAN_HOURS,
   SPLIT_GAP_HEIGHT,
+  getScheduledEventFromDragRange,
 } from "@/composables/schedule_overlap/types"
 import type {
   FetchedResponse, RenderedTimeGridRow, RenderedTimeGridRowCell, RowCol, Timezone, ScheduleOverlapState, ScheduleOverlapEvent, NormalizedCalendarEvent, CalendarEventsByDay, CalendarEventsMap,
@@ -443,6 +445,7 @@ const eventSched = useEventScheduling({
   isGroup,
   isSpecificTimes: grid.isSpecificTimes,
   getDateFromRowCol: grid.getDateFromRowCol,
+  numDisplayedDays: computed(() => grid.days.value.length),
   getMinMaxHoursFromTimes: grid.getMinMaxHoursFromTimes,
   dragging,
   dragStart,
@@ -581,8 +584,8 @@ const {
 } = avail
 
 const {
-  curScheduledEvent, allowScheduleEvent, scheduledEventStyle, signUpBlockBeingDraggedStyle,
-  scheduleEvent, cancelScheduleEvent, confirmScheduleEvent, saveTempTimes,
+  curScheduledEvent, savedScheduledEvent, allowScheduleEvent, scheduledEventStyle, signUpBlockBeingDraggedStyle,
+  scheduleEvent, cancelScheduleEvent, confirmScheduleEvent, clearScheduledEvent, saveTempTimes,
 } = eventSched
 
 const {
@@ -1050,12 +1053,56 @@ const renderedRows = computed<RenderedTimeGridRow[]>(() => {
     })
   }
 
-  const pushFillerRow = (slot: PageSlot, rowTop: number) => {
-    const cells: RenderedTimeGridRowCell[] = Array.from({ length: days.value.length }, () => ({
-      class: "tw-bg-light-gray-stroke",
-      style: { height: `${String(timeslotHeight.value)}px` },
-      von: {},
-    }))
+  const pushFillerRow = (
+    slot: PageSlot,
+    rowTop: number,
+    followsTimeslotRow: boolean
+  ) => {
+    const localMinute = ((slot.startMinutes % 60) + 60) % 60
+    const isHourBoundary = localMinute === 0
+    const isHalfHourBoundary = localMinute === 30
+    const isDayEnd = slot.endMinutes % (24 * 60) === 0
+    const cells: RenderedTimeGridRowCell[] = Array.from(
+      { length: days.value.length },
+      (_, dayIndex) => {
+        const isLeftDateBoundary =
+          dayIndex === 0 || !isColConsecutive(dayIndex)
+        const isRightDateBoundary =
+          dayIndex === days.value.length - 1 ||
+          !isColConsecutive(dayIndex + 1)
+        let cellClass = "tw-bg-light-gray-stroke tw-border-r "
+        const style: Record<string, string> = {
+          height: `${String(timeslotHeight.value)}px`,
+          borderRightStyle: "solid",
+          borderRightWidth: "var(--timeful-grid-line-width)",
+          borderRightColor: "var(--timeful-grid-line-color)",
+        }
+
+        if (isLeftDateBoundary) {
+          cellClass += "tw-border-l "
+          style.borderLeftStyle = "solid"
+          style.borderLeftWidth = "var(--timeful-grid-line-width)"
+          style.borderLeftColor = "var(--timeful-grid-line-color)"
+        }
+        if (isRightDateBoundary) {
+          cellClass += "tw-border-r "
+        }
+        if (!followsTimeslotRow && (isHourBoundary || isHalfHourBoundary)) {
+          cellClass += "tw-border-t "
+          style.borderTopStyle = isHourBoundary ? "solid" : "dashed"
+          style.borderTopWidth = "var(--timeful-grid-line-width)"
+          style.borderTopColor = "var(--timeful-grid-line-color)"
+        }
+        if (isDayEnd) {
+          cellClass += "tw-border-b "
+          style.borderBottomStyle = "solid"
+          style.borderBottomWidth = "var(--timeful-grid-line-width)"
+          style.borderBottomColor = "var(--timeful-grid-line-color)"
+        }
+
+        return { class: cellClass, style, von: {} }
+      }
+    )
     rows.push({
       id: slot.id,
       kind: "filler",
@@ -1126,7 +1173,7 @@ const renderedRows = computed<RenderedTimeGridRow[]>(() => {
       }
       pushTimeslotRow(slot.baseRowIndex, rowTop)
     } else {
-      pushFillerRow(slot, rowTop)
+      pushFillerRow(slot, rowTop, rows.at(-1)?.kind === "timeslot")
     }
     rowTop += timeslotHeight.value
   }
@@ -1139,6 +1186,20 @@ const timeAxisEndText = computed(() => {
   return typeof endMinutes === "number" && endMinutes % 60 === 0
     ? formatAbsoluteMinutes(endMinutes)
     : undefined
+})
+
+const scheduledEventStyles = computed(() => {
+  const scheduledEvent =
+    dragging.value && dragStart.value && dragCur.value
+      ? getScheduledEventFromDragRange(dragStart.value, dragCur.value)
+      : curScheduledEvent.value ?? savedScheduledEvent.value
+  if (!scheduledEvent) return []
+
+  return buildRenderedTimeBlockFragments({
+    renderedRows: renderedRows.value,
+    startBaseRowIndex: scheduledEvent.row,
+    coveredBaseRowCount: scheduledEvent.numRows,
+  })
 })
 
 const timeslotClassStyle = computed(() =>
@@ -1257,7 +1318,10 @@ const toolRowActions = computed<ScheduleOverlapToolRowActions>(() => ({
   updateWeekOffset: emitWeekOffsetUpdate,
   scheduleEvent,
   cancelScheduleEvent,
-  confirmScheduleEvent,
+  confirmScheduleEvent: (destination) => {
+    void confirmScheduleEvent(destination)
+  },
+  clearScheduledEvent,
 }))
 
 const sharedRespondentListeners = {
@@ -1463,7 +1527,9 @@ const {
   maxDaysPerPage,
   dragStart,
   curScheduledEvent,
+  savedScheduledEvent,
   scheduledEventStyle,
+  scheduledEventStyles,
   signUpBlockBeingDraggedStyle,
   newSignUpBlockName,
   overlaidAvailability,
@@ -1476,6 +1542,7 @@ const {
   fetchedResponses,
   loadingResponsesLoading: computed(() => loadingResponses.value.loading),
   getRenderedTimeBlockStyle: getRenderedTimeBlockStyleForTemplate,
+  getRenderedTimeBlockStyles: getRenderedTimeBlockStylesForTemplate,
   getSignUpBlockStyle,
 })
 
@@ -1523,30 +1590,40 @@ function getTimeslotVon(row: number, col: number): Record<string, () => void> {
 function getRenderedTimeBlockStyleForTemplate(
   timeBlock: { hoursOffset?: Temporal.Duration; hoursLength?: Temporal.Duration }
 ): Record<string, string> {
-  const style = getTimeBlockStyle({
+  return getTimeBlockStyle({
     timeBlock,
     firstSplitTimes: splitTimes.value[0],
     secondSplitTimes: splitTimes.value[1],
     timeslotHeight: timeslotHeight.value,
   })
+}
+
+function getRenderedTimeBlockStylesForTemplate(
+  timeBlock: { hoursOffset?: Temporal.Duration; hoursLength?: Temporal.Duration }
+): Record<string, string>[] {
+  const style = getRenderedTimeBlockStyleForTemplate(timeBlock)
   const baseRowIndex = [...splitTimes.value[0], ...splitTimes.value[1]].findIndex(
     (time) =>
       time.hoursOffset.total("minutes") ===
       (timeBlock.hoursOffset?.total("minutes") ?? 0)
   )
   if (baseRowIndex === -1) {
-    return style
+    return [style]
   }
 
-  const renderedRow = renderedRows.value.find(
-    (row) => row.kind === "timeslot" && row.baseRowIndex === baseRowIndex
+  const coveredBaseRowCount = Math.round(
+    (timeBlock.hoursLength?.total("minutes") ?? 0) /
+      timeslotDuration.value.total("minutes")
   )
-  if (!renderedRow) {
-    return style
+  if (coveredBaseRowCount <= 0) {
+    return [style]
   }
 
-  style.top = `${String(renderedRow.rowTop)}px`
-  return style
+  return buildRenderedTimeBlockFragments({
+    renderedRows: renderedRows.value,
+    startBaseRowIndex: baseRowIndex,
+    coveredBaseRowCount,
+  })
 }
 
 function startEditing() {
@@ -1752,6 +1829,7 @@ defineExpose({
   scheduleEvent,
   cancelScheduleEvent,
   confirmScheduleEvent,
+  clearScheduledEvent,
   getAllValidTimeRanges: _getAllValidTimeRanges,
 })
 </script>

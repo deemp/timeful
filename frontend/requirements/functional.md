@@ -80,6 +80,7 @@ Grid colors shall use context-specific labels:
 - In the event availability grid: pale red is `Unavailable, select in Add/Edit availability`, light grey is `Unavailable, select in Edit event`, and dark grey is `Unavailable, padding`.
 - The event availability legend shall show light grey and dark grey when there are no active slots or responses; add pale red when there are active slots; show all colors while adding availability or after receiving a response.
 - Specific-times enabled inactive cells shall remain editable, while dark-grey padding cells outside the enabled domain shall be non-editable.
+- Full-day padding rows shall retain the grid's vertical, hourly, and half-hour separators. A trailing padding row immediately after a timeslot shall share one boundary with that timeslot.
 
 ## FR-019
 
@@ -115,6 +116,8 @@ When `Show all hours` is disabled, the grid shall collapse inactive runs based o
 - Collapse bands shall align to complete hours and require at least three consecutive inactive hours.
 - The left time axis shall show each collapsed band's start boundary and day-boundary labels such as `00:00`.
 - Wrapped overnight ranges shall retain their split-gap behavior and shall not receive same-day filler slots.
+- Schedule drags shall end only on active slots; moving into an enabled inactive slot shall retain the last active endpoint.
+- Calendar, selected, and saved scheduled-event overlays shall render as contiguous visible fragments and shall not cross collapsed rows.
 
 ## FR-024
 
@@ -122,7 +125,8 @@ Anyone with the event link can schedule a selected time range on Timeful:
 
 - The Schedule menu shall list `Timeful` first, with a Timeful icon, followed by Google Calendar and Outlook.
 - The mobile Schedule action shall offer the same three destinations.
-- Selecting Timeful shall persist the selected range and render it as a blue event-name block that is narrower than its day column, so availability remains visible behind it.
+- Selecting Timeful shall persist the selected range and render it as an unlabelled, solid blue indicator centered at 70% of its day-column width, so availability remains visible behind it.
 - Anyone with the event link can schedule, reschedule, or clear the Timeful schedule.
 - After saving a Timeful schedule, viewers shall see `Reschedule event` and `Clear` actions.
 - Starting rescheduling shall hide the saved block; saving a new Timeful range shall replace the prior schedule.
+- The legend shall permanently include a blue `Scheduled event` item matching the scheduled-event indicator.

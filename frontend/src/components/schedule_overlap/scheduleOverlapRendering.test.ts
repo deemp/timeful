@@ -10,6 +10,7 @@ import {
 } from "@/composables/schedule_overlap/types"
 import {
   buildRenderedOverlayAvailability,
+  buildRenderedTimeBlockFragments,
   buildTimeGridTimeslotClassStyles,
   buildOverlaidAvailability,
   formatTooltipContent,
@@ -22,6 +23,25 @@ import {
 const zdt = (iso: string) => Temporal.Instant.from(iso).toZonedDateTimeISO(UTC)
 
 describe("scheduleOverlapRendering", () => {
+  it("splits a timed block around collapsed rows", () => {
+    const fragments = buildRenderedTimeBlockFragments({
+      renderedRows: [
+        { id: "time-0", kind: "timeslot", baseRowIndex: 0, rowTop: 0, height: 16 },
+        { id: "time-1", kind: "timeslot", baseRowIndex: 1, rowTop: 16, height: 16 },
+        { id: "time-2", kind: "timeslot", baseRowIndex: 2, rowTop: 32, height: 16 },
+        { id: "collapsed-3-4", kind: "collapsed", rowTop: 48, height: 44 },
+        { id: "time-4", kind: "timeslot", baseRowIndex: 4, rowTop: 92, height: 16 },
+      ],
+      startBaseRowIndex: 0,
+      coveredBaseRowCount: 5,
+    })
+
+    expect(fragments).toEqual([
+      { top: "0px", height: "48px" },
+      { top: "92px", height: "16px" },
+    ])
+  })
+
   it("merges adjacent availability slots by assigning the new Temporal.Duration", () => {
     const first = zdt("2026-01-01T09:00:00Z")
     const second = zdt("2026-01-01T09:30:00Z")

@@ -70,6 +70,8 @@ func InitEvents(router *gin.RouterGroup) {
 	eventRouter.GET("/:eventId/responses", getResponses)
 	eventRouter.POST("/:eventId/response", updateEventResponse)
 	eventRouter.DELETE("/:eventId/response", deleteEventResponse)
+	eventRouter.PUT("/:eventId/schedule", saveTimefulSchedule)
+	eventRouter.DELETE("/:eventId/schedule", clearTimefulSchedule)
 	eventRouter.POST("/:eventId/rename-user", renameUser)
 	eventRouter.POST("/:eventId/responded", userResponded)
 	eventRouter.POST("/:eventId/decline", middleware.AuthRequired(), declineInvite)
@@ -77,6 +79,64 @@ func InitEvents(router *gin.RouterGroup) {
 	eventRouter.DELETE("/:eventId", middleware.AuthRequired(), deleteEvent)
 	eventRouter.POST("/:eventId/duplicate", middleware.AuthRequired(), duplicateEvent)
 	eventRouter.POST("/:eventId/archive", middleware.AuthRequired(), archiveEvent)
+}
+
+// saveTimefulSchedule stores a selected range directly on the event. Unlike
+// metadata edits, scheduling is intentionally available to anyone with its link.
+func saveTimefulSchedule(c *gin.Context) {
+	payload := struct {
+		StartDate primitive.DateTime `json:"startDate" binding:"required"`
+		EndDate   primitive.DateTime `json:"endDate" binding:"required"`
+	}{}
+	if err := c.Bind(&payload); err != nil {
+		return
+	}
+	if payload.EndDate <= payload.StartDate {
+		c.JSON(http.StatusBadRequest, responses.Error{Error: "scheduled-event-end-must-follow-start"})
+		return
+	}
+
+	event := db.GetEventByEitherId(c.Param("eventId"))
+	if event == nil {
+		c.JSON(http.StatusNotFound, responses.Error{Error: errs.EventNotFound})
+		return
+	}
+
+	_, err := db.EventsCollection.UpdateOne(
+		context.Background(),
+		bson.M{"_id": event.Id},
+		bson.M{"$set": bson.M{"scheduledEvent": models.CalendarEvent{
+			Summary: event.Name, StartDate: payload.StartDate, EndDate: payload.EndDate,
+		}}},
+	)
+	if err != nil {
+		logger.StdErr.Println(err)
+		c.JSON(http.StatusInternalServerError, responses.Error{Error: "failed-to-save-scheduled-event"})
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
+func clearTimefulSchedule(c *gin.Context) {
+	event := db.GetEventByEitherId(c.Param("eventId"))
+	if event == nil {
+		c.JSON(http.StatusNotFound, responses.Error{Error: errs.EventNotFound})
+		return
+	}
+
+	_, err := db.EventsCollection.UpdateOne(
+		context.Background(),
+		bson.M{"_id": event.Id},
+		bson.M{"$unset": bson.M{"scheduledEvent": ""}},
+	)
+	if err != nil {
+		logger.StdErr.Println(err)
+		c.JSON(http.StatusInternalServerError, responses.Error{Error: "failed-to-clear-scheduled-event"})
+		return
+	}
+
+	c.Status(http.StatusOK)
 }
 
 func normalizeTimedResponseAvailabilitySlots(

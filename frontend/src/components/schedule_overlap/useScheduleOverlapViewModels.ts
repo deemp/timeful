@@ -128,7 +128,9 @@ interface UseScheduleOverlapViewModelsOptions {
   maxDaysPerPage: Ref<number>
   dragStart: Ref<RowCol | null>
   curScheduledEvent: Ref<ScheduledEvent | null>
+  savedScheduledEvent: ComputedRef<ScheduledEvent | null>
   scheduledEventStyle: Ref<Record<string, string>>
+  scheduledEventStyles: ComputedRef<Record<string, string>[]>
   signUpBlockBeingDraggedStyle: Ref<Record<string, string>>
   newSignUpBlockName: Ref<string>
   overlaidAvailability: ComputedRef<OverlaidAvailabilityBlock[][]>
@@ -140,6 +142,9 @@ interface UseScheduleOverlapViewModelsOptions {
   max: Ref<number>
   fetchedResponses: Ref<Record<string, FetchedResponse | undefined>>
   loadingResponsesLoading: ComputedRef<boolean>
+  getRenderedTimeBlockStyles: (
+    block: { hoursOffset?: Temporal.Duration; hoursLength?: Temporal.Duration }
+  ) => Record<string, string>[]
   getRenderedTimeBlockStyle: (
     block: { hoursOffset?: Temporal.Duration; hoursLength?: Temporal.Duration }
   ) => Record<string, string>
@@ -314,7 +319,9 @@ export function useScheduleOverlapViewModels(
     maxDaysPerPage: opts.maxDaysPerPage.value,
     dragStart: opts.dragStart.value,
     curScheduledEvent: opts.curScheduledEvent.value,
+    savedScheduledEvent: opts.savedScheduledEvent.value,
     scheduledEventStyle: opts.scheduledEventStyle.value,
+    scheduledEventStyles: opts.scheduledEventStyles.value,
     signUpBlockBeingDraggedStyle: opts.signUpBlockBeingDraggedStyle.value,
     newSignUpBlockName: opts.newSignUpBlockName.value,
     isSignUp: opts.isSignUp.value,
@@ -333,6 +340,7 @@ export function useScheduleOverlapViewModels(
     fetchedResponses: opts.fetchedResponses.value,
     loadingResponsesLoading: opts.loadingResponsesLoading.value,
     toolRow: toolRowViewModel.value,
+    getRenderedTimeBlockStyles: opts.getRenderedTimeBlockStyles,
     getRenderedTimeBlockStyle: opts.getRenderedTimeBlockStyle,
     getSignUpBlockStyle: opts.getSignUpBlockStyle,
   }))
