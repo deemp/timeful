@@ -2,12 +2,14 @@ package db
 
 import (
 	"context"
+	"errors"
 	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"timeful/server/logger"
 )
 
@@ -29,6 +31,14 @@ func DatabaseName() string {
 	}
 
 	return "timeful"
+}
+
+func Ping(ctx context.Context) error {
+	if Client == nil {
+		return errors.New("mongodb client is not initialized")
+	}
+
+	return Client.Ping(ctx, readpref.Primary())
 }
 
 func Init() func() {

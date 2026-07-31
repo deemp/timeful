@@ -19,6 +19,7 @@ services:
     environment:
       MONGODB_URI: mongodb://${MONGODB_APP_USERNAME:?MONGODB_APP_USERNAME is required}:${MONGODB_APP_PASSWORD:?MONGODB_APP_PASSWORD is required}@mongo:27017/${MONGODB_DATABASE:?MONGODB_DATABASE is required}?authSource=${MONGODB_DATABASE}
     networks:
+      default: {}
       edge:
         aliases:
           - production-server

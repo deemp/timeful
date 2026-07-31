@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io"
@@ -32,6 +33,8 @@ import (
 )
 
 const defaultLogPath = "logs/server.log"
+
+var databasePing = db.Ping
 
 // @title Timeful API
 // @version 1.0
@@ -128,9 +131,7 @@ func main() {
 
 	// Init routes
 	apiRouter := router.Group("/api")
-	apiRouter.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
-	})
+	initHealthRoute(apiRouter)
 	routes.InitAuth(apiRouter)
 	routes.InitUser(apiRouter)
 	routes.InitUsers(apiRouter)
@@ -164,6 +165,20 @@ func main() {
 
 	// Run server
 	router.Run(":" + appenv.Port(currentAppEnv))
+}
+
+func initHealthRoute(apiRouter *gin.RouterGroup) {
+	apiRouter.GET("/health", func(c *gin.Context) {
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Second)
+		defer cancel()
+
+		if err := databasePing(ctx); err != nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unavailable"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
 }
 
 func shouldRunInReleaseMode(env appenv.Environment) bool {
