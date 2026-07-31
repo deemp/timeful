@@ -54,7 +54,6 @@ Frontend build-time variables:
 - `VITE_ENABLE_FREEMIUM`
 - `VITE_ENABLE_RICH_LANDING`
 - `VITE_ENABLE_THIRD_PARTY_SHELL`
-- `VITE_SHOW_FORMERLY_KNOWN_AS_SCHEJ`
 - `VITE_FEEDBACK_URL`
 - `VITE_GITHUB_REPO_URL`
 
@@ -74,10 +73,10 @@ Compose-to-frontend build arg mappings:
   This is a frontend-only gate; backend auth endpoints remain live regardless.
 - **`VITE_ENABLE_RICH_LANDING`** — Controls whether the full landing page is shown.
   Defaults to `true` when unset or blank. Set to `false` to keep only the Timeful
-  brand, the header "How it works" action, the GitHub icon, the "Find a time to meet"
-  heading, the primary create-event CTA, and the hero preview card. This minimal mode
-  hides landing sign-in affordances, the formerly-known-as note, the in-page how-it-works
-  section, testimonials, the FAQ, and the footer.
+   brand, the header "How it works" action, the GitHub icon, the "Find a time to meet"
+   heading, the primary create-event CTA, and the hero preview card. This minimal mode
+   hides landing sign-in affordances, the in-page how-it-works section, testimonials, the FAQ,
+   and the footer.
 - **`VITE_FEEDBACK_URL`** — Controls where frontend “Give feedback” links point.
   Defaults to `https://github.com/deemp/timeful/issues` when unset or blank.
 - **`VITE_POSTHOG_API_HOST`** — Optional PostHog API host. Set this when analytics uses a
@@ -130,7 +129,7 @@ Backend runtime variables:
 - `LISTMONK_FINAL_EMAIL_REMINDER_ID`
 - `LISTMONK_OTP_EMAIL_TEMPLATE_ID`
 - `GMAIL_APP_PASSWORD`
-- `SCHEJ_EMAIL_ADDRESS`
+- `TIMEFUL_EMAIL_ADDRESS`
 - `STRIPE_API_KEY`
 - `STRIPE_WEBHOOK_SECRET`
 - `STRIPE_MONTHLY_PRICE_ID`

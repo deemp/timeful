@@ -4,14 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository layout
 
-Monorepo for Timeful (formerly Schej.it), a group availability/scheduling app.
+Monorepo for Timeful, a group availability/scheduling app.
 
 - `frontend/` — Vue 2 + Vuetify + Tailwind single-page app (Vue CLI). Built output lands in `frontend/dist`.
 - `server/` — Go (Gin) HTTP API backed by MongoDB. Also serves the built frontend as static files at the root.
 - `compose.yaml` — Docker Compose: `mongo` + `frontend` (build-only, writes dist to a shared volume) + `server` (binds `127.0.0.1:3002`, mounts the dist volume read-only). See `DEPLOYMENT.md`.
 - `PLUGIN_API_README.md` — `window.postMessage` API used by browser plugins to read/write availability on the frontend.
 
-The Go module path remains `schej.it/server` for source compatibility. The application database is
+The Go module path is `timeful/server` and is local to this application. The application database is
 configured through `MONGODB_DATABASE` and defaults to `timeful`.
 
 ## Common commands
@@ -28,7 +28,7 @@ configured through `MONGODB_DATABASE` and defaults to `timeful`.
 - `go run main.go` — run without live reload. Pass `-release` to force `GIN_MODE=release`.
 - `go test ./...` — run all Go tests.
 - `go test ./db -run TestName` — run a single test (e.g. `./services/microsoftgraph`, `./services/gcloud`, `./services/listmonk`).
-- `swag init` (in `server/`) — regenerate Swagger docs in `server/docs/` after editing route comments. Swagger UI is served at `http://localhost:3002/swagger/index.html`.
+- `go run github.com/swaggo/swag/cmd/swag@v1.16.1 init --parseDependency` (in `server/`) — regenerate Swagger docs in `server/docs/` after editing route comments. Then run `npm run gen:api` in `frontend/`. Swagger UI is served at `http://localhost:3002/swagger/index.html`.
 - MongoDB backup/restore: `mongodump --host=localhost:27017 --db=timeful` / `mongorestore --uri mongodb://localhost:27017 ./dump --drop`.
 
 ### Required env vars for local server boot
@@ -41,7 +41,7 @@ For local frontend → local backend, set `CORS_ORIGINS=http://localhost:8080` i
 ### Backend (Gin + MongoDB)
 `server/main.go` wires everything: CORS, cookie sessions, Mongo init (`db.Init`), Google Cloud Tasks init (`services/gcloud.InitTasks`), then mounts API groups under `/api` via `routes.Init*` and `slackbot.InitSlackbot`. After API routes, it walks `frontend/dist` and registers each file as a static route, loads `index.html` as a template, and falls back to a `NoRoute` handler that injects per-route OG meta tags (e.g. for `/e/:eventId` it looks up the event to set the title and OG image).
 
-- `routes/` — HTTP handlers grouped by domain: `auth.go`, `user.go`, `users.go`, `events.go`, `folders.go`, `analytics.go`, `stripe.go`. Route comments use Swag annotations; `swag init` regenerates `docs/`.
+- `routes/` — HTTP handlers grouped by domain: `auth.go`, `user.go`, `users.go`, `events.go`, `folders.go`, `analytics.go`, `stripe.go`. Route comments use Swag annotations; the documented Swag command regenerates `docs/`.
 - `models/` — Mongo document structs (`Event`, `User`, `Response`, `Folder`, `Attendee`, `Calendar`, `Set`, `Otp`, `FriendRequest`, `Location`, `DailyUserLog`).
 - `db/` — Mongo accessors per model (`events.go`, `users.go`, `folders.go`, `analytics.go`, `utils.go`) plus `init.go`. Treat this as the only layer that talks to Mongo.
 - `services/` — external integrations. Notable: `calendar/` (Google, Outlook/Graph, Apple CalDAV via `jonyTF/go-webdav`, generic ICS), `auth/`, `contacts/`, `gcloud/` (Cloud Tasks for scheduled jobs), `listmonk/`, `microsoftgraph/`.
@@ -69,8 +69,8 @@ The frontend exposes `get-slots` / `set-slots` over `window.postMessage` with a 
 
 ## Conventions worth knowing
 
-- The Go module path is `schej.it/server`; imports use that prefix throughout. Don't rename.
+- The Go module path is `timeful/server`; imports use that prefix throughout.
 - Mongo collection naming and indexes are established by the dated migration scripts in `server/scripts/` — when adding a new collection or index, follow the same dated-folder pattern.
-- New API routes need Swag comments above the handler so `swag init` picks them up; otherwise they're invisible in `/swagger`.
+- New API routes need Swag comments above the handler so generation picks them up; otherwise they're invisible in `/swagger`.
 - The server panics on startup if `SESSION_SECRET` is missing or shorter than 32 chars (`validateSessionSecret` in `main.go`).
 - `frontend/dist` is consumed by the Go server at runtime — local server boot tries `./frontend/dist` then `../frontend/dist`, or honors `FRONTEND_DIST` env var.
