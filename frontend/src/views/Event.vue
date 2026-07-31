@@ -296,13 +296,24 @@
                               </template>
                             </v-switch>
                           </div>
-                          <div v-if="showScheduleEventButton && isScheduling">
+                          <div
+                            v-if="showScheduleEventButton && isScheduling"
+                            class="tw-flex tw-gap-2"
+                          >
                             <v-btn
                               variant="outlined"
-                              class="desktop-event-header-control tw-w-full tw-text-red"
+                              class="desktop-event-header-control tw-flex-1 tw-text-red"
                               @click="cancelScheduleEvent"
                             >
                               Cancel
+                            </v-btn>
+                            <v-btn
+                              v-if="hasSavedTimefulSchedule"
+                              variant="outlined"
+                              class="desktop-event-header-control tw-flex-1 tw-text-red"
+                              @click="clearScheduledEvent"
+                            >
+                              Clear
                             </v-btn>
                           </div>
                         </div>
@@ -449,12 +460,6 @@
                           <v-icon small>mdi-calendar-check</v-icon>
                           <span class="tw-ml-2">{{ hasSavedTimefulSchedule ? 'Reschedule event' : 'Schedule event' }}</span>
                         </v-btn>
-                        <v-btn
-                          v-if="hasSavedTimefulSchedule"
-                          variant="outlined"
-                          class="desktop-event-header-control tw-flex-1 tw-text-blue"
-                          @click="clearScheduledEvent"
-                        >Clear</v-btn>
                       </div>
                     </template>
                     <template v-else>
@@ -743,20 +748,14 @@
         >
           <template v-if="!isEditing && !isScheduling">
             <div v-if="showScheduleEventButton" class="tw-flex tw-items-center tw-gap-1">
-              <v-btn
-                variant="outlined"
-                class="tw-border-white tw-px-2 tw-text-[13px] tw-text-white max-sm:tw-px-1 max-sm:tw-text-xs"
+                <v-btn
+                  variant="outlined"
+                  class="tw-border-white tw-px-2 tw-text-[13px] tw-text-white max-sm:tw-px-1 max-sm:tw-text-xs"
                 @click="scheduleEvent"
               >
-                <v-icon>mdi-calendar-check</v-icon>
-                <span class="tw-ml-1">{{ hasSavedTimefulSchedule ? 'Reschedule' : 'Schedule' }}</span>
-              </v-btn>
-              <v-btn
-                v-if="hasSavedTimefulSchedule"
-                variant="outlined"
-                class="tw-px-1 tw-text-xs tw-text-white"
-                @click="clearScheduledEvent"
-              >Clear</v-btn>
+                  <v-icon>mdi-calendar-check</v-icon>
+                  <span class="tw-ml-1">{{ hasSavedTimefulSchedule ? 'Reschedule' : 'Schedule' }}</span>
+                </v-btn>
             </div>
             <v-spacer />
             <div class="tw-flex tw-min-w-0 tw-items-center tw-gap-2 max-sm:tw-gap-1">
@@ -856,6 +855,14 @@
               @click="cancelScheduleEvent"
             >
               Cancel
+            </v-btn>
+            <v-btn
+              v-if="hasSavedTimefulSchedule"
+              variant="outlined"
+              class="tw-ml-2 tw-border-white tw-text-white"
+              @click="clearScheduledEvent"
+            >
+              Clear
             </v-btn>
             <v-spacer />
             <v-menu location="top end" offset="8">

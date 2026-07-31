@@ -35,6 +35,7 @@ interface EventTestState {
   times?: Temporal.ZonedDateTime[]
   enabledSlots?: Temporal.ZonedDateTime[]
   activeSlots?: Temporal.ZonedDateTime[]
+  scheduledEvent?: Record<string, unknown>
   eventTimezone?: string
   slotGeneration?: {
     startTimeLocal: Temporal.PlainTime
@@ -2552,6 +2553,109 @@ describe("Event guest edit action", () => {
     expect(scheduleButton?.attributes("style")).toContain(
       "border: 1px solid transparent"
     )
+  })
+
+  it("moves Clear next to Cancel while rescheduling on desktop", async () => {
+    loaderEventState.value = {
+      ...loaderEventState.value,
+      scheduledEvent: {},
+    }
+
+    const wrapper = shallowMount(EventView, {
+      props: { eventId: "dEeaF" },
+      global: {
+        stubs: {
+          ScheduleOverlap: ScheduleOverlapSchedulingStub,
+          NewDialog: true,
+          GuestDialog: true,
+          SignUpForSlotDialog: true,
+          SignInNotSupportedDialog: true,
+          MarkAvailabilityDialog: true,
+          InvitationDialog: true,
+          HelpDialog: true,
+          EventDescription: true,
+          AsyncPubliftAd: true,
+          AccessDenied: true,
+          NotSignedIn: true,
+          RouterLink: true,
+          "v-chip": true,
+          "v-icon": iconTextStub,
+          "v-card": true,
+          "v-card-title": true,
+          "v-card-text": true,
+          "v-card-actions": true,
+          "v-dialog": true,
+          "v-spacer": true,
+          "v-menu": menuStub,
+          "v-btn": buttonSemanticStub,
+        },
+      },
+    })
+
+    await flushDeferredMount()
+
+    const buttons = wrapper.findAll("button")
+    const cancelIndex = buttons.findIndex((button) => button.text().trim() === "Cancel")
+    const clearIndex = buttons.findIndex((button) => button.text().trim() === "Clear")
+    const scheduleIndex = buttons.findIndex((button) => button.text().includes("Schedule"))
+
+    expect(clearIndex).toBeGreaterThan(cancelIndex)
+    expect(clearIndex).toBeLessThan(scheduleIndex)
+    expect(buttons[clearIndex].element.parentElement?.className).toContain("tw-gap-2")
+    await buttons[clearIndex].trigger("click")
+    expect(scheduleOverlapMethodMocks.clearScheduledEvent).toHaveBeenCalledOnce()
+  })
+
+  it("places Clear beside Cancel while rescheduling on mobile", async () => {
+    isPhoneState.value = true
+    loaderEventState.value = {
+      ...loaderEventState.value,
+      scheduledEvent: {},
+    }
+
+    const wrapper = shallowMount(EventView, {
+      props: { eventId: "dEeaF" },
+      global: {
+        stubs: {
+          ScheduleOverlap: ScheduleOverlapSchedulingStub,
+          NewDialog: true,
+          GuestDialog: true,
+          SignUpForSlotDialog: true,
+          SignInNotSupportedDialog: true,
+          MarkAvailabilityDialog: true,
+          InvitationDialog: true,
+          HelpDialog: true,
+          EventDescription: true,
+          AsyncPubliftAd: true,
+          AccessDenied: true,
+          NotSignedIn: true,
+          RouterLink: true,
+          "v-chip": true,
+          "v-icon": iconTextStub,
+          "v-card": true,
+          "v-card-title": true,
+          "v-card-text": true,
+          "v-card-actions": true,
+          "v-dialog": true,
+          "v-spacer": true,
+          "v-menu": menuStub,
+          "v-btn": buttonSemanticStub,
+        },
+      },
+    })
+
+    await flushDeferredMount()
+
+    const buttons = wrapper.findAll("button")
+    const cancelIndex = buttons.findIndex((button) => button.text().trim() === "Cancel")
+    const clearIndex = buttons.findIndex((button) => button.text().trim() === "Clear")
+    const scheduleIndex = buttons.findIndex((button) => button.text().includes("Schedule"))
+
+    expect(clearIndex).toBe(cancelIndex + 1)
+    expect(clearIndex).toBeLessThan(scheduleIndex)
+    expect(buttons[clearIndex].classes()).toContain("tw-ml-2")
+    await buttons[clearIndex].trigger("click")
+    expect(scheduleOverlapMethodMocks.clearScheduledEvent).toHaveBeenCalledOnce()
   })
 
   it("renders mobile scheduling actions with muted disabled schedule colors", async () => {
