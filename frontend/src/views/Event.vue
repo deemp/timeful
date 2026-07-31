@@ -451,7 +451,7 @@
                         </v-btn>
                         <v-btn
                           v-if="hasSavedTimefulSchedule"
-                          variant="text"
+                          variant="outlined"
                           class="desktop-event-header-control tw-flex-1 tw-text-blue"
                           @click="clearScheduledEvent"
                         >Clear</v-btn>
@@ -753,7 +753,7 @@
               </v-btn>
               <v-btn
                 v-if="hasSavedTimefulSchedule"
-                variant="text"
+                variant="outlined"
                 class="tw-px-1 tw-text-xs tw-text-white"
                 @click="clearScheduledEvent"
               >Clear</v-btn>
