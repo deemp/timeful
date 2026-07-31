@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/mail"
 	"net/url"
 	"os"
 	"regexp"
@@ -127,6 +128,49 @@ func GetBaseUrl() string {
 func ValidateBaseUrl() error {
 	_, err := normalizedBaseUrl(os.Getenv("APP_BASE_URL"))
 	return err
+}
+
+// CORSOrigins returns the canonical application origin and any configured additional origins.
+func CORSOrigins(additionalOrigins string) ([]string, error) {
+	baseUrl, err := normalizedBaseUrl(os.Getenv("APP_BASE_URL"))
+	if err != nil {
+		return nil, err
+	}
+
+	origins := []string{baseUrl}
+	seen := map[string]struct{}{baseUrl: {}}
+	for _, origin := range strings.Split(additionalOrigins, ",") {
+		if strings.TrimSpace(origin) == "" {
+			continue
+		}
+
+		normalizedOrigin, err := normalizedBaseUrl(origin)
+		if err != nil {
+			return nil, fmt.Errorf("CORS_ORIGINS contains an invalid origin: %w", err)
+		}
+		if _, exists := seen[normalizedOrigin]; exists {
+			continue
+		}
+
+		seen[normalizedOrigin] = struct{}{}
+		origins = append(origins, normalizedOrigin)
+	}
+
+	return origins, nil
+}
+
+// GetListmonkOtpFromAddress returns the configured sender for Listmonk OTP emails.
+func GetListmonkOtpFromAddress() (string, error) {
+	fromAddress := strings.TrimSpace(os.Getenv("LISTMONK_OTP_FROM_ADDRESS"))
+	if fromAddress == "" {
+		return "", errors.New("LISTMONK_OTP_FROM_ADDRESS is required when sending OTP emails")
+	}
+
+	if _, err := mail.ParseAddress(fromAddress); err != nil {
+		return "", fmt.Errorf("LISTMONK_OTP_FROM_ADDRESS is invalid: %w", err)
+	}
+
+	return fromAddress, nil
 }
 
 func normalizedBaseUrl(value string) (string, error) {

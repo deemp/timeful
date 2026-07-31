@@ -387,10 +387,15 @@ func sendOtp(c *gin.Context) {
 	if err != nil {
 		logger.StdErr.Panicln("LISTMONK_OTP_EMAIL_TEMPLATE_ID is not set or invalid")
 	}
+	fromAddress, err := utils.GetListmonkOtpFromAddress()
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, responses.Error{Error: err.Error()})
+		return
+	}
 
 	listmonk.SendEmailAddSubscriberIfNotExist(email, otpTemplateId, bson.M{
 		"code": code,
-	}, false, "Timeful <noreply@timeful.fun>")
+	}, false, fromAddress)
 
 	c.JSON(http.StatusOK, gin.H{})
 }

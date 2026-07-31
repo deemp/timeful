@@ -55,6 +55,7 @@ Frontend build-time variables:
 - `VITE_ENABLE_RICH_LANDING`
 - `VITE_ENABLE_THIRD_PARTY_SHELL`
 - `VITE_FEEDBACK_URL`
+- `VITE_SUPPORT_EMAIL`
 - `VITE_GITHUB_REPO_URL`
 
 Compose-to-frontend build arg mappings:
@@ -79,6 +80,8 @@ Compose-to-frontend build arg mappings:
    and the footer.
 - **`VITE_FEEDBACK_URL`** — Controls where frontend “Give feedback” links point.
   Defaults to `https://github.com/deemp/timeful/issues` when unset or blank.
+- **`VITE_SUPPORT_EMAIL`** — Controls the support email address shown in the frontend. Support
+  affordances are hidden when unset or blank.
 - **`VITE_POSTHOG_API_HOST`** — Optional PostHog API host. Set this when analytics uses a
   self-hosted or reverse-proxied PostHog endpoint; otherwise the PostHog SDK default is used.
 - **`VITE_GITHUB_REPO_URL`** — Controls where frontend GitHub links point. This value
@@ -128,6 +131,7 @@ Backend runtime variables:
 - `LISTMONK_SECOND_EMAIL_REMINDER_ID`
 - `LISTMONK_FINAL_EMAIL_REMINDER_ID`
 - `LISTMONK_OTP_EMAIL_TEMPLATE_ID`
+- `LISTMONK_OTP_FROM_ADDRESS`
 - `GMAIL_APP_PASSWORD`
 - `TIMEFUL_EMAIL_ADDRESS`
 - `STRIPE_API_KEY`
@@ -149,6 +153,11 @@ Deployment environment semantics:
 - `VITE_APP_ENV` is the frontend-facing mirror for browser-exposed environment-dependent behavior and should normally match `APP_ENV`.
 - `APP_BASE_URL` is required and must be an absolute HTTP(S) origin without a path. The backend
   uses it for generated email links, Cloud Tasks payloads, Stripe redirects, and Slack messages.
+- `CORS_ORIGINS` is an optional comma-separated list of additional browser origins. The normalized
+  `APP_BASE_URL` is always allowed, so use this for `www`, localhost, preview, or alternate-client
+  origins only.
+- `LISTMONK_OTP_FROM_ADDRESS` is the sender used for OTP emails. It must be a valid mailbox or
+  RFC 5322 display-name address when an OTP email is sent.
 
 ## Precedence
 
@@ -204,6 +213,8 @@ applicable, `AAAA` records point to the host:
 - `CADDY_PRODUCTION_WWW_DOMAIN`
 - `CADDY_STAGING_DOMAIN`
 - `CADDY_STAGING_WWW_DOMAIN`
+
+The canonical Caddy hostname must match the hostname in that environment's `APP_BASE_URL`.
 
 Provision the shared network and artifact volumes once. They are external so tearing down one
 Compose project cannot remove resources used by another:

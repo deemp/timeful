@@ -177,7 +177,7 @@ See `docs/environments.md` for the full contract and development commands.
 
 | Variable       | Description                                                                                                          |
 | -------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `CORS_ORIGINS` | Comma-separated allowed browser origins. Set it to the environment's canonical HTTPS origin. |
+| `CORS_ORIGINS` | Comma-separated additional browser origins, such as the `www` hostname. `APP_BASE_URL` is always allowed. |
 
 #### Optional — Other Services
 
@@ -187,7 +187,8 @@ See `docs/environments.md` for the full contract and development commands.
 | `SERVICE_ACCOUNT_KEY_PATH`                   | Google Cloud service account for Cloud Tasks |
 | `SLACK_*_WEBHOOK_URL`                        | Slack webhooks for notifications             |
 | `GMAIL_APP_PASSWORD` / `TIMEFUL_EMAIL_ADDRESS` | Gmail SMTP for sending emails                |
-| `LISTMONK_*`                                 | Listmonk email service configuration         |
+| `LISTMONK_*`                                 | Listmonk email service configuration, including `LISTMONK_OTP_FROM_ADDRESS` for OTP senders |
+| `VITE_SUPPORT_EMAIL`                         | Support email embedded in frontend artifacts |
 | `DISCORD_BOT_TOKEN` / `GUILD_ID`             | Discord bot integration                      |
 
 See `.env.production.example` and `.env.staging.example` for the complete lists.

@@ -127,7 +127,7 @@
       </div>
 
       <!-- Question Section -->
-      <div class="tw-flex tw-flex-col tw-gap-5">
+      <div v-if="supportEmail" class="tw-flex tw-flex-col tw-gap-5">
         <div
           class="tw-text-xl tw-font-medium tw-text-dark-green sm:tw-text-2xl"
         >
@@ -137,9 +137,9 @@
           <div class="tw-text-black">
             Email us at
             <a
-              href="mailto:contact@timeful.fun"
+              :href="`mailto:${supportEmail}`"
               class="tw-text-black tw-underline"
-              >contact@timeful.fun</a
+              >{{ supportEmail }}</a
             >
             with any questions!
           </div>
@@ -199,6 +199,7 @@ import { _delete, patch, get } from "@/utils"
 import { useMainStore } from "@/stores/main"
 import { useDisplayHelpers } from "@/utils/useDisplayHelpers"
 import CalendarAccounts from "@/components/settings/CalendarAccounts.vue"
+import { supportEmail } from "@/utils/support"
 
 useHead({ title: "Settings - Timeful" })
 

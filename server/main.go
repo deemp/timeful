@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -101,19 +100,13 @@ func main() {
 	}))
 	router.Use(gin.Recovery())
 
-	// Cors
-	corsOrigins := os.Getenv("CORS_ORIGINS")
-	if corsOrigins == "" {
-		corsOrigins = strings.Join([]string{
-			"https://www.timeful.fun",
-			"https://timeful.fun",
-			"http://localhost:8080",
-			"http://localhost:4173",
-			"http://127.0.0.1:4173",
-		}, ",")
+	// The public app origin is always allowed; CORS_ORIGINS adds non-canonical origins.
+	corsOrigins, err := utils.CORSOrigins(os.Getenv("CORS_ORIGINS"))
+	if err != nil {
+		logger.StdErr.Panicln(err)
 	}
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     strings.Split(corsOrigins, ","),
+		AllowOrigins:     corsOrigins,
 		AllowMethods:     []string{"GET", "POST", "PATCH", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Content-Type"},
 		ExposeHeaders:    []string{"Content-Length"},

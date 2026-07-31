@@ -37,6 +37,7 @@ interface ImportMetaEnv {
   readonly VITE_ENABLE_THIRD_PARTY_SHELL?: string
   readonly VITE_ENABLE_PRIVACY_POLICY?: string
   readonly VITE_FEEDBACK_URL?: string
+  readonly VITE_SUPPORT_EMAIL?: string
   readonly VITE_GITHUB_REPO_URL: string
 }
 

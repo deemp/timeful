@@ -79,7 +79,12 @@
             <a :href="gitHubRepoUrl" target="_blank" class="tw-text-sm">GitHub</a>
           </div>
           <div>
-            <v-menu :nudge-bottom="10" offset-y :close-on-content-click="false">
+            <v-menu
+              v-if="supportEmail"
+              :nudge-bottom="10"
+              offset-y
+              :close-on-content-click="false"
+            >
               <template #activator="{ props }">
                 <span
                   class="tw-cursor-pointer tw-text-sm tw-text-white/80 hover:tw-text-white"
@@ -91,8 +96,10 @@
               <v-card class="tw-p-3">
                 <div class="tw-text-sm">
                   Email support at
-                  <span class="tw-text-green tw-underline"
-                    >contact@timeful.fun</span
+                  <a
+                    :href="`mailto:${supportEmail}`"
+                    class="tw-text-green tw-underline"
+                    >{{ supportEmail }}</a
                   >
                 </div>
               </v-card>
@@ -160,6 +167,7 @@ import { useMainStore } from "@/stores/main"
 import { feedbackUrl } from "@/utils/feedback"
 import { gitHubRepoUrl } from "@/utils/github"
 import { privacyPolicyEnabled } from "@/utils/privacyPolicy"
+import { supportEmail } from "@/utils/support"
 
 defineOptions({ name: "AppFooter" })
 

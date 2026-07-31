@@ -9,13 +9,18 @@
       <div class="tw-mb-4">
         <h2 class="tw-text-lg tw-font-medium">Student Verification</h2>
       </div>
-      <p class="tw-mb-6 tw-text-sm tw-text-dark-gray">
+      <p v-if="supportEmail" class="tw-mb-6 tw-text-sm tw-text-dark-gray">
         Please email
-        <span class="tw-font-medium tw-text-dark-green tw-underline"
-          >contact@timeful.fun</span
+        <a
+          :href="`mailto:${supportEmail}`"
+          class="tw-font-medium tw-text-dark-green tw-underline"
+          >{{ supportEmail }}</a
         >
         with proof that you are a student to get the discounted price. The
         subject of your email should be "Student Discount".
+      </p>
+      <p v-else class="tw-mb-6 tw-text-sm tw-text-dark-gray">
+        Student verification is unavailable because support email is not configured.
       </p>
       <v-btn variant="text" block @click="emit('update:modelValue', false)">OK</v-btn>
     </v-card>
@@ -23,6 +28,8 @@
 </template>
 
 <script setup lang="ts">
+import { supportEmail } from "@/utils/support"
+
 defineProps<{
   modelValue: boolean
 }>()
