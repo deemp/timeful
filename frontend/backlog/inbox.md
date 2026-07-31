@@ -239,6 +239,9 @@ Semi-structured TODO list
   - Phase 1 - everyone
   - Phase 2 - only the event owner, be it a registered or an anon user
 - [ ] Support setting password when adding availability
+- [x] don't uncollapse rows when scheduling
+- [x] show event when rescheduling
+- [x] Schedule button on mobile should be filled blueish when clicked
 
 ## MUST
 
