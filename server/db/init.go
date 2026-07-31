@@ -23,6 +23,14 @@ var FoldersCollection *mongo.Collection
 var FolderEventsCollection *mongo.Collection
 var OtpCodesCollection *mongo.Collection
 
+func DatabaseName() string {
+	if name := os.Getenv("MONGODB_DATABASE"); name != "" {
+		return name
+	}
+
+	return "timeful"
+}
+
 func Init() func() {
 	// Establish mongodb connection
 	var ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
@@ -39,7 +47,7 @@ func Init() func() {
 	}
 
 	// Define mongodb database + collections
-	Db = Client.Database("schej-it")
+	Db = Client.Database(DatabaseName())
 	EventsCollection = Db.Collection("events")
 	UsersCollection = Db.Collection("users")
 	DailyUserLogCollection = Db.Collection("dailyuserlogs")
@@ -66,7 +74,7 @@ func Init() func() {
 // MongoDB backup / restore commands
 
 // Backup
-// mongodump --uri="mongodb://localhost:27017" --db=schej-it
+// mongodump --uri="mongodb://localhost:27017" --db=timeful
 
 // Restore
-// mongorestore --uri="mongodb://localhost:27017" --drop --db=schej-it ./dump
+// mongorestore --uri="mongodb://localhost:27017" --drop --db=timeful ./dump

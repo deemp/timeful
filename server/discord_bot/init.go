@@ -15,6 +15,16 @@ var bot *discordgo.Session
 var listeningChannel *discordgo.Channel
 var commandMap map[string]commands.Command = make(map[string]commands.Command)
 
+func listeningChannelName() string {
+	if configuredChannel := os.Getenv("DISCORD_BOT_CHANNEL"); configuredChannel != "" {
+		return configuredChannel
+	}
+	if utils.IsRelease() {
+		return "timeful-bot"
+	}
+	return "timeful-bot-dev"
+}
+
 // Initialize the discord bot
 func Init() {
 	var err error
@@ -38,15 +48,10 @@ func Init() {
 	logger.StdOut.Println("Discord bot initialized")
 
 	// Get the channel object to listen on
-	var listeningChannelName string
-	if utils.IsRelease() {
-		listeningChannelName = "schej-it-bot"
-	} else {
-		listeningChannelName = "schej-it-bot-dev"
-	}
+	channelName := listeningChannelName()
 	channels, _ := bot.GuildChannels(guildId)
 	for _, channel := range channels {
-		if channel.Name == listeningChannelName {
+		if channel.Name == channelName {
 			listeningChannel = channel
 			break
 		}

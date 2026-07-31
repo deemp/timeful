@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	cloudtasks "cloud.google.com/go/cloudtasks/apiv2beta3"
@@ -20,6 +21,25 @@ import (
 )
 
 var TasksClient *cloudtasks.Client
+
+func EmailTasksParent() string {
+	projectID := strings.TrimSpace(os.Getenv("GOOGLE_CLOUD_PROJECT_ID"))
+	if projectID == "" {
+		projectID = "timeful"
+	}
+
+	location := strings.TrimSpace(os.Getenv("GOOGLE_CLOUD_TASKS_LOCATION"))
+	if location == "" {
+		location = "us-central1"
+	}
+
+	queue := strings.TrimSpace(os.Getenv("GOOGLE_CLOUD_TASKS_QUEUE"))
+	if queue == "" {
+		queue = "SendReminderEmail"
+	}
+
+	return fmt.Sprintf("projects/%s/locations/%s/queues/%s", projectID, location, queue)
+}
 
 func InitTasks() func() {
 	credsFile := os.Getenv("SERVICE_ACCOUNT_KEY_PATH")
@@ -108,7 +128,7 @@ func CreateEmailTask(email string, ownerName string, eventName string, eventId s
 
 		// Create task
 		task, err := TasksClient.CreateTask(context.Background(), &cloudtaskspb.CreateTaskRequest{
-			Parent: "projects/schej-it/locations/us-central1/queues/SendReminderEmail",
+			Parent: EmailTasksParent(),
 			Task: &cloudtaskspb.Task{
 				ScheduleTime: scheduleTime,
 				PayloadType: &cloudtaskspb.Task_HttpRequest{

@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"schej.it/server/db"
 )
 
 func main() {
@@ -20,8 +21,9 @@ func main() {
 	defer client.Disconnect(context.Background())
 
 	// Get collections
-	eventsCollection := client.Database("schej-it").Collection("events")
-	// eventResponsesCollection := client.Database("schej-it").Collection("eventResponses")
+	database := client.Database(db.DatabaseName())
+	eventsCollection := database.Collection("events")
+	// eventResponsesCollection := database.Collection("eventResponses")
 
 	// Get all events
 	latestID, err := primitive.ObjectIDFromHex("6804a0d136c40b06cf27aca9")

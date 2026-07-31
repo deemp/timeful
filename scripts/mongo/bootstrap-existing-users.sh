@@ -17,6 +17,7 @@ set +a
 : "${MONGODB_ROOT_PASSWORD:?MONGODB_ROOT_PASSWORD is required}"
 : "${MONGODB_APP_USERNAME:?MONGODB_APP_USERNAME is required}"
 : "${MONGODB_APP_PASSWORD:?MONGODB_APP_PASSWORD is required}"
+: "${MONGODB_DATABASE:?MONGODB_DATABASE is required}"
 
 compose=(docker compose --env-file "$env_file")
 
@@ -26,4 +27,5 @@ compose=(docker compose --env-file "$env_file")
   -e MONGODB_ROOT_PASSWORD \
   -e MONGODB_APP_USERNAME \
   -e MONGODB_APP_PASSWORD \
+  -e MONGODB_DATABASE \
   mongo mongosh --quiet --file /tmp/timeful-create-users.js

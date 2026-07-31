@@ -3,6 +3,7 @@ const requiredVariables = [
   "MONGODB_ROOT_PASSWORD",
   "MONGODB_APP_USERNAME",
   "MONGODB_APP_PASSWORD",
+  "MONGODB_DATABASE",
 ]
 
 for (const variable of requiredVariables) {
@@ -21,12 +22,12 @@ if (!adminDatabase.getUser(process.env.MONGODB_ROOT_USERNAME)) {
   })
 }
 
-const appDatabase = db.getSiblingDB("schej-it")
+const appDatabase = db.getSiblingDB(process.env.MONGODB_DATABASE)
 
 if (!appDatabase.getUser(process.env.MONGODB_APP_USERNAME)) {
   appDatabase.createUser({
     user: process.env.MONGODB_APP_USERNAME,
     pwd: process.env.MONGODB_APP_PASSWORD,
-    roles: [{ role: "readWrite", db: "schej-it" }],
+    roles: [{ role: "readWrite", db: appDatabase.getName() }],
   })
 }

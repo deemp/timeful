@@ -8,8 +8,8 @@ Semi-structured TODO list
 - [ ] remove `as unknown as`
 - [ ] add eslint rule for `as unknown`
 - [ ] is `$el` idiomatic modern syntax?
-- [ ] add playwright e2e tests from comparator inside timeful.app repo
-- [ ] commit comparator code to timeful.app until it works as expected
+- [ ] add Playwright e2e tests from the comparator to the main repository
+- [ ] commit comparator code to the main repository until it works as expected
 - [ ] Check against composition API
 - [ ] Use the right palette consistently for dropdowns, selects, buttons, switches
 - [ ] use clean layout-based fixes
@@ -24,7 +24,7 @@ Semi-structured TODO list
 - [x] Let's nest all toggles under Options dropdown and make it open by default
   - Show best times is always visible, other can be opened via Options
 - [ ] refactoring - get rid of duplication
-- [x] overlay availabilities - each slot has a solid frame <https://timeful.app/e/c762cA>
+- [x] overlay availabilities - each slot has a solid frame <https://timeful.fun/e/c762cA>
 - [x] there should be a space between grids for non-consecutive days
 - [ ] add more instrumentation?
 - [x] edit event button is missing

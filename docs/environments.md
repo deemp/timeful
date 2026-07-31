@@ -96,6 +96,7 @@ Backend runtime variables:
 - `MICROSOFT_CLIENT_ID`
 - `MICROSOFT_CLIENT_SECRET`
 - `MONGODB_URI` (development and direct server runs)
+- `MONGODB_DATABASE`
 - `MONGODB_ROOT_USERNAME`
 - `MONGODB_ROOT_PASSWORD`
 - `MONGODB_APP_USERNAME`
@@ -107,7 +108,11 @@ Backend runtime variables:
 - `ANALYTICS_USERNAME`
 - `ANALYTICS_PASSWORD`
 - `DISCORD_BOT_TOKEN`
+- `DISCORD_BOT_CHANNEL`
 - `GUILD_ID`
+- `GOOGLE_CLOUD_PROJECT_ID`
+- `GOOGLE_CLOUD_TASKS_LOCATION`
+- `GOOGLE_CLOUD_TASKS_QUEUE`
 - `SLACK_DEV_WEBHOOK_URL`
 - `SLACK_PROD_WEBHOOK_URL`
 - `SLACK_MONETIZATION_WEBHOOK_URL`
@@ -236,8 +241,25 @@ allowed origins to use the configured HTTPS canonical hostnames.
 
 Development and test Compose stacks use unauthenticated, isolated MongoDB instances.
 Staging and production require separate root and application credentials. Their overlays
-create the root account and an application account with `readWrite` access only to
-`schej-it`; Compose constructs the server connection URI from the application credentials.
+create the root account and an application account with `readWrite` access only to the configured
+`MONGODB_DATABASE`; Compose constructs the server connection URI from the application credentials.
+The new default database name is `timeful`.
+
+Changing `MONGODB_DATABASE` selects a different database; it does not rename or copy existing
+data. Migrate a populated deployment by backing up the old database, restoring it under the new
+name, creating the application user for the new database, then deploying the changed environment.
+
+## External Service Names
+
+`GOOGLE_CLOUD_PROJECT_ID`, `GOOGLE_CLOUD_TASKS_LOCATION`, and
+`GOOGLE_CLOUD_TASKS_QUEUE` form the Cloud Tasks parent used for reminder jobs. The defaults name
+the Timeful project and existing `us-central1` / `SendReminderEmail` resources. Create the target
+project and queue, grant the configured service account access, and update these values before
+retiring the old Google Cloud project; Google Cloud project IDs cannot be renamed in place.
+
+`DISCORD_BOT_CHANNEL` selects the channel used by the Discord bot. Set it explicitly for each
+environment after creating the replacement channel; the Timeful defaults are only used when the
+variable is unset.
 
 Mongo initialization scripts run only for an empty data volume. To enable authentication
 for an existing unauthenticated staging or production volume, first populate the new

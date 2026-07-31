@@ -11,7 +11,8 @@ Monorepo for Timeful (formerly Schej.it), a group availability/scheduling app.
 - `compose.yaml` — Docker Compose: `mongo` + `frontend` (build-only, writes dist to a shared volume) + `server` (binds `127.0.0.1:3002`, mounts the dist volume read-only). See `DEPLOYMENT.md`.
 - `PLUGIN_API_README.md` — `window.postMessage` API used by browser plugins to read/write availability on the frontend.
 
-Internal identifiers (Go module `schej.it/server`, Mongo DB `schej-it`, prod email "Schej.it") still use the old name — leave them alone unless rebranding is the explicit task.
+The Go module path remains `schej.it/server` for source compatibility. The application database is
+configured through `MONGODB_DATABASE` and defaults to `timeful`.
 
 ## Common commands
 
@@ -28,7 +29,7 @@ Internal identifiers (Go module `schej.it/server`, Mongo DB `schej-it`, prod ema
 - `go test ./...` — run all Go tests.
 - `go test ./db -run TestName` — run a single test (e.g. `./services/microsoftgraph`, `./services/gcloud`, `./services/listmonk`).
 - `swag init` (in `server/`) — regenerate Swagger docs in `server/docs/` after editing route comments. Swagger UI is served at `http://localhost:3002/swagger/index.html`.
-- MongoDB backup/restore: `mongodump --host=localhost:27017 --db=schej-it` / `mongorestore --uri mongodb://localhost:27017 ./dump --drop`.
+- MongoDB backup/restore: `mongodump --host=localhost:27017 --db=timeful` / `mongorestore --uri mongodb://localhost:27017 ./dump --drop`.
 
 ### Required env vars for local server boot
 `SESSION_SECRET` (≥32 chars) is enforced at startup. `CLIENT_ID`/`CLIENT_SECRET` (Google OAuth) and `ENCRYPTION_KEY` are required for most flows. See `server/.env.template` and `DEPLOYMENT.md` for the full list (Stripe, Microsoft, Listmonk, Slack, Discord, Gmail, etc.).

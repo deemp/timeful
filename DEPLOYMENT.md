@@ -101,16 +101,16 @@ Data is persisted in Docker volumes: `mongo_data`, `frontend_dist`, `server_logs
 The restore command below uses `--drop`.
 
 > [!CAUTION]
-> Run it only when you intend to replace the current `schej-it` database with the backup archive.
+> Run it only when you intend to replace the current `timeful` database with the backup archive.
 
 ```bash
 # Backup MongoDB
-docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml exec mongo sh -c 'mongodump --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --db=schej-it --archive=/data/db/backup.archive'
+docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml exec mongo sh -c 'mongodump --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --db="$MONGODB_DATABASE" --archive=/data/db/backup.archive'
 docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml cp mongo:/data/db/backup.archive ./backup.archive
 
 # Restore MongoDB
 docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml cp ./backup.archive mongo:/data/db/backup.archive
-docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml exec mongo sh -c 'mongorestore --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --drop --db=schej-it --archive=/data/db/backup.archive'
+docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml exec mongo sh -c 'mongorestore --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --drop --db="$MONGODB_DATABASE" --archive=/data/db/backup.archive'
 ```
 
 ## Troubleshooting
@@ -155,7 +155,8 @@ See `docs/environments.md` for the full contract and development commands.
 | `SESSION_SECRET` | Session cookie encryption key (generate with `openssl rand -base64 32`)     |
 | `APP_BASE_URL` | Canonical public HTTPS origin used in generated links and payment redirects |
 | `MONGODB_ROOT_USERNAME` / `MONGODB_ROOT_PASSWORD` | MongoDB administrative account for backups and maintenance |
-| `MONGODB_APP_USERNAME` / `MONGODB_APP_PASSWORD` | MongoDB application account with access only to `schej-it` |
+| `MONGODB_APP_USERNAME` / `MONGODB_APP_PASSWORD` | MongoDB application account with access only to `MONGODB_DATABASE` |
+| `MONGODB_DATABASE` | Application database name; defaults to `timeful` |
 
 #### Optional — Payments
 

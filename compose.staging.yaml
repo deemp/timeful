@@ -5,6 +5,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_ROOT_PASSWORD:?MONGODB_ROOT_PASSWORD is required}
       MONGODB_APP_USERNAME: ${MONGODB_APP_USERNAME:?MONGODB_APP_USERNAME is required}
       MONGODB_APP_PASSWORD: ${MONGODB_APP_PASSWORD:?MONGODB_APP_PASSWORD is required}
+      MONGODB_DATABASE: ${MONGODB_DATABASE:?MONGODB_DATABASE is required}
     volumes:
       - ./mongo/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
@@ -21,7 +22,7 @@ services:
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:3003/api/health"]
     environment:
-      MONGODB_URI: mongodb://${MONGODB_APP_USERNAME:?MONGODB_APP_USERNAME is required}:${MONGODB_APP_PASSWORD:?MONGODB_APP_PASSWORD is required}@mongo:27017/schej-it?authSource=schej-it
+      MONGODB_URI: mongodb://${MONGODB_APP_USERNAME:?MONGODB_APP_USERNAME is required}:${MONGODB_APP_PASSWORD:?MONGODB_APP_PASSWORD is required}@mongo:27017/${MONGODB_DATABASE:?MONGODB_DATABASE is required}?authSource=${MONGODB_DATABASE}
     networks:
       edge:
         aliases:

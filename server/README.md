@@ -11,8 +11,8 @@ API docs (available when the server is running): http://localhost:3002/swagger/i
 
 ## Make a backup of the mongodb database
 
-- Run `mongodump --host="localhost:27017" --db=schej-it` to make a backup
-- Run `mongorestore --uri mongodb://localhost:27017 ./dump --drop` to restore only when you intend to replace the current local `schej-it` database. The `--drop` flag removes existing data before importing the dump.
+- Run `mongodump --host="localhost:27017" --db=timeful` to make a backup
+- Run `mongorestore --uri mongodb://localhost:27017 ./dump --drop` to restore only when you intend to replace the current local `timeful` database. The `--drop` flag removes existing data before importing the dump.
 
 ## Tests
 
