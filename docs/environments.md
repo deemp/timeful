@@ -89,7 +89,11 @@ Backend runtime variables:
 - `IOS_CLIENT_ID`
 - `MICROSOFT_CLIENT_ID`
 - `MICROSOFT_CLIENT_SECRET`
-- `MONGODB_URI`
+- `MONGODB_URI` (development and direct server runs)
+- `MONGODB_ROOT_USERNAME`
+- `MONGODB_ROOT_PASSWORD`
+- `MONGODB_APP_USERNAME`
+- `MONGODB_APP_PASSWORD`
 - `ENCRYPTION_KEY`
 - `SESSION_SECRET`
 - `CORS_ORIGINS`
@@ -171,8 +175,27 @@ Production Docker Compose:
 
 ```sh
 cp .env.production.example .env.production
-docker compose --env-file .env.production up -d --build
+docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml up -d --build
 ```
+
+## MongoDB authentication
+
+Development and test Compose stacks use unauthenticated, isolated MongoDB instances.
+Staging and production require separate root and application credentials. Their overlays
+create the root account and an application account with `readWrite` access only to
+`schej-it`; Compose constructs the server connection URI from the application credentials.
+
+Mongo initialization scripts run only for an empty data volume. To enable authentication
+for an existing unauthenticated staging or production volume, first populate the new
+credentials in the selected env file and run the bootstrap script against the currently
+running unauthenticated stack:
+
+```sh
+./scripts/mongo/bootstrap-existing-users.sh .env.production
+```
+
+Then stop the existing stack and start it with the appropriate authenticated overlay.
+The bootstrap script is idempotent and does not remove data.
 
 ## Server test modes
 

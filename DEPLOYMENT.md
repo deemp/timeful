@@ -23,7 +23,7 @@ cp .env.production.example .env.production
 # Edit the selected env file with your values (see Configuration below)
 
 # 3. Build and start services
-docker compose --env-file .env.production up -d --build
+docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml up -d --build
 # Or for staging:
 # docker compose --env-file .env.staging -f compose.yaml -f compose.staging.yaml up -d --build
 
@@ -63,12 +63,12 @@ Edit `/etc/caddy/Caddyfile` with your domain before reloading.
 > For production, this deletes the MongoDB data volume unless a backup is restored afterward.
 
 ```bash
-docker compose --env-file .env.production up -d              # Start services
-docker compose --env-file .env.production logs -f            # View logs
-docker compose --env-file .env.production logs -f server     # View specific service logs
-docker compose --env-file .env.production up -d --build      # Rebuild after code changes
-docker compose --env-file .env.production down               # Stop services
-docker compose --env-file .env.production down -v            # Stop and remove volumes (deletes data!)
+docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml up -d              # Start services
+docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml logs -f            # View logs
+docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml logs -f server     # View specific service logs
+docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml up -d --build      # Rebuild after code changes
+docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml down               # Stop services
+docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml down -v            # Stop and remove volumes (deletes data!)
 ```
 
 Staging uses the same base commands with the staging env file and override:
@@ -90,28 +90,28 @@ The restore command below uses `--drop`.
 
 ```bash
 # Backup MongoDB
-docker compose --env-file .env.production exec mongo mongodump --db=schej-it --archive=/data/db/backup.archive
-docker compose --env-file .env.production cp mongo:/data/db/backup.archive ./backup.archive
+docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml exec mongo sh -c 'mongodump --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --db=schej-it --archive=/data/db/backup.archive'
+docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml cp mongo:/data/db/backup.archive ./backup.archive
 
 # Restore MongoDB
-docker compose --env-file .env.production cp ./backup.archive mongo:/data/db/backup.archive
-docker compose --env-file .env.production exec mongo mongorestore --drop --db=schej-it --archive=/data/db/backup.archive
+docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml cp ./backup.archive mongo:/data/db/backup.archive
+docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml exec mongo sh -c 'mongorestore --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --drop --db=schej-it --archive=/data/db/backup.archive'
 ```
 
 ## Troubleshooting
 
 ```bash
 # Container won't start
-docker compose --env-file .env.production logs server
+docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml logs server
 ls -la .env.production
 
 # MongoDB connection issues
-docker compose --env-file .env.production ps
-docker compose --env-file .env.production exec mongo mongosh --eval "db.adminCommand('ping')"
+docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml ps
+docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml exec mongo sh -c 'mongosh --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --eval "db.adminCommand(\"ping\")"'
 
 # Frontend not loading
-docker compose --env-file .env.production logs frontend-artifacts
-docker compose --env-file .env.production exec server ls -la /app/frontend/dist
+docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml logs frontend-artifacts
+docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml exec server ls -la /app/frontend/dist
 ```
 
 ---
@@ -138,6 +138,8 @@ See `docs/environments.md` for the full contract and development commands.
 | `CLIENT_SECRET`  | Google OAuth client secret                                                  |
 | `ENCRYPTION_KEY` | Key for encrypting sensitive data (generate with `openssl rand -base64 32`) |
 | `SESSION_SECRET` | Session cookie encryption key (generate with `openssl rand -base64 32`)     |
+| `MONGODB_ROOT_USERNAME` / `MONGODB_ROOT_PASSWORD` | MongoDB administrative account for backups and maintenance |
+| `MONGODB_APP_USERNAME` / `MONGODB_APP_PASSWORD` | MongoDB application account with access only to `schej-it` |
 
 #### Optional — Payments
 
