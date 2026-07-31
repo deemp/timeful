@@ -11,3 +11,11 @@ Production and staging MongoDB shall disallow unauthenticated access.
 ## QR-002
 
 Dev MongoDB shall allow unauthenticated access.
+
+## QR-003
+
+The server shall not used as a libarary.
+
+Thus:
+
+- Can use an internal name prefixed with `timeful` instead of prefixed with `github.com/deemp/timeful`
