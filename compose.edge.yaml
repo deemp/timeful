@@ -1,0 +1,38 @@
+name: timeful-edge
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      CADDY_PRODUCTION_DOMAIN: ${CADDY_PRODUCTION_DOMAIN:?CADDY_PRODUCTION_DOMAIN is required}
+      CADDY_PRODUCTION_WWW_DOMAIN: ${CADDY_PRODUCTION_WWW_DOMAIN:?CADDY_PRODUCTION_WWW_DOMAIN is required}
+      CADDY_STAGING_DOMAIN: ${CADDY_STAGING_DOMAIN:?CADDY_STAGING_DOMAIN is required}
+      CADDY_STAGING_WWW_DOMAIN: ${CADDY_STAGING_WWW_DOMAIN:?CADDY_STAGING_WWW_DOMAIN is required}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy/snippets:/etc/caddy/snippets:ro
+      - ./caddy/sites:/etc/caddy/sites:ro
+      - production_frontend_dist:/srv/production:ro
+      - staging_frontend_dist:/srv/staging:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  production_frontend_dist:
+    name: timeful-production-frontend-dist
+    external: true
+  staging_frontend_dist:
+    name: timeful-staging-frontend-dist
+    external: true
+  caddy_data:
+  caddy_config:
+
+networks:
+  default:
+    name: timeful-edge
+    external: true

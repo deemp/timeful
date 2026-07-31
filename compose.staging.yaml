@@ -22,3 +22,17 @@ services:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:3003/api/health"]
     environment:
       MONGODB_URI: mongodb://${MONGODB_APP_USERNAME:?MONGODB_APP_USERNAME is required}:${MONGODB_APP_PASSWORD:?MONGODB_APP_PASSWORD is required}@mongo:27017/schej-it?authSource=schej-it
+    networks:
+      edge:
+        aliases:
+          - staging-server
+
+volumes:
+  frontend_dist:
+    name: timeful-staging-frontend-dist
+    external: true
+
+networks:
+  edge:
+    name: timeful-edge
+    external: true

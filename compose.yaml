@@ -20,6 +20,7 @@ services:
       args:
         VITE_APP_ENV: ${VITE_APP_ENV:-}
         VITE_POSTHOG_API_KEY: ${VITE_POSTHOG_API_KEY:-}
+        VITE_POSTHOG_API_HOST: ${VITE_POSTHOG_API_HOST:-}
         VITE_GOOGLE_CLIENT_ID: ${CLIENT_ID:-}
         VITE_MICROSOFT_CLIENT_ID: ${MICROSOFT_CLIENT_ID:-}
         VITE_ENABLE_SIGN_IN: ${VITE_ENABLE_SIGN_IN:-}
@@ -45,9 +46,10 @@ services:
     restart: unless-stopped
     # Base Compose targets the default non-staging server port.
     ports:
-      - "3002:3002"
+      - "127.0.0.1:3002:3002"
     environment:
       APP_ENV: ${APP_ENV:-}
+      APP_BASE_URL: ${APP_BASE_URL:-}
       ANALYTICS_PASSWORD: ${ANALYTICS_PASSWORD:-}
       ANALYTICS_USERNAME: ${ANALYTICS_USERNAME:-}
       ANDROID_CLIENT_ID: ${ANDROID_CLIENT_ID:-}
@@ -108,27 +110,7 @@ services:
       retries: 3
       start_period: 10s
 
-  caddy:
-    image: caddy:2-alpine
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - frontend_dist:/srv:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      frontend-artifacts:
-        condition: service_completed_successfully
-      server:
-        condition: service_healthy
-
 volumes:
   mongo_data:
   frontend_dist:
   server_logs:
-  caddy_data:
-  caddy_config:

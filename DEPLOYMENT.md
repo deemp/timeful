@@ -1,36 +1,38 @@
 # Timeful Deployment Guide
 
-Production and staging deployment using Docker Compose behind a Caddy reverse proxy.
+Production and staging deployment using Docker Compose behind one shared Docker Caddy edge.
 
 ## Prerequisites
 
 - Docker and Docker Compose
-- Caddy on the host (for reverse proxy + automatic HTTPS, although you can use any reverse proxy)
 - Domain with DNS pointing to your server
+- Inbound TCP ports 80 and 443, plus UDP port 443
 
 ## Quick Start
 
 ```bash
 # 1. Clone the repository
 git clone https://github.com/deemp/timeful
-cd timeful.app
+cd timeful
 
-# 2. Create the root deployment environment file
+# 2. Create both app environment files. Caddy reads their namespaced host variables.
 cp .env.production.example .env.production
-# Or for staging:
-# cp .env.staging.example .env.staging
+cp .env.staging.example .env.staging
 
-# Edit the selected env file with your values (see Configuration below)
+# Edit both env files with their environment-specific values (see Configuration below).
 
-# 3. Build and start services
-docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml up -d --build
-# Or for staging:
-# docker compose --env-file .env.staging -f compose.yaml -f compose.staging.yaml up -d --build
+# 3. Configure both app env files, including APP_BASE_URL and their CADDY_* values.
+# Start the shared HTTPS edge once.
+docker network create timeful-edge
+docker volume create timeful-production-frontend-dist
+docker volume create timeful-staging-frontend-dist
+docker compose --env-file .env.production --env-file .env.staging -f compose.edge.yaml up -d
 
-# 4. Configure Caddy
-sudo cp Caddyfile.example /etc/caddy/Caddyfile
-# Edit /etc/caddy/Caddyfile with your domain
-sudo systemctl reload caddy
+# 4. Build and start production.
+docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml up -d --build
+
+# Start staging independently when needed.
+# docker compose --project-name timeful-staging --env-file .env.staging -f compose.yaml -f compose.staging.yaml up -d --build
 ```
 
 ## Services
@@ -43,9 +45,11 @@ sudo systemctl reload caddy
 
 For staging, use `.env.staging` together with `compose.staging.yaml`; the server binds `127.0.0.1:3003`.
 
-## Caddy
+## Shared Caddy Edge
 
-The example Caddyfile proxies all traffic to the Go backend on port 3002. Caddy handles:
+One Docker Caddy service owns public ports 80 and 443 for both environments. It routes each
+hostname to the matching private backend and frontend artifacts over the `timeful-edge` Docker
+network. Caddy handles:
 
 - Automatic HTTPS certificates
 - HTTP → HTTPS redirect
@@ -53,7 +57,18 @@ The example Caddyfile proxies all traffic to the Go backend on port 3002. Caddy 
 - Compression (gzip/zstd)
 - Security headers
 
-Edit `/etc/caddy/Caddyfile` with your domain before reloading.
+The root config imports a shared Timeful snippet and separate staging/production site files:
+
+```text
+caddy/Caddyfile
+caddy/snippets/timeful.caddy
+caddy/sites/production.caddy
+caddy/sites/staging.caddy
+```
+
+The production and staging site hostnames are read from their respective app env files. DNS for
+every canonical and `www` hostname must point to the server before Caddy can obtain its
+certificates.
 
 ## Commands
 
@@ -63,20 +78,20 @@ Edit `/etc/caddy/Caddyfile` with your domain before reloading.
 > For production, this deletes the MongoDB data volume unless a backup is restored afterward.
 
 ```bash
-docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml up -d              # Start services
-docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml logs -f            # View logs
-docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml logs -f server     # View specific service logs
-docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml up -d --build      # Rebuild after code changes
-docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml down               # Stop services
-docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml down -v            # Stop and remove volumes (deletes data!)
+docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml up -d              # Start services
+docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml logs -f            # View logs
+docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml logs -f server     # View specific service logs
+docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml up -d --build      # Rebuild after code changes
+docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml down               # Stop services
+docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml down -v            # Stop and remove volumes (deletes data!)
 ```
 
 Staging uses the same base commands with the staging env file and override:
 
 ```bash
-docker compose --env-file .env.staging -f compose.yaml -f compose.staging.yaml up -d --build
-docker compose --env-file .env.staging -f compose.yaml -f compose.staging.yaml logs -f
-docker compose --env-file .env.staging -f compose.yaml -f compose.staging.yaml down
+docker compose --project-name timeful-staging --env-file .env.staging -f compose.yaml -f compose.staging.yaml up -d --build
+docker compose --project-name timeful-staging --env-file .env.staging -f compose.yaml -f compose.staging.yaml logs -f
+docker compose --project-name timeful-staging --env-file .env.staging -f compose.yaml -f compose.staging.yaml down
 ```
 
 ## Data & Backup
@@ -90,28 +105,28 @@ The restore command below uses `--drop`.
 
 ```bash
 # Backup MongoDB
-docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml exec mongo sh -c 'mongodump --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --db=schej-it --archive=/data/db/backup.archive'
-docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml cp mongo:/data/db/backup.archive ./backup.archive
+docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml exec mongo sh -c 'mongodump --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --db=schej-it --archive=/data/db/backup.archive'
+docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml cp mongo:/data/db/backup.archive ./backup.archive
 
 # Restore MongoDB
-docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml cp ./backup.archive mongo:/data/db/backup.archive
-docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml exec mongo sh -c 'mongorestore --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --drop --db=schej-it --archive=/data/db/backup.archive'
+docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml cp ./backup.archive mongo:/data/db/backup.archive
+docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml exec mongo sh -c 'mongorestore --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --drop --db=schej-it --archive=/data/db/backup.archive'
 ```
 
 ## Troubleshooting
 
 ```bash
 # Container won't start
-docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml logs server
+docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml logs server
 ls -la .env.production
 
 # MongoDB connection issues
-docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml ps
-docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml exec mongo sh -c 'mongosh --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --eval "db.adminCommand(\"ping\")"'
+docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml ps
+docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml exec mongo sh -c 'mongosh --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --eval "db.adminCommand(\"ping\")"'
 
 # Frontend not loading
-docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml logs frontend-artifacts
-docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml exec server ls -la /app/frontend/dist
+docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml logs frontend-artifacts
+docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml exec server ls -la /app/frontend/dist
 ```
 
 ---
@@ -138,6 +153,7 @@ See `docs/environments.md` for the full contract and development commands.
 | `CLIENT_SECRET`  | Google OAuth client secret                                                  |
 | `ENCRYPTION_KEY` | Key for encrypting sensitive data (generate with `openssl rand -base64 32`) |
 | `SESSION_SECRET` | Session cookie encryption key (generate with `openssl rand -base64 32`)     |
+| `APP_BASE_URL` | Canonical public HTTPS origin used in generated links and payment redirects |
 | `MONGODB_ROOT_USERNAME` / `MONGODB_ROOT_PASSWORD` | MongoDB administrative account for backups and maintenance |
 | `MONGODB_APP_USERNAME` / `MONGODB_APP_PASSWORD` | MongoDB application account with access only to `schej-it` |
 
@@ -160,7 +176,7 @@ See `docs/environments.md` for the full contract and development commands.
 
 | Variable       | Description                                                                                                          |
 | -------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `CORS_ORIGINS` | Comma-separated allowed origins (default: production domains). For local development, set to `http://localhost:8080` |
+| `CORS_ORIGINS` | Comma-separated allowed browser origins. Set it to the environment's canonical HTTPS origin. |
 
 #### Optional — Other Services
 

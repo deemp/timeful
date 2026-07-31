@@ -1,10 +1,4 @@
-{
-	admin off
-}
-
-
-localhost {
-	
+(timeful) {
 	encode gzip zstd
 
 	header {
@@ -14,21 +8,21 @@ localhost {
 		-Server
 	}
 
-	root * /srv
+	root * {args[1]}
 
 	handle /api/* {
-		reverse_proxy server:3002
+		reverse_proxy {args[0]}
 	}
 
 	handle /swagger/* {
-		reverse_proxy server:3002
+		reverse_proxy {args[0]}
 	}
 
 	# Event pages still come from the backend so route-specific meta tags
 	# continue to work for shared links.
 	@eventPage path_regexp eventPage ^/e/[^/]+$
 	handle @eventPage {
-		reverse_proxy server:3002
+		reverse_proxy {args[0]}
 	}
 
 	handle /assets/* {

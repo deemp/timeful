@@ -17,3 +17,17 @@ services:
   server:
     environment:
       MONGODB_URI: mongodb://${MONGODB_APP_USERNAME:?MONGODB_APP_USERNAME is required}:${MONGODB_APP_PASSWORD:?MONGODB_APP_PASSWORD is required}@mongo:27017/schej-it?authSource=schej-it
+    networks:
+      edge:
+        aliases:
+          - production-server
+
+volumes:
+  frontend_dist:
+    name: timeful-production-frontend-dist
+    external: true
+
+networks:
+  edge:
+    name: timeful-edge
+    external: true

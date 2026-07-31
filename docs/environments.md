@@ -31,6 +31,8 @@ Shareable defaults live in:
 - Docker Compose reads the selected root env file through `--env-file`.
 - `frontend-artifacts` receives frontend build-time values from that same Compose env file.
 - `server` receives backend runtime variables from Compose interpolation based on that same file.
+- The edge Caddy Compose project reads both `.env.production` and `.env.staging`; it only
+  passes their namespaced `CADDY_*` values into Caddy.
 - When the Go server is run directly, it prefers `.env.development` for `APP_ENV=development`, `.env.staging` for `APP_ENV=staging`, and `.env.production` for `APP_ENV=production`. `GIN_MODE` still controls Gin release/debug behavior, and `ENV_FILE=/path/to/file` overrides the lookup entirely.
 
 ## Variable ownership
@@ -47,6 +49,7 @@ Frontend build-time variables:
 
 - `VITE_APP_ENV`
 - `VITE_POSTHOG_API_KEY`
+- `VITE_POSTHOG_API_HOST`
 - `VITE_ENABLE_SIGN_IN`
 - `VITE_ENABLE_FREEMIUM`
 - `VITE_ENABLE_RICH_LANDING`
@@ -77,12 +80,15 @@ Compose-to-frontend build arg mappings:
   section, testimonials, the FAQ, and the footer.
 - **`VITE_FEEDBACK_URL`** — Controls where frontend “Give feedback” links point.
   Defaults to `https://github.com/deemp/timeful/issues` when unset or blank.
+- **`VITE_POSTHOG_API_HOST`** — Optional PostHog API host. Set this when analytics uses a
+  self-hosted or reverse-proxied PostHog endpoint; otherwise the PostHog SDK default is used.
 - **`VITE_GITHUB_REPO_URL`** — Controls where frontend GitHub links point. This value
   is required for Docker-built frontend artifacts.
 
 Backend runtime variables:
 
 - `APP_ENV`
+- `APP_BASE_URL`
 - `CLIENT_ID`
 - `CLIENT_SECRET`
 - `ANDROID_CLIENT_ID`
@@ -137,6 +143,8 @@ Deployment environment semantics:
 - `APP_ENV=staging` defaults the Go server to port `3003`, prefers `.env.staging`, and defaults Gin to release unless `GIN_MODE` overrides it.
 - `APP_ENV=production` defaults the Go server to port `3002`, prefers `.env.production`, and defaults Gin to release unless `GIN_MODE` overrides it.
 - `VITE_APP_ENV` is the frontend-facing mirror for browser-exposed environment-dependent behavior and should normally match `APP_ENV`.
+- `APP_BASE_URL` is required and must be an absolute HTTP(S) origin without a path. The backend
+  uses it for generated email links, Cloud Tasks payloads, Stripe redirects, and Slack messages.
 
 ## Precedence
 
@@ -159,7 +167,7 @@ Staging Docker Compose:
 
 ```sh
 cp .env.staging.example .env.staging
-docker compose --env-file .env.staging -f compose.yaml -f compose.staging.yaml up -d --build
+docker compose --project-name timeful-staging --env-file .env.staging -f compose.yaml -f compose.staging.yaml up -d --build
 ```
 
 Production-style local build/preview:
@@ -175,8 +183,54 @@ Production Docker Compose:
 
 ```sh
 cp .env.production.example .env.production
-docker compose --env-file .env.production -f compose.yaml -f compose.production.yaml up -d --build
+docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml up -d --build
 ```
+
+## Shared HTTPS edge
+
+Local development does not run Caddy. It uses the Vite server and its same-origin API proxy.
+When staging and production share a host, a single Docker Caddy service owns public ports 80
+and 443, issues certificates, and routes requests by hostname to each stack over the
+`timeful-edge` Docker network.
+
+Set these values in their corresponding app env files to DNS names whose `A` and, if
+applicable, `AAAA` records point to the host:
+
+- `CADDY_PRODUCTION_DOMAIN`
+- `CADDY_PRODUCTION_WWW_DOMAIN`
+- `CADDY_STAGING_DOMAIN`
+- `CADDY_STAGING_WWW_DOMAIN`
+
+Provision the shared network and artifact volumes once. They are external so tearing down one
+Compose project cannot remove resources used by another:
+
+```sh
+docker network create timeful-edge
+docker volume create timeful-production-frontend-dist
+docker volume create timeful-staging-frontend-dist
+```
+
+Then start the edge by merging the two app env files. Compose uses them for interpolation, but
+only the four `CADDY_*` variables are passed to Caddy:
+
+```sh
+docker compose --env-file .env.production --env-file .env.staging -f compose.edge.yaml up -d
+```
+
+Then start each app as a separate project:
+
+```sh
+docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml up -d --build
+docker compose --project-name timeful-staging --env-file .env.staging -f compose.yaml -f compose.staging.yaml up -d --build
+```
+
+The edge configuration is split into `caddy/Caddyfile`, shared handlers in
+`caddy/snippets/timeful.caddy`, and one site file per environment. Keep shared routing in the
+snippet; site files should only provide hostnames, upstreams, and frontend roots.
+
+Open inbound TCP ports 80 and 443 and UDP port 443. Caddy automatically redirects HTTP to
+HTTPS and obtains certificates after DNS points to the host. Update OAuth redirect URIs and
+allowed origins to use the configured HTTPS canonical hostnames.
 
 ## MongoDB authentication
 

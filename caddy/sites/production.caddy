@@ -1,0 +1,7 @@
+{$CADDY_PRODUCTION_DOMAIN} {
+	import timeful production-server:3002 /srv/production
+}
+
+{$CADDY_PRODUCTION_WWW_DOMAIN} {
+	redir https://{$CADDY_PRODUCTION_DOMAIN}{uri} permanent
+}

@@ -1,0 +1,7 @@
+{$CADDY_STAGING_DOMAIN} {
+	import timeful staging-server:3003 /srv/staging
+}
+
+{$CADDY_STAGING_WWW_DOMAIN} {
+	redir https://{$CADDY_STAGING_DOMAIN}{uri} permanent
+}
