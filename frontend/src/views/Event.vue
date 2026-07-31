@@ -1105,7 +1105,7 @@ const mobileScheduleButtonStyle = computed<Record<string, string>>(() => ({
     ? "#FFFFFF"
     : "rgba(255,255,255,0.12)",
   color: allowScheduleEvent.value
-    ? "var(--timeful-primary-action-bg)"
+    ? "#006BE8"
     : "rgba(255,255,255,0.5)",
   border: allowScheduleEvent.value
     ? "1px solid transparent"

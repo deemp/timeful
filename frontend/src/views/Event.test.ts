@@ -2502,7 +2502,7 @@ describe("Event guest edit action", () => {
     )
   })
 
-  it("renders mobile scheduling actions with outlined cancel and explicit active schedule colors", async () => {
+  it("renders mobile scheduling actions with outlined cancel and blue active schedule colors", async () => {
     isPhoneState.value = true
 
     const wrapper = shallowMount(EventView, {
@@ -2548,7 +2548,7 @@ describe("Event guest edit action", () => {
     expect(scheduleButton?.classes()).toContain("mobile-schedule-button")
     expect(scheduleButton?.attributes("style")).toContain("background-color: #FFFFFF")
     expect(scheduleButton?.attributes("style")).toContain(
-      "color: var(--timeful-primary-action-bg)"
+      "color: #006BE8"
     )
     expect(scheduleButton?.attributes("style")).toContain(
       "border: 1px solid transparent"
