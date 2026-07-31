@@ -187,7 +187,7 @@ Semi-structured TODO list
     - quality 90
   - <https://ezgif.com/webp-maker/ezgif-62a1b9a1b6704abf-split.html>
 - [ ] rich landing enabled flag - enable more than just the title and demo
-- [ ] remove formerly known as schej and flag
+- [x] remove formerly known as schej and flag
 - [ ] font size of hours and days of week too large on mobile
 - [ ] tooltip with time should appear where I hover cursor or release it
 - [ ] on click on lock icon, show a tooltip with explanation why not editable
@@ -227,6 +227,18 @@ Semi-structured TODO list
 - [ ] make the app name configurable and when2meet by default
 - [ ] why grey without grid in <http://127.0.0.1:4173/e/Eb67A> at gmt+9?
 - [ ] reduce the number of columns on mobile so that the event can fit into that
+- [ ] Summarize feedback on <https://www.reddit.com/r/schej/>
+- [ ] Document the architecture and integration with external systems,
+    e.g. Google Cloud project
+- [ ] Add `flake.nix`
+- [ ] enable tests with chromium in addition to Firefox
+- [ ] Refactor .env files
+  - Group values
+  - Shift the most important higher
+- [ ] Schedule:
+  - Phase 1 - everyone
+  - Phase 2 - only the event owner, be it a registered or an anon user
+- [ ] Support setting password when adding availability
 
 ## MUST
 
