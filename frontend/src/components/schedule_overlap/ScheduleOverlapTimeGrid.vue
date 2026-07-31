@@ -194,7 +194,7 @@
                           v-if="
                             (timedGrid.dragStart && timedGrid.dragStart.col === d) ||
                             (!timedGrid.dragStart && timedGrid.curScheduledEvent && timedGrid.curScheduledEvent.col === d) ||
-                            (timedGrid.state !== timedGrid.states.SCHEDULE_EVENT && timedGrid.savedScheduledEvent?.col === d)
+                            (!timedGrid.dragStart && !timedGrid.curScheduledEvent && timedGrid.savedScheduledEvent?.col === d)
                           "
                         >
                           <div

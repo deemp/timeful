@@ -401,6 +401,21 @@ describe("ScheduleOverlap grid drag bindings", () => {
     expect(scheduledEvent.element.parentElement?.classList).toContain("tw-w-[70%]")
   })
 
+  it("keeps the saved event visible while rescheduling", () => {
+    const { timedGrid } = createTimeGridViewModel()
+    timedGrid.dragStart = null
+    timedGrid.curScheduledEvent = null
+    timedGrid.savedScheduledEvent = { row: 0, col: 0, numRows: 1 }
+    timedGrid.scheduledEventStyles = [{ top: "0px", height: "60px" }]
+
+    const wrapper = mount(ScheduleOverlapTimeGrid, {
+      props: { timedGrid },
+      global,
+    })
+
+    expect(wrapper.findAll(".scheduled-event-block")).toHaveLength(1)
+  })
+
   it("renders one structural interior collapsed-hours row and forwards expansion clicks", async () => {
     const { timedGrid, actions } = createNonConsecutiveTimeGridViewModel()
     timedGrid.state = states.HEATMAP
