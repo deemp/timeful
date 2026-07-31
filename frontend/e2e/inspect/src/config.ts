@@ -1,5 +1,4 @@
-export const DEFAULT_NEW_APP_URL = "http://127.0.0.1:4173"
-export const DEFAULT_OLD_APP_URL = "http://127.0.0.1:4174"
+export const DEFAULT_FRONTEND_URL = "http://127.0.0.1:4173"
 export const VIEWPORT = { width: 1440, height: 1400 } as const
 
 export const PROPERTY_GROUPS = {

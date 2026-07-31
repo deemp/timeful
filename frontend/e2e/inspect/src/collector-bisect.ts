@@ -2,10 +2,10 @@ import process from "node:process"
 
 import { firefox } from "@playwright/test"
 
-import { FLATTENED_PROPERTIES } from "./config.js"
+import { DEFAULT_FRONTEND_URL, FLATTENED_PROPERTIES } from "./config.js"
 import { resolveSnapshotEntries } from "./dom-resolvers.js"
 import {
-  createComparatorContext,
+  createInspectionContext,
   installStableBrowserLocale,
   preparePage,
   runWithPhaseTimeout,
@@ -72,7 +72,7 @@ async function runStage(
   const browser = await firefox.launch()
 
   try {
-    const context = await createComparatorContext(browser, {
+    const context = await createInspectionContext(browser, {
       viewport: { width: 1440, height: 900 },
     })
     const page = await context.newPage()
@@ -99,7 +99,7 @@ async function runStage(
         finalUrl: page.url() || null,
         timedOut:
           error instanceof Error &&
-          error.message.includes(`Timed out during comparator phase: collector-bisect ${stage}`),
+          error.message.includes(`Timed out during inspection phase: collector-bisect ${stage}`),
         error: {
           name: error instanceof Error ? error.name : "Error",
           message: error instanceof Error ? error.message : String(error),
@@ -117,8 +117,7 @@ async function main() {
   const target = parseTarget(process.argv.slice(2))
   const scenario = SCENARIOS[target]
   const label: AppLabel = {
-    name: "new",
-    url: process.env.NEW_APP_URL || "http://127.0.0.1:4173",
+    url: process.env.FRONTEND_URL || DEFAULT_FRONTEND_URL,
   }
 
   const results: StageResult[] = []
@@ -188,7 +187,7 @@ async function main() {
       async (page) => {
         await preparePage(page, label, scenario)
         await runWithPhaseTimeout(
-          `page.evaluate ${label.name}`,
+            "page.evaluate",
           page.evaluate(
             `((args) => {
               const __name = (target) => target

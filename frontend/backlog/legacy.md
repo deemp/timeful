@@ -13,7 +13,7 @@ Stable inventory for migration refactor debt. Use this file as the top-level ind
 - Reconfirm the finding still reproduces before changing code
 - Add regression coverage first when practical
 - Refactor through helpers, composables, or clearer boundaries instead of view-local shims
-- Use Firefox comparator evidence from `../migration/comparator` for parity-sensitive UI work
+- Use current-app inspection and Playwright evidence for UI work
 - Run `npm run lint`, `npm run typecheck`, `npm run build`, and `npm run test:unit` for implemented fixes
 
 ## P0

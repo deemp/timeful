@@ -1,7 +1,7 @@
 import { firefox, type Locator, type Page, type Request, type Response } from "@playwright/test"
 import { Temporal } from "temporal-polyfill"
 
-export const APP_BASE_URL = process.env.NEW_APP_URL ?? "http://127.0.0.1:4173"
+export const APP_BASE_URL = process.env.FRONTEND_URL ?? "http://127.0.0.1:4173"
 export const HOME_URL = `${APP_BASE_URL}/`
 const VIEWPORT = { width: 1440, height: 1600 }
 

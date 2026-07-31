@@ -17,8 +17,12 @@
     "test:e2e:repro:anonymous-create": "node --experimental-strip-types ./e2e/repro/repro-anonymous-timed-create-firefox.ts",
     "test:e2e:repro:edit-date-preserves-selection": "node --experimental-strip-types ./e2e/repro/repro-edit-date-preserves-selection.ts",
     "test:e2e:repro:utc4-edit-clears-active-slots": "node --experimental-strip-types ./e2e/repro/repro-utc4-edit-clears-active-slots.ts",
-    "lint": "eslint src e2e playwright.config.ts --cache --concurrency auto",
-    "lint:fix": "eslint src e2e playwright.config.ts --fix --cache --concurrency auto"
+    "inspect": "tsx ./e2e/inspect/src/inspect.ts",
+    "inspect:landing": "tsx ./e2e/inspect/src/inspect.ts --target landing",
+    "inspect:route": "tsx ./e2e/inspect/src/route-profile.ts",
+    "inspect:collector-bisect": "tsx ./e2e/inspect/src/collector-bisect.ts",
+    "lint": "eslint src e2e playwright.config.ts --ignore-pattern 'e2e/inspect/**' --cache --concurrency auto",
+    "lint:fix": "eslint src e2e playwright.config.ts --ignore-pattern 'e2e/inspect/**' --fix --cache --concurrency auto"
   },
   "dependencies": {
     "@gtm-support/vue-gtm": "^3.1.0",
@@ -61,6 +65,7 @@
     "prettier-plugin-tailwindcss": "^0.8.0",
     "swagger2openapi": "^7.0.8",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.20.6",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.61.1",
     "vite": "^8.0.16",

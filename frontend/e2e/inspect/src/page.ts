@@ -2,7 +2,7 @@ import { setTimeout as delay } from "node:timers/promises"
 
 import type { Browser, BrowserContext, Page } from "@playwright/test"
 
-import type { AppLabel, ScenarioDefinition } from "./types.js"
+import type { InspectionTarget, ScenarioDefinition } from "./types.js"
 
 const DEFAULT_PHASE_TIMEOUT_MS = 15_000
 export const THIRD_PARTY_BLOCKLIST = [
@@ -28,7 +28,7 @@ export async function runWithPhaseTimeout<T>(
   return await Promise.race([
     task,
     delay(timeoutMs).then(() => {
-      throw new Error(`Timed out during comparator phase: ${phaseLabel} (${String(timeoutMs)}ms)`)
+      throw new Error(`Timed out during inspection phase: ${phaseLabel} (${String(timeoutMs)}ms)`)
     }),
   ])
 }
@@ -126,16 +126,16 @@ export async function installStableBrowserLocale(page: Page) {
   })
 }
 
-export async function gotoComparatorUrl(page: Page, url: string) {
-  console.error(`[comparator] goto:start ${url}`)
+export async function gotoInspectionUrl(page: Page, url: string) {
+  console.error(`[inspect] goto:start ${url}`)
   await runWithPhaseTimeout(
     `goto ${url}`,
     page.goto(url, { waitUntil: "domcontentloaded" }),
   )
-  console.error(`[comparator] goto:done ${url}`)
+  console.error(`[inspect] goto:done ${url}`)
 }
 
-export async function createComparatorContext(
+export async function createInspectionContext(
   browser: Browser,
   options?: {
     javaScriptEnabled?: boolean
@@ -157,25 +157,29 @@ export async function createComparatorContext(
   return context
 }
 
-export async function preparePage(page: Page, label: AppLabel, scenario: ScenarioDefinition) {
+export async function preparePage(
+  page: Page,
+  target: InspectionTarget,
+  scenario: ScenarioDefinition,
+) {
   await installStableBrowserLocale(page)
   if (!scenario.skipInitialGoto) {
-    await gotoComparatorUrl(page, label.url)
+    await gotoInspectionUrl(page, target.url)
   }
-  console.error(`[comparator] scenario-prepare:start ${label.name}`)
+  console.error("[inspect] scenario-prepare:start")
   await runWithPhaseTimeout(
-    `scenario.prepare ${label.name}`,
-    scenario.prepare(page, label),
+    "scenario.prepare",
+    scenario.prepare(page, target),
     DEFAULT_PHASE_TIMEOUT_MS,
   )
-  console.error(`[comparator] scenario-prepare:done ${label.name}`)
-  console.error(`[comparator] ready:start ${label.name} selector=${scenario.readySelector}`)
+  console.error("[inspect] scenario-prepare:done")
+  console.error(`[inspect] ready:start selector=${scenario.readySelector}`)
   await runWithPhaseTimeout(
-    `waitForSelector ${label.name} ${scenario.readySelector}`,
+    `waitForSelector ${scenario.readySelector}`,
     page.waitForSelector(scenario.readySelector, {
       timeout: scenario.readyTimeoutMs ?? DEFAULT_PHASE_TIMEOUT_MS,
     }),
     (scenario.readyTimeoutMs ?? DEFAULT_PHASE_TIMEOUT_MS) + 1_000,
   )
-  console.error(`[comparator] ready:done ${label.name} selector=${scenario.readySelector}`)
+  console.error(`[inspect] ready:done selector=${scenario.readySelector}`)
 }

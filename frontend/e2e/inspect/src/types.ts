@@ -1,11 +1,13 @@
 import type { Page } from "@playwright/test"
 
-import type { PropertyGroupName, PropertyName } from "./config.js"
+import type { PropertyName } from "./config.js"
 
-export type AppLabel = {
-  name: "old" | "new"
+export type InspectionTarget = {
   url: string
 }
+
+// Scenario modules receive the inspected frontend URL through this shared shape.
+export type AppLabel = InspectionTarget
 
 export type SelectorElementDescriptor = {
   name: string
@@ -24,8 +26,6 @@ export type SpecialElementDescriptor = {
   name: string
   kind:
     | "heroCopy"
-    | "legacyNoteRow"
-    | "legacyNoteIcon"
     | "newEventDialog"
     | "daysOnlyToggle"
     | "daysOnlyToggleFrame"
@@ -56,8 +56,7 @@ export type ScenarioDefinition = {
   elements: ElementDescriptor[]
   readyTimeoutMs?: number
   skipInitialGoto?: boolean
-  prepare: (page: Page, label: AppLabel) => Promise<void>
-  runInteraction?: (oldPage: Page, newPage: Page) => Promise<void>
+  prepare: (page: Page, target: InspectionTarget) => Promise<void>
 }
 
 export type Box = {
@@ -79,34 +78,3 @@ export type SnapshotElement = {
 
 export type SnapshotEntry = [name: string, element: SnapshotElement | null]
 export type Snapshot = Record<string, SnapshotElement | null>
-
-export type MissingDiff = {
-  status: "missing"
-  oldFound: boolean
-  newFound: boolean
-}
-
-export type PropertyDiffEntry = {
-  property: PropertyName
-  oldValue: string
-  newValue: string
-}
-
-export type BoxDiff = {
-  [K in keyof Box]: {
-    old: number
-    new: number
-    delta: number
-  }
-}
-
-export type MatchOrDiffResult = {
-  status: "match" | "diff"
-  old: Omit<SnapshotElement, "properties">
-  new: Omit<SnapshotElement, "properties">
-  boxDiff: BoxDiff
-  propertyDiffs: Partial<Record<PropertyGroupName, PropertyDiffEntry[]>>
-}
-
-export type DiffResult = MissingDiff | MatchOrDiffResult
-export type Diff = Record<string, DiffResult>

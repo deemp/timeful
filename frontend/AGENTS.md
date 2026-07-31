@@ -36,10 +36,8 @@ Do not treat "read every ADR in the folder" as the default requirement.
 - treat `Temporal` values with value semantics, not identity semantics
 - keep civil-date, end-of-day, and working-hours semantics explicit at domain boundaries
 
-## Parity And Styling Rules
+## Styling Rules
 
-- preserve legacy visual behavior and user-facing behavior without copying legacy DOM structure directly
-- base parity changes on comparator evidence, not guesses from reading code
 - use layout-based fixes instead of overrides or hacks
 - when debugging Vuetify wrapper behavior, verify rendered ancestor styles such as wrapper opacity, not only the leaf node
 - in non-scoped Vue style blocks, prefer plain selectors over `:deep(...)` for framework wrapper overrides
@@ -48,13 +46,10 @@ Do not treat "read every ADR in the folder" as the default requirement.
 
 ## Browser Verification
 
-- use `../migration/comparator` for browser verification
-- prefer `inspect` for migrated-only investigation
-- use `compare` when you specifically need old-vs-new parity evidence
+- use `npm run inspect -- --target <scenario-name>` for current-app diagnostics
 - keep repo-tracked Playwright specs, helpers, and repro entrypoints under `./e2e`
-- do not run direct Playwright probes against the legacy app
-- if a direct Playwright probe is needed outside the shared comparator flow, run it only against the migrated app
-- follow `../migration/comparator/AGENTS.md` for command details, startup order, URL overrides, and scenario rules
+- use Playwright specs for assertion-based regression coverage
+- follow `./e2e/inspect/AGENTS.md` for inspection command details
 
 ## Required Checks
 

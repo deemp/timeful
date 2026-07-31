@@ -4,19 +4,19 @@ import { FLATTENED_PROPERTIES } from "./config.js"
 import { resolveSnapshotEntries } from "./dom-resolvers.js"
 import { preparePage, runWithPhaseTimeout } from "./page.js"
 
-import type { AppLabel, ScenarioDefinition, Snapshot, SnapshotEntry } from "./types.js"
+import type { InspectionTarget, ScenarioDefinition, Snapshot, SnapshotEntry } from "./types.js"
 
 export async function collectStyles(
   page: Page,
-  label: AppLabel,
+  target: InspectionTarget,
   scenario: ScenarioDefinition,
 ): Promise<Snapshot> {
-  console.error(`[comparator] collect:start ${label.name}`)
-  await preparePage(page, label, scenario)
+  console.error("[inspect] collect:start")
+  await preparePage(page, target, scenario)
 
-  console.error(`[comparator] evaluate:start ${label.name}`)
+  console.error("[inspect] evaluate:start")
   const entries = (await runWithPhaseTimeout(
-    `page.evaluate ${label.name}`,
+    "page.evaluate",
     page.evaluate(
       `((args) => {
         const __name = (target) => target
@@ -27,8 +27,8 @@ export async function collectStyles(
       })})`,
     ),
   )) as SnapshotEntry[]
-  console.error(`[comparator] evaluate:done ${label.name}`)
+  console.error("[inspect] evaluate:done")
 
-  console.error(`[comparator] collect:done ${label.name}`)
+  console.error("[inspect] collect:done")
   return Object.fromEntries(entries)
 }

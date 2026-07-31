@@ -45,18 +45,6 @@ export function resolveSnapshotEntries({
     return heading?.parentElement?.parentElement ?? null
   }
 
-  function findLegacyNote() {
-    return (
-      Array.from(document.querySelectorAll("a"))
-        .filter((node) => node.textContent?.includes('Formerly known as "Schej"'))
-        .sort(
-          (left, right) =>
-            (left.textContent?.trim().length ?? Number.MAX_SAFE_INTEGER) -
-            (right.textContent?.trim().length ?? Number.MAX_SAFE_INTEGER),
-        )[0] ?? null
-    )
-  }
-
   function findVisibleTimezoneRow() {
     const timezoneRows = Array.from(document.querySelectorAll("#timezone-select-container"))
     return findVisibleCandidate(timezoneRows)
@@ -203,10 +191,6 @@ export function resolveSnapshotEntries({
     switch (descriptor.kind) {
       case "heroCopy":
         return findHeroCopy()
-      case "legacyNoteRow":
-        return findLegacyNote()?.parentElement ?? null
-      case "legacyNoteIcon":
-        return findLegacyNote()?.parentElement?.querySelector("div") ?? null
       case "newEventDialog":
         return (
           document.querySelector('input[placeholder="Name your event..."]')?.closest(".v-card") ??

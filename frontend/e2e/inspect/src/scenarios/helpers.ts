@@ -22,6 +22,8 @@ export function resolveComparatorEventPath(defaultPath = DEFAULT_EVENT_PATH) {
   return overridePath.startsWith("/") ? overridePath : `/${overridePath}`
 }
 
+export const resolveInspectionEventPath = resolveComparatorEventPath
+
 export function resolveComparatorEventWaitUntil(
   defaultWaitUntil: EventWaitUntil = "domcontentloaded",
 ): EventWaitUntil {
@@ -38,6 +40,8 @@ export function resolveComparatorEventWaitUntil(
     `Unsupported COMPARATOR_EVENT_WAIT_UNTIL=${JSON.stringify(overrideWaitUntil)}. Expected one of ${SUPPORTED_EVENT_WAIT_UNTIL.join(", ")}`,
   )
 }
+
+export const resolveInspectionEventWaitUntil = resolveComparatorEventWaitUntil
 
 export async function gotoComparatorEventUrl(
   page: Page,

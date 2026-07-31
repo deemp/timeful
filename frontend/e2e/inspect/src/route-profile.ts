@@ -2,17 +2,17 @@ import process from "node:process"
 
 import { chromium, firefox } from "@playwright/test"
 
-import { DEFAULT_NEW_APP_URL, VIEWPORT } from "./config.js"
+import { DEFAULT_FRONTEND_URL, VIEWPORT } from "./config.js"
 import {
-  createComparatorContext,
+  createInspectionContext,
   THIRD_PARTY_BLOCKLIST,
   installStableBrowserLocale,
   runWithPhaseTimeout,
   waitForUrl,
 } from "./page.js"
 import {
-  resolveComparatorEventPath,
-  resolveComparatorEventWaitUntil,
+  resolveInspectionEventPath,
+  resolveInspectionEventWaitUntil,
 } from "./scenarios/helpers.js"
 
 type RouteProfile = {
@@ -76,15 +76,15 @@ function parseIntEnv(name: string, defaultValue: number) {
 
 async function main() {
   const browserName = process.env.PLAYWRIGHT_BROWSER === "chromium" ? "chromium" : "firefox"
-  const appUrl = process.env.NEW_APP_URL || DEFAULT_NEW_APP_URL
-  const route = resolveComparatorEventPath()
+  const appUrl = process.env.FRONTEND_URL || DEFAULT_FRONTEND_URL
+  const route = resolveInspectionEventPath()
   const url = new URL(route, appUrl).toString()
-  const waitUntil = resolveComparatorEventWaitUntil()
-  const javaScriptEnabled = !parseBooleanEnv("COMPARATOR_DISABLE_JS")
-  const localeShimEnabled = !parseBooleanEnv("COMPARATOR_SKIP_LOCALE_SHIM")
+  const waitUntil = resolveInspectionEventWaitUntil()
+  const javaScriptEnabled = !parseBooleanEnv("INSPECT_DISABLE_JS")
+  const localeShimEnabled = !parseBooleanEnv("INSPECT_SKIP_LOCALE_SHIM")
   const viewport = {
-    width: parseIntEnv("COMPARATOR_VIEWPORT_WIDTH", VIEWPORT.width),
-    height: parseIntEnv("COMPARATOR_VIEWPORT_HEIGHT", VIEWPORT.height),
+    width: parseIntEnv("INSPECT_VIEWPORT_WIDTH", VIEWPORT.width),
+    height: parseIntEnv("INSPECT_VIEWPORT_HEIGHT", VIEWPORT.height),
   }
 
   await waitForUrl(appUrl)
@@ -108,7 +108,7 @@ async function main() {
   }
 
   try {
-    const context = await createComparatorContext(browser, {
+    const context = await createInspectionContext(browser, {
       javaScriptEnabled,
       viewport,
     })
@@ -142,7 +142,7 @@ async function main() {
     })
 
     console.error(
-      `[comparator] route-profile:start url=${url} waitUntil=${waitUntil} js=${String(javaScriptEnabled)} localeShim=${String(localeShimEnabled)}`,
+      `[inspect] route-profile:start url=${url} waitUntil=${waitUntil} js=${String(javaScriptEnabled)} localeShim=${String(localeShimEnabled)}`,
     )
 
     await runWithPhaseTimeout(
@@ -154,7 +154,7 @@ async function main() {
     profile.finalPageUrl = page.url()
     profile.title = await page.title().catch(() => null)
 
-    console.error(`[comparator] route-profile:done url=${url}`)
+    console.error(`[inspect] route-profile:done url=${url}`)
 
     await context.close()
   } catch (error) {

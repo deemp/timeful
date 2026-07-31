@@ -25,14 +25,6 @@ export const landingScenario = {
       text: "Coordinate group meetings without the back and forth.",
     },
     { name: "calendarLink", kind: "text", selector: "span, a", text: "calendar" },
-    {
-      name: "legacyNote",
-      kind: "containsText",
-      selector: "a",
-      text: 'Formerly known as "Schej"',
-    },
-    { name: "legacyNoteRow", kind: "legacyNoteRow" },
-    { name: "legacyNoteIcon", kind: "legacyNoteIcon" },
   ],
   prepare: async () => {},
 } satisfies ScenarioDefinition

@@ -1,3 +1,0 @@
-[submodule "migration/timeful.app.js"]
-	path = migration/timeful.app.js
-	url = https://github.com/schej-it/timeful.app
