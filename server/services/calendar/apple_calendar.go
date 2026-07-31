@@ -10,8 +10,8 @@ import (
 	"github.com/jonyTF/go-webdav"
 	"github.com/jonyTF/go-webdav/caldav"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"schej.it/server/models"
-	"schej.it/server/utils"
+	"timeful/server/models"
+	"timeful/server/utils"
 )
 
 type AppleCalendar struct {

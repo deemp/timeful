@@ -6,8 +6,8 @@ import (
 	"encoding/hex"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"schej.it/server/models"
-	"schej.it/server/respondents"
+	"timeful/server/models"
+	"timeful/server/respondents"
 )
 
 const (

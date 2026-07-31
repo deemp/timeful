@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"schej.it/server/models"
-	"schej.it/server/respondents"
+	"timeful/server/models"
+	"timeful/server/respondents"
 )
 
 func TestGuestResponseLookupKeyUsesOpaqueGuestId(t *testing.T) {

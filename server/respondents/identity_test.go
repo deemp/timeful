@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"schej.it/server/models"
+	"timeful/server/models"
 )
 
 func TestNormalizeGuestNameCanonicalizesWhitespaceFormattingAndUnicode(t *testing.T) {

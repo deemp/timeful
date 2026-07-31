@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"schej.it/server/models"
+	"timeful/server/models"
 )
 
 func completeTimedFields(t *testing.T) timedEventPayloadFields {

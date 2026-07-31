@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"schej.it/server/db"
-	"schej.it/server/models"
+	"timeful/server/db"
+	"timeful/server/models"
 )
 
 func main() {

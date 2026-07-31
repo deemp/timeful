@@ -8,8 +8,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"schej.it/server/logger"
-	"schej.it/server/models"
+	"timeful/server/logger"
+	"timeful/server/models"
 )
 
 // Returns a user based on their _id

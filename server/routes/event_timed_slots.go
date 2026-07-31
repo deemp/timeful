@@ -5,7 +5,7 @@ import (
 	"sort"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"schej.it/server/models"
+	"timeful/server/models"
 )
 
 var errActiveSlotOutsideEnabled = errors.New("active-slots-must-be-enabled")

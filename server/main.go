@@ -17,26 +17,26 @@ import (
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/stripe/stripe-go/v82"
-	"schej.it/server/appenv"
-	"schej.it/server/db"
-	"schej.it/server/envfiles"
-	"schej.it/server/logger"
-	"schej.it/server/routes"
-	"schej.it/server/services/gcloud"
-	"schej.it/server/slackbot"
-	"schej.it/server/utils"
+	"timeful/server/appenv"
+	"timeful/server/db"
+	"timeful/server/envfiles"
+	"timeful/server/logger"
+	"timeful/server/routes"
+	"timeful/server/services/gcloud"
+	"timeful/server/slackbot"
+	"timeful/server/utils"
 
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	_ "schej.it/server/docs"
+	_ "timeful/server/docs"
 )
 
 const defaultLogPath = "logs/server.log"
 
-// @title Schej.it API
+// @title Timeful API
 // @version 1.0
-// @description This is the API for Schej.it!
+// @description This is the API for Timeful.
 
 // @host localhost:3002/api
 
@@ -241,7 +241,7 @@ func eventPageHandler(hasFrontendIndex bool) gin.HandlerFunc {
 		event := db.GetEventByEitherId(eventId)
 
 		if event != nil {
-			title := fmt.Sprintf("%s - Timeful (formerly Schej)", event.Name)
+			title := fmt.Sprintf("%s - Timeful", event.Name)
 			params["title"] = title
 			params["ogTitle"] = title
 

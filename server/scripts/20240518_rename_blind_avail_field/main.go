@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"schej.it/server/db"
+	"timeful/server/db"
 )
 
 func main() {

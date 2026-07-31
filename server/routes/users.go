@@ -4,10 +4,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"schej.it/server/db"
-	"schej.it/server/errs"
-	"schej.it/server/models"
-	"schej.it/server/responses"
+	"timeful/server/db"
+	"timeful/server/errs"
+	"timeful/server/models"
+	"timeful/server/responses"
 )
 
 func InitUsers(router *gin.RouterGroup) {

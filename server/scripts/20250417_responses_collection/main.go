@@ -9,8 +9,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"schej.it/server/db"
-	"schej.it/server/models"
+	"timeful/server/db"
+	"timeful/server/models"
 )
 
 func main() {

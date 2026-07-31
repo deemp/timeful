@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"schej.it/server/models"
+	"timeful/server/models"
 )
 
 func TestGetUserInfo(t *testing.T) {

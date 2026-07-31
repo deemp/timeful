@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is the API for Schej.it!",
-        "title": "Schej.it API",
+        "description": "This is the API for Timeful.",
+        "title": "Timeful API",
         "contact": {},
         "version": "1.0"
     },
@@ -19,7 +19,7 @@
                 "tags": [
                     "analytics"
                 ],
-                "summary": "Downgrades the specified user to Schej Free",
+                "summary": "Downgrades the specified user to Timeful Free",
                 "parameters": [
                     {
                         "description": "Object containing the user email",
@@ -283,7 +283,7 @@
                 "tags": [
                     "analytics"
                 ],
-                "summary": "Upgrades the specified user to Schej Premium",
+                "summary": "Upgrades the specified user to Timeful Premium",
                 "parameters": [
                     {
                         "description": "Object containing the user email",
@@ -605,7 +605,7 @@
                 "summary": "Creates a new event",
                 "parameters": [
                     {
-                        "description": "Object containing info about the event to create",
+                        "description": "Timed events require the complete canonical slot contract; day-only events require dates",
                         "name": "payload",
                         "in": "body",
                         "required": true,
@@ -635,9 +635,6 @@
                                 },
                                 "daysOnly": {
                                     "type": "boolean"
-                                },
-                                "duration": {
-                                    "type": "number"
                                 },
                                 "enabledSlots": {
                                     "type": "array",
@@ -674,9 +671,6 @@
                                 },
                                 "slotGeneration": {
                                     "$ref": "#/definitions/models.SlotGeneration"
-                                },
-                                "timeIncrement": {
-                                    "type": "integer"
                                 },
                                 "timedRecurrence": {
                                     "$ref": "#/definitions/models.TimedRecurrence"
@@ -796,7 +790,7 @@
                         "required": true
                     },
                     {
-                        "description": "Object containing info about the event to update",
+                        "description": "Timed events require the complete canonical slot contract; day-only events require dates",
                         "name": "payload",
                         "in": "body",
                         "required": true,
@@ -830,9 +824,6 @@
                                 "description": {
                                     "type": "string"
                                 },
-                                "duration": {
-                                    "type": "number"
-                                },
                                 "enabledSlots": {
                                     "type": "array",
                                     "items": {
@@ -865,9 +856,6 @@
                                 },
                                 "slotGeneration": {
                                     "$ref": "#/definitions/models.SlotGeneration"
-                                },
-                                "timeIncrement": {
-                                    "type": "integer"
                                 },
                                 "timedRecurrence": {
                                     "$ref": "#/definitions/models.TimedRecurrence"

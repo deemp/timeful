@@ -11,9 +11,9 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"schej.it/server/db"
-	"schej.it/server/models"
-	"schej.it/server/responses"
+	"timeful/server/db"
+	"timeful/server/models"
+	"timeful/server/responses"
 )
 
 func timedSlotDateTime(t *testing.T, raw string) primitive.DateTime {

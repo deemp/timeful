@@ -18,12 +18,12 @@ import (
 	"github.com/stripe/stripe-go/v82/webhook"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"schej.it/server/db"
-	"schej.it/server/logger"
-	"schej.it/server/middleware"
-	"schej.it/server/models"
-	"schej.it/server/slackbot"
-	"schej.it/server/utils"
+	"timeful/server/db"
+	"timeful/server/logger"
+	"timeful/server/middleware"
+	"timeful/server/models"
+	"timeful/server/slackbot"
+	"timeful/server/utils"
 )
 
 func InitStripe(router *gin.RouterGroup) {
@@ -252,7 +252,7 @@ func _fulfillCheckout(sessionId string) {
 					}
 					amountTotal := float32(cs.LineItems.Data[0].AmountTotal) / 100.0
 
-					message := fmt.Sprintf(":moneybag: %s %s (%s) paid for Schej ($%.2f, %s) :moneybag:", user.FirstName, user.LastName, user.Email, amountTotal, priceDescription)
+					message := fmt.Sprintf(":moneybag: %s %s (%s) paid for Timeful ($%.2f, %s) :moneybag:", user.FirstName, user.LastName, user.Email, amountTotal, priceDescription)
 					slackbot.SendTextMessageWithType(message, slackbot.MONETIZATION)
 				}
 
@@ -311,7 +311,7 @@ func stripeWebhook(c *gin.Context) {
 			return
 		}
 		db.UsersCollection.UpdateOne(context.Background(), bson.M{"stripeCustomerId": inv.Customer.ID}, bson.M{"$set": bson.M{"isPremium": true}})
-		logger.StdOut.Printf("Customer %s renewed Schej!\n", inv.Customer.ID)
+		logger.StdOut.Printf("Customer %s renewed Timeful!\n", inv.Customer.ID)
 	} else if event.Type == stripe.EventTypeInvoicePaymentFailed {
 		var inv stripe.Invoice
 		err := json.Unmarshal(event.Data.Raw, &inv)
@@ -326,9 +326,9 @@ func stripeWebhook(c *gin.Context) {
 			return
 		}
 		db.UsersCollection.UpdateOne(context.Background(), bson.M{"stripeCustomerId": inv.Customer.ID}, bson.M{"$set": bson.M{"isPremium": false}})
-		logger.StdOut.Printf("Customer %s failed to pay for Schej!\n", inv.Customer.ID)
+		logger.StdOut.Printf("Customer %s failed to pay for Timeful!\n", inv.Customer.ID)
 
-		message := fmt.Sprintf(":x: %s %s (%s) failed to pay for Schej :x:", user.FirstName, user.LastName, user.Email)
+		message := fmt.Sprintf(":x: %s %s (%s) failed to pay for Timeful :x:", user.FirstName, user.LastName, user.Email)
 		slackbot.SendTextMessageWithType(message, slackbot.MONETIZATION)
 	} else if event.Type == stripe.EventTypeCustomerSubscriptionDeleted {
 		var sub stripe.Subscription

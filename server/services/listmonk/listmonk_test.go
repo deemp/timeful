@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"schej.it/server/envfiles"
-	"schej.it/server/logger"
+	"timeful/server/envfiles"
+	"timeful/server/logger"
 )
 
 func TestSendEmail(t *testing.T) {
@@ -26,7 +26,7 @@ func TestSendEmail(t *testing.T) {
 		logger.StdErr.Panicln("Error loading env file")
 	}
 
-	SendEmail("schej.team@gmail.com", 8, bson.M{
+	SendEmail("timeful.team@example.com", 8, bson.M{
 		"eventName": "casablanca",
 		"eventUrl":  "http://localhost:8080/e/65e636bb760d3ea2e113e161",
 	})

@@ -1,9 +1,9 @@
 package routes
 
 import (
-	"schej.it/server/db"
-	"schej.it/server/models"
-	"schej.it/server/respondents"
+	"timeful/server/db"
+	"timeful/server/models"
+	"timeful/server/respondents"
 )
 
 func cloneUser(user *models.User) *models.User {

@@ -9,7 +9,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"gopkg.in/gomail.v2"
-	"schej.it/server/logger"
+	"timeful/server/logger"
 )
 
 // Send email to the given email
@@ -19,7 +19,7 @@ func SendEmail(toEmail string, subject string, body string, contentType string) 
 	}
 
 	appPassword := os.Getenv("GMAIL_APP_PASSWORD")
-	fromEmail := os.Getenv("SCHEJ_EMAIL_ADDRESS")
+	fromEmail := os.Getenv("TIMEFUL_EMAIL_ADDRESS")
 
 	m := gomail.NewMessage()
 	m.SetHeader("From", fromEmail)
@@ -130,7 +130,7 @@ func AddUserToMailjet(email string, firstName string, lastName string, picture s
 	}
 	defer resp.Body.Close()
 
-	// Add contact to "schej users" contact list
+	// Add contact to the configured user contact list.
 	// POST https://api.mailjet.com/v3/REST/contact/$contactId/managecontactslists
 	// '{ "ContactsLists": [{"Action": "addforce", "ListID": "10219365"}] }'
 	body, _ = json.Marshal(bson.M{

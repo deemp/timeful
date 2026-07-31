@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"schej.it/server/logger"
+	"timeful/server/logger"
 )
 
 // Adds the given user to the Listmonk contact list

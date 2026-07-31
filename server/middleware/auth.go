@@ -5,9 +5,9 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"schej.it/server/db"
-	"schej.it/server/errs"
-	"schej.it/server/responses"
+	"timeful/server/db"
+	"timeful/server/errs"
+	"timeful/server/responses"
 )
 
 func AuthRequired() gin.HandlerFunc {

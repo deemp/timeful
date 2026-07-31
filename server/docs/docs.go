@@ -27,7 +27,7 @@ const docTemplate = `{
                 "tags": [
                     "analytics"
                 ],
-                "summary": "Downgrades the specified user to Schej Free",
+                "summary": "Downgrades the specified user to Timeful Free",
                 "parameters": [
                     {
                         "description": "Object containing the user email",
@@ -291,7 +291,7 @@ const docTemplate = `{
                 "tags": [
                     "analytics"
                 ],
-                "summary": "Upgrades the specified user to Schej Premium",
+                "summary": "Upgrades the specified user to Timeful Premium",
                 "parameters": [
                     {
                         "description": "Object containing the user email",
@@ -613,7 +613,7 @@ const docTemplate = `{
                 "summary": "Creates a new event",
                 "parameters": [
                     {
-                        "description": "Object containing info about the event to create",
+                        "description": "Timed events require the complete canonical slot contract; day-only events require dates",
                         "name": "payload",
                         "in": "body",
                         "required": true,
@@ -643,9 +643,6 @@ const docTemplate = `{
                                 },
                                 "daysOnly": {
                                     "type": "boolean"
-                                },
-                                "duration": {
-                                    "type": "number"
                                 },
                                 "enabledSlots": {
                                     "type": "array",
@@ -682,9 +679,6 @@ const docTemplate = `{
                                 },
                                 "slotGeneration": {
                                     "$ref": "#/definitions/models.SlotGeneration"
-                                },
-                                "timeIncrement": {
-                                    "type": "integer"
                                 },
                                 "timedRecurrence": {
                                     "$ref": "#/definitions/models.TimedRecurrence"
@@ -804,7 +798,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Object containing info about the event to update",
+                        "description": "Timed events require the complete canonical slot contract; day-only events require dates",
                         "name": "payload",
                         "in": "body",
                         "required": true,
@@ -838,9 +832,6 @@ const docTemplate = `{
                                 "description": {
                                     "type": "string"
                                 },
-                                "duration": {
-                                    "type": "number"
-                                },
                                 "enabledSlots": {
                                     "type": "array",
                                     "items": {
@@ -873,9 +864,6 @@ const docTemplate = `{
                                 },
                                 "slotGeneration": {
                                     "$ref": "#/definitions/models.SlotGeneration"
-                                },
-                                "timeIncrement": {
-                                    "type": "integer"
                                 },
                                 "timedRecurrence": {
                                     "$ref": "#/definitions/models.TimedRecurrence"
@@ -2907,8 +2895,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:3002/api",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "Schej.it API",
-	Description:      "This is the API for Schej.it!",
+	Title:            "Timeful API",
+	Description:      "This is the API for Timeful.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

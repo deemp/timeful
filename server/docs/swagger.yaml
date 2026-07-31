@@ -444,8 +444,8 @@ definitions:
 host: localhost:3002/api
 info:
   contact: {}
-  description: This is the API for Schej.it!
-  title: Schej.it API
+  description: This is the API for Timeful.
+  title: Timeful API
   version: "1.0"
 paths:
   /analytics/downgrade-user:
@@ -467,7 +467,7 @@ paths:
       responses:
         "200":
           description: OK
-      summary: Downgrades the specified user to Schej Free
+      summary: Downgrades the specified user to Timeful Free
       tags:
       - analytics
   /analytics/monthly-active-event-creators:
@@ -641,7 +641,7 @@ paths:
       responses:
         "200":
           description: OK
-      summary: Upgrades the specified user to Schej Premium
+      summary: Upgrades the specified user to Timeful Premium
       tags:
       - analytics
   /analytics/user/{email}:
@@ -833,7 +833,8 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: Object containing info about the event to create
+      - description: Timed events require the complete canonical slot contract; day-only
+          events require dates
         in: body
         name: payload
         required: true
@@ -855,8 +856,6 @@ paths:
               type: array
             daysOnly:
               type: boolean
-            duration:
-              type: number
             enabledSlots:
               items:
                 type: string
@@ -881,8 +880,6 @@ paths:
               type: array
             slotGeneration:
               $ref: '#/definitions/models.SlotGeneration'
-            timeIncrement:
-              type: integer
             timedRecurrence:
               $ref: '#/definitions/models.TimedRecurrence'
             type:
@@ -943,7 +940,8 @@ paths:
         name: eventId
         required: true
         type: string
-      - description: Object containing info about the event to update
+      - description: Timed events require the complete canonical slot contract; day-only
+          events require dates
         in: body
         name: payload
         required: true
@@ -967,8 +965,6 @@ paths:
               type: boolean
             description:
               type: string
-            duration:
-              type: number
             enabledSlots:
               items:
                 type: string
@@ -991,8 +987,6 @@ paths:
               type: array
             slotGeneration:
               $ref: '#/definitions/models.SlotGeneration'
-            timeIncrement:
-              type: integer
             timedRecurrence:
               $ref: '#/definitions/models.TimedRecurrence'
             type:

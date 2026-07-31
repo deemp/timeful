@@ -7,7 +7,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/text/unicode/norm"
-	"schej.it/server/models"
+	"timeful/server/models"
 )
 
 const MaxGuestNameLength = 100

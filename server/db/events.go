@@ -8,8 +8,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"schej.it/server/logger"
-	"schej.it/server/models"
+	"timeful/server/logger"
+	"timeful/server/models"
 )
 
 // Returns an event based on its _id
@@ -215,7 +215,7 @@ func GuestNameExists(eventId string, guestName string) bool {
 
 	// Check if the name is a valid ObjectID that corresponds to an existing user
 	// If so, block it to prevent conflicts
-	//NOTE: we're checking against ALL logged in users because in case we allowed this, and a user with an account tried to 
+	//NOTE: we're checking against ALL logged in users because in case we allowed this, and a user with an account tried to
 	// submit their availability, overwriting would happen and we'd lose data.
 	objectId, err := primitive.ObjectIDFromHex(guestName)
 	if err == nil {
@@ -226,7 +226,6 @@ func GuestNameExists(eventId string, guestName string) bool {
 			return true
 		}
 	}
-
 
 	// For events, check EventResponsesCollection
 	eventObjectId, err := primitive.ObjectIDFromHex(event.Id.Hex())

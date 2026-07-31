@@ -7,9 +7,9 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"schej.it/server/models"
-	"schej.it/server/services"
-	"schej.it/server/utils"
+	"timeful/server/models"
+	"timeful/server/services"
+	"timeful/server/utils"
 )
 
 type OutlookCalendar struct {

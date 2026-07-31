@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"net/url"
 
-	"schej.it/server/errs"
-	"schej.it/server/logger"
-	"schej.it/server/models"
-	"schej.it/server/services"
-	"schej.it/server/utils"
+	"timeful/server/errs"
+	"timeful/server/logger"
+	"timeful/server/models"
+	"timeful/server/services"
+	"timeful/server/utils"
 )
 
 func SearchContacts(user *models.User, query string) ([]models.User, *errs.GoogleAPIError) {

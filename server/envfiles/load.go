@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/joho/godotenv"
-	"schej.it/server/appenv"
+	"timeful/server/appenv"
 )
 
 // Load reads the first matching repo env file without overriding existing shell variables.

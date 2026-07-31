@@ -11,9 +11,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
-	"schej.it/server/db"
-	"schej.it/server/models"
-	"schej.it/server/slackbot"
+	"timeful/server/db"
+	"timeful/server/models"
+	"timeful/server/slackbot"
 )
 
 // BasicAuth middleware for analytics routes
@@ -260,7 +260,7 @@ func getMonthlyActiveEventCreatorsWithMoreThanXEvents(c *gin.Context) {
 	c.JSON(http.StatusOK, results)
 }
 
-// @Summary Upgrades the specified user to Schej Premium
+// @Summary Upgrades the specified user to Timeful Premium
 // @Tags analytics
 // @Accept json
 // @Produce json
@@ -288,7 +288,7 @@ func upgradeUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-// @Summary Downgrades the specified user to Schej Free
+// @Summary Downgrades the specified user to Timeful Free
 // @Tags analytics
 // @Accept json
 // @Produce json

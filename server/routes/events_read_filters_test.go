@@ -15,9 +15,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"schej.it/server/db"
-	"schej.it/server/models"
-	"schej.it/server/utils"
+	"timeful/server/db"
+	"timeful/server/models"
+	"timeful/server/utils"
 )
 
 var routesReadFiltersTestDBOnce sync.Once

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"schej.it/server/models"
+	"timeful/server/models"
 )
 
 func TestRepairCanonicalEventResponseGroupKeepsNewestCanonicalGuestDuplicate(t *testing.T) {

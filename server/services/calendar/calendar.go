@@ -3,8 +3,8 @@ package calendar
 import (
 	"time"
 
-	"schej.it/server/models"
-	"schej.it/server/services/auth"
+	"timeful/server/models"
+	"timeful/server/services/auth"
 )
 
 type GetCalendarListData struct {

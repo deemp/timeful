@@ -8,8 +8,8 @@ import (
 	"regexp"
 
 	"github.com/gin-gonic/gin"
-	"schej.it/server/slackbot/commands"
-	"schej.it/server/utils"
+	"timeful/server/slackbot/commands"
+	"timeful/server/utils"
 )
 
 type SlackbotMessageType string
@@ -36,14 +36,14 @@ func SendMessageWithType(message *commands.Response, messageType SlackbotMessage
 	if utils.IsRelease() {
 		switch messageType {
 		case GENERAL:
-			// schej-bot
+			// timeful-bot
 			webhookUrl = os.Getenv("SLACK_PROD_WEBHOOK_URL")
 		case MONETIZATION:
 			// monetization-bot
 			webhookUrl = os.Getenv("SLACK_MONETIZATION_WEBHOOK_URL")
 		}
 	} else {
-		// schej-bot-dev
+		// timeful-bot-dev
 		webhookUrl = os.Getenv("SLACK_DEV_WEBHOOK_URL")
 	}
 

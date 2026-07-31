@@ -17,17 +17,17 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"schej.it/server/db"
-	"schej.it/server/errs"
-	"schej.it/server/logger"
-	"schej.it/server/middleware"
-	"schej.it/server/models"
-	"schej.it/server/responses"
-	"schej.it/server/services/auth"
-	"schej.it/server/services/calendar"
-	"schej.it/server/services/listmonk"
-	"schej.it/server/services/microsoftgraph"
-	"schej.it/server/utils"
+	"timeful/server/db"
+	"timeful/server/errs"
+	"timeful/server/logger"
+	"timeful/server/middleware"
+	"timeful/server/models"
+	"timeful/server/responses"
+	"timeful/server/services/auth"
+	"timeful/server/services/calendar"
+	"timeful/server/services/listmonk"
+	"timeful/server/services/microsoftgraph"
+	"timeful/server/utils"
 )
 
 func InitAuth(router *gin.RouterGroup) {
@@ -219,7 +219,7 @@ func signInHelper(c *gin.Context, token auth.TokenResponse, tokenOrigin models.T
 
 		userId = res.InsertedID.(primitive.ObjectID)
 
-		// slackbot.SendTextMessage(fmt.Sprintf(":wave: %s %s (%s) has joined schej.it!", firstName, lastName, email))
+		// slackbot.SendTextMessage(fmt.Sprintf(":wave: %s %s (%s) has joined Timeful!", firstName, lastName, email))
 	} else {
 		user := existing
 		userId = user.Id

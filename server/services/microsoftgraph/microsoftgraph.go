@@ -3,9 +3,9 @@ package microsoftgraph
 import (
 	"encoding/json"
 
-	"schej.it/server/logger"
-	"schej.it/server/models"
-	"schej.it/server/services"
+	"timeful/server/logger"
+	"timeful/server/models"
+	"timeful/server/services"
 )
 
 type UserInfo struct {

@@ -20,8 +20,8 @@ import (
 	"github.com/brianvoe/sjwt"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"schej.it/server/logger"
-	"schej.it/server/models"
+	"timeful/server/logger"
+	"timeful/server/models"
 )
 
 // Returns whether running on production server

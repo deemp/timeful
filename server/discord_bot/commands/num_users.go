@@ -6,8 +6,8 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"go.mongodb.org/mongo-driver/bson"
-	"schej.it/server/db"
-	"schej.it/server/logger"
+	"timeful/server/db"
+	"timeful/server/logger"
 )
 
 var numUsers Command = Command{

@@ -3,7 +3,7 @@ package calendar
 import (
 	"time"
 
-	"schej.it/server/models"
+	"timeful/server/models"
 )
 
 type CalendarProvider interface {

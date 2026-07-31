@@ -1,8 +1,8 @@
 package main
 
 import (
-	"schej.it/server/models"
-	"schej.it/server/respondents"
+	"timeful/server/models"
+	"timeful/server/respondents"
 )
 
 type canonicalizedEventResponse struct {

@@ -1,4 +1,4 @@
-module schej.it/server
+module timeful/server
 
 go 1.20
 
