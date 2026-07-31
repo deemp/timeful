@@ -5,7 +5,8 @@ Production and staging deployment using Docker Compose behind one shared Docker 
 ## Prerequisites
 
 - Docker and Docker Compose
-- Domain with DNS pointing to your server
+- The deploy user can run Docker. Either add it to the `docker` group or prefix the commands below with `sudo`.
+- A domain with DNS pointing to your server before Caddy starts
 - Inbound TCP ports 80 and 443, plus UDP port 443
 
 ## Quick Start
@@ -15,7 +16,7 @@ Production and staging deployment using Docker Compose behind one shared Docker 
 git clone https://github.com/deemp/timeful
 cd timeful
 
-# 2. Create both app environment files. Caddy reads their namespaced host variables.
+# 2. Create both app environment files. The shared edge reads their namespaced host variables.
 cp .env.production.example .env.production
 cp .env.staging.example .env.staging
 
@@ -34,6 +35,21 @@ docker compose --project-name timeful-production --env-file .env.production -f c
 # Start staging independently when needed.
 # docker compose --project-name timeful-staging --env-file .env.staging -f compose.yaml -f compose.staging.yaml up -d --build
 ```
+
+### Staging Only
+
+Use the staging-only edge when production is not running on this server. It requires only
+`.env.staging` and the staging frontend volume:
+
+```bash
+docker network inspect timeful-edge >/dev/null 2>&1 || docker network create timeful-edge
+docker volume inspect timeful-staging-frontend-dist >/dev/null 2>&1 || docker volume create timeful-staging-frontend-dist
+docker compose --env-file .env.staging -f compose.edge.staging.yaml up -d
+docker compose --project-name timeful-staging --env-file .env.staging -f compose.yaml -f compose.staging.yaml up -d --build
+```
+
+Only one Caddy edge can bind ports 80 and 443. Stop the staging-only edge before starting the
+shared production-and-staging edge.
 
 ## Services
 
@@ -70,6 +86,17 @@ The production and staging site hostnames are read from their respective app env
 every canonical and `www` hostname must point to the server before Caddy can obtain its
 certificates.
 
+For `staging.timeful.fun` on a server with IPv4 address `192.144.13.176`, create these DNS records
+before starting Caddy:
+
+| Type | Name | Value |
+| ---- | ---- | ----- |
+| `A` | `staging` | `192.144.13.176` |
+| `A` | `www.staging` | `192.144.13.176` |
+
+Do not create an `AAAA` record unless the server has a reachable IPv6 address. Caddy logs an
+ACME DNS error and cannot issue HTTPS certificates until every configured hostname resolves.
+
 ## Commands
 
 > [!CAUTION]
@@ -92,6 +119,36 @@ Staging uses the same base commands with the staging env file and override:
 docker compose --project-name timeful-staging --env-file .env.staging -f compose.yaml -f compose.staging.yaml up -d --build
 docker compose --project-name timeful-staging --env-file .env.staging -f compose.yaml -f compose.staging.yaml logs -f
 docker compose --project-name timeful-staging --env-file .env.staging -f compose.yaml -f compose.staging.yaml down
+```
+
+## Upgrading an Existing Deployment
+
+Back up MongoDB before changing the database authentication contract. Existing deployments that
+only define `MONGODB_URI` must add the `MONGODB_ROOT_*`, `MONGODB_APP_*`, and `MONGODB_DATABASE`
+values from the current environment template.
+
+```bash
+git pull --autostash origin main
+docker compose --project-name timeful-production --env-file .env.production -f compose.yaml -f compose.production.yaml up -d mongo
+scripts/mongo/bootstrap-existing-users.sh production
+# Or, for staging:
+docker compose --project-name timeful-staging --env-file .env.staging -f compose.yaml -f compose.staging.yaml up -d mongo
+scripts/mongo/bootstrap-existing-users.sh staging
+```
+
+If the pull reports a conflict for the retired root `Caddyfile`, retain the new `caddy/` layout and
+move any custom host rules into a file under `caddy/sites/`. The autostash remains available until
+it is explicitly dropped.
+
+## Validation
+
+After deployment, confirm the selected application stack is healthy and the public edge is serving
+it:
+
+```bash
+docker compose --project-name timeful-staging --env-file .env.staging -f compose.yaml -f compose.staging.yaml ps
+curl -fsS https://staging.timeful.fun/api/health
+docker compose --env-file .env.staging -f compose.edge.staging.yaml logs --tail=50 caddy
 ```
 
 ## Data & Backup
@@ -145,18 +202,25 @@ The selected root env file is the single source of truth for:
 
 See `docs/environments.md` for the full contract and development commands.
 
-#### Required
+#### Required To Start
 
 | Variable         | Description                                                                 |
 | ---------------- | --------------------------------------------------------------------------- |
-| `CLIENT_ID`      | Google OAuth client ID                                                      |
-| `CLIENT_SECRET`  | Google OAuth client secret                                                  |
 | `ENCRYPTION_KEY` | Key for encrypting sensitive data (generate with `openssl rand -base64 32`) |
 | `SESSION_SECRET` | Session cookie encryption key (generate with `openssl rand -base64 32`)     |
 | `APP_BASE_URL` | Canonical public HTTPS origin used in generated links and payment redirects |
 | `MONGODB_ROOT_USERNAME` / `MONGODB_ROOT_PASSWORD` | MongoDB administrative account for backups and maintenance |
 | `MONGODB_APP_USERNAME` / `MONGODB_APP_PASSWORD` | MongoDB application account with access only to `MONGODB_DATABASE` |
 | `MONGODB_DATABASE` | Application database name; defaults to `timeful` |
+
+`CADDY_PRODUCTION_DOMAIN` and `CADDY_PRODUCTION_WWW_DOMAIN`, or their staging equivalents, are
+required by the Caddy edge that serves that environment.
+
+#### Required For Enabled Features
+
+| Variable | Feature |
+| -------- | ------- |
+| `CLIENT_ID` / `CLIENT_SECRET` | Google sign-in and calendar integration |
 
 #### Optional — Payments
 

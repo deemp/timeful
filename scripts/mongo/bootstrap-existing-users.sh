@@ -1,7 +1,27 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-env_file="${1:-.env.production}"
+environment="${1:-production}"
+
+case "$environment" in
+production)
+  env_file=".env.production"
+  project_name="timeful-production"
+  override_file="compose.production.yaml"
+  ;;
+staging)
+  env_file=".env.staging"
+  project_name="timeful-staging"
+  override_file="compose.staging.yaml"
+  ;;
+*)
+  printf 'Usage: %s [production|staging]\n' "$0" >&2
+  exit 1
+  ;;
+esac
+
+repo_root="$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)"
+cd "$repo_root"
 
 if [[ ! -f "$env_file" ]]; then
   printf 'Environment file not found: %s\n' "$env_file" >&2
@@ -19,7 +39,13 @@ set +a
 : "${MONGODB_APP_PASSWORD:?MONGODB_APP_PASSWORD is required}"
 : "${MONGODB_DATABASE:?MONGODB_DATABASE is required}"
 
-compose=(docker compose --env-file "$env_file")
+compose=(
+  docker compose
+  --project-name "$project_name"
+  --env-file "$env_file"
+  -f compose.yaml
+  -f "$override_file"
+)
 
 "${compose[@]}" cp mongo/migration/create-users.js mongo:/tmp/timeful-create-users.js
 "${compose[@]}" exec -T \
