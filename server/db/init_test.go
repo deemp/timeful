@@ -19,14 +19,14 @@ func TestDatabaseNameDefaultsToTimeful(t *testing.T) {
 	}
 }
 
-func TestPingReturnsErrorWhenClientIsUninitialized(t *testing.T) {
-	previousClient := Client
-	Client = nil
+func TestPingReturnsErrorWhenDatabaseIsUninitialized(t *testing.T) {
+	previousDatabase := Db
+	Db = nil
 	t.Cleanup(func() {
-		Client = previousClient
+		Db = previousDatabase
 	})
 
 	if err := Ping(context.Background()); err == nil {
-		t.Fatal("Ping() error = nil, want an uninitialized client error")
+		t.Fatal("Ping() error = nil, want an uninitialized database error")
 	}
 }

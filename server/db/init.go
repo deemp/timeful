@@ -9,7 +9,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"timeful/server/logger"
 )
 
@@ -34,11 +33,11 @@ func DatabaseName() string {
 }
 
 func Ping(ctx context.Context) error {
-	if Client == nil {
-		return errors.New("mongodb client is not initialized")
+	if Db == nil {
+		return errors.New("mongodb database is not initialized")
 	}
 
-	return Client.Ping(ctx, readpref.Primary())
+	return Db.RunCommand(ctx, bson.D{{Key: "ping", Value: 1}}).Err()
 }
 
 func Init() func() {
