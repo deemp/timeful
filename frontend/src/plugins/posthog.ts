@@ -49,6 +49,7 @@ function loadPosthog(): Promise<PosthogClient | null> {
   }
 
   const apiKey = import.meta.env.VITE_POSTHOG_API_KEY.trim()
+  const apiHost = import.meta.env.VITE_POSTHOG_API_HOST?.trim()
   if (!apiKey) {
     return Promise.resolve(null)
   }
@@ -56,7 +57,7 @@ function loadPosthog(): Promise<PosthogClient | null> {
   posthogLoadPromise = import("posthog-js")
     .then(({ default: client }) => {
       client.init(apiKey, {
-        api_host: "https://e.timeful.app",
+        ...(apiHost ? { api_host: apiHost } : {}),
         capture_pageview: false,
         autocapture: false,
       })

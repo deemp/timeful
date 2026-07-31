@@ -34,6 +34,20 @@ import {
   type Timezone,
 } from "./types"
 
+const getCurrentOrigin = () => {
+  const location = Reflect.get(globalThis, "location") as unknown
+  if (
+    typeof location !== "object" ||
+    location === null ||
+    !("origin" in location) ||
+    typeof location.origin !== "string"
+  ) {
+    return ""
+  }
+
+  return location.origin
+}
+
 export interface UseEventSchedulingOptions {
   event: Ref<ScheduleOverlapEvent>
   // TODO
@@ -192,6 +206,7 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
 
     const eventId = opts.event.value.shortId ?? opts.event.value._id ?? ""
     const scheduleTimezoneId = encodeURIComponent(opts.curTimezone.value.value)
+    const appOrigin = getCurrentOrigin()
 
     let url: string
     if (googleCalendar) {
@@ -206,13 +221,13 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
       url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
         opts.event.value.name ?? ""
       )}&dates=${start}/${end}&details=${encodeURIComponent(
-        "\n\nThis event was scheduled with Timeful: https://timeful.app/e/"
+        `\n\nThis event was scheduled with Timeful: ${appOrigin}/e/`
       )}${eventId}&ctz=${scheduleTimezoneId}&add=${emailsString}`
     } else {
       url = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(
         opts.event.value.name ?? ""
       )}&body=${encodeURIComponent(
-        "\n\nThis event was scheduled with Timeful: https://timeful.app/e/" +
+        `\n\nThis event was scheduled with Timeful: ${appOrigin}/e/` +
           eventId
       )}&startdt=${startDate.toInstant().toString()}&enddt=${endDate
         .toInstant()

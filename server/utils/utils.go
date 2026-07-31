@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"regexp"
 	"strings"
@@ -114,15 +115,32 @@ func PrintHttpResponse(resp *http.Response) {
 	resp.Body = io.NopCloser(bytes.NewBuffer(body))
 }
 
-// Returns the correct base URL for development versus release environments.
+// GetBaseUrl returns the canonical public application origin for generated links.
 func GetBaseUrl() string {
-	var baseUrl string
-	if IsRelease() {
-		baseUrl = "https://timeful.app"
-	} else {
-		baseUrl = "http://localhost:8080"
+	baseUrl, err := normalizedBaseUrl(os.Getenv("APP_BASE_URL"))
+	if err != nil {
+		panic(err)
 	}
 	return baseUrl
+}
+
+func ValidateBaseUrl() error {
+	_, err := normalizedBaseUrl(os.Getenv("APP_BASE_URL"))
+	return err
+}
+
+func normalizedBaseUrl(value string) (string, error) {
+	parsed, err := url.Parse(strings.TrimSpace(value))
+	if err != nil || parsed.Scheme == "" || parsed.Host == "" {
+		return "", errors.New("APP_BASE_URL must be an absolute HTTP(S) origin")
+	}
+	if parsed.Scheme != "http" && parsed.Scheme != "https" {
+		return "", errors.New("APP_BASE_URL must use the http or https scheme")
+	}
+	if parsed.User != nil || (parsed.Path != "" && parsed.Path != "/") || parsed.RawQuery != "" || parsed.Fragment != "" {
+		return "", errors.New("APP_BASE_URL must not include credentials, a path, query, or fragment")
+	}
+	return parsed.Scheme + "://" + parsed.Host, nil
 }
 
 // Returns the value of the first non nil pointer in `args`.

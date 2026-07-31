@@ -105,10 +105,8 @@ func main() {
 	corsOrigins := os.Getenv("CORS_ORIGINS")
 	if corsOrigins == "" {
 		corsOrigins = strings.Join([]string{
-			"https://www.schej.it",
-			"https://schej.it",
-			"https://www.timeful.app",
-			"https://timeful.app",
+			"https://www.timeful.fun",
+			"https://timeful.fun",
 			"http://localhost:8080",
 			"http://localhost:4173",
 			"http://localhost:4174",
@@ -213,6 +211,9 @@ func loadDotEnv() {
 
 	// Validate session secret
 	validateSessionSecret()
+	if err := utils.ValidateBaseUrl(); err != nil {
+		logger.StdErr.Panicln(err)
+	}
 }
 
 // validateSessionSecret ensures SESSION_SECRET is set and meets security requirements

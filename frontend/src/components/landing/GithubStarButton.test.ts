@@ -26,7 +26,7 @@ describe("GithubStarButton", () => {
     const anchor = wrapper.get("a")
     expect(anchor.attributes("href")).toBe(repoUrl)
     expect(anchor.attributes("data-show-count")).toBe("true")
-    expect(anchor.attributes("aria-label")).toBe("Star timeful.app on GitHub")
+    expect(anchor.attributes("aria-label")).toBe("Star Timeful on GitHub")
 
     await nextTick()
     await nextTick()

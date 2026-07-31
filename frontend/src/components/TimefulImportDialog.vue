@@ -26,7 +26,7 @@
         <v-text-field
           v-model="url"
           label="Event URL"
-          placeholder="https://timeful.app/e/abc123"
+          placeholder="https://example.com/e/abc123"
           variant="outlined"
           density="compact"
           :disabled="loading"

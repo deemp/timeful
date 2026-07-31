@@ -83,9 +83,9 @@ describe("TimefulImportDialog", () => {
   })
 
   it("blocks same-host and private import URLs through the shared validation boundary", () => {
-    expect(isBlockedTimefulImportUrl("https://timeful.app/e/abc123", "timeful.app")).toBe(true)
-    expect(isBlockedTimefulImportUrl("http://localhost/e/abc123", "timeful.app")).toBe(true)
-    expect(isBlockedTimefulImportUrl("https://remote.example/e/abc123", "timeful.app")).toBe(
+    expect(isBlockedTimefulImportUrl("https://timeful.fun/e/abc123", "timeful.fun")).toBe(true)
+    expect(isBlockedTimefulImportUrl("http://localhost/e/abc123", "timeful.fun")).toBe(true)
+    expect(isBlockedTimefulImportUrl("https://remote.example/e/abc123", "timeful.fun")).toBe(
       false
     )
   })
@@ -107,7 +107,7 @@ describe("TimefulImportDialog", () => {
     expect(textField.props("disabled")).toBe(false)
     expect(textField.props("errorMessages")).toBe("")
 
-    await wrapper.get('input[placeholder="https://timeful.app/e/abc123"]').setValue(
+    await wrapper.get('input[placeholder="https://example.com/e/abc123"]').setValue(
       "https://remote.example/e/abc123"
     )
     await findButtonByText(wrapper, "Import").trigger("click")
@@ -118,7 +118,7 @@ describe("TimefulImportDialog", () => {
     resolveImport({ shortId: "new123" })
     await flushPromises()
 
-    await wrapper.get('input[placeholder="https://timeful.app/e/abc123"]').setValue(
+    await wrapper.get('input[placeholder="https://example.com/e/abc123"]').setValue(
       "http://localhost/e/blocked"
     )
     await findButtonByText(wrapper, "Import").trigger("click")
@@ -131,7 +131,7 @@ describe("TimefulImportDialog", () => {
   it("resets the form when closed without relying on a writable computed model shim", async () => {
     const wrapper = mountDialog()
 
-    await wrapper.get('input[placeholder="https://timeful.app/e/abc123"]').setValue(
+    await wrapper.get('input[placeholder="https://example.com/e/abc123"]').setValue(
       "https://remote.example/e/abc123"
     )
 
@@ -140,7 +140,7 @@ describe("TimefulImportDialog", () => {
     expect(wrapper.emitted("update:modelValue")).toEqual([[false]])
     expect(
       (
-        wrapper.get('input[placeholder="https://timeful.app/e/abc123"]')
+        wrapper.get('input[placeholder="https://example.com/e/abc123"]')
           .element as HTMLInputElement
       ).value
     ).toBe("")

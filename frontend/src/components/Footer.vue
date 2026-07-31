@@ -100,7 +100,7 @@
                 <div class="tw-text-sm">
                   Email support at
                   <span class="tw-text-green tw-underline"
-                    >contact@timeful.app</span
+                    >contact@timeful.fun</span
                   >
                 </div>
               </v-card>

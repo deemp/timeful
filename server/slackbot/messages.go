@@ -10,15 +10,18 @@ import (
 )
 
 func SendEventCreatedMessage(insertedId string, creator string, event models.Event, numAttendees int) {
+	baseUrl := utils.GetBaseUrl()
 	eventInfoText := fmt.Sprintf(
 		"*Name*: %s\n"+
-			"*Event url*: https://schej.it/e/%s\n"+
-			"*Short url*: https://schej.it/e/%s\n"+
+			"*Event url*: %s/e/%s\n"+
+			"*Short url*: %s/e/%s\n"+
 			"*Creator*: %s\n"+
 			"*Num days*: %v\n"+
 			"*Type*: %s\n",
 		event.Name,
+		baseUrl,
 		insertedId,
+		baseUrl,
 		utils.Coalesce(event.ShortId),
 		creator,
 		len(event.Dates),

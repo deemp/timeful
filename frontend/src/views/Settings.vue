@@ -137,9 +137,9 @@
           <div class="tw-text-black">
             Email us at
             <a
-              href="mailto:contact@timeful.app"
+              href="mailto:contact@timeful.fun"
               class="tw-text-black tw-underline"
-              >contact@timeful.app</a
+              >contact@timeful.fun</a
             >
             with any questions!
           </div>

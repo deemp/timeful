@@ -4,7 +4,7 @@
       ref="buttonAnchor"
       :href="gitHubRepoUrl"
       data-show-count="true"
-      aria-label="Star timeful.app on GitHub"
+    aria-label="Star Timeful on GitHub"
     >
       Star
     </a>
