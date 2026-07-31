@@ -220,6 +220,13 @@ Semi-structured TODO list
 - [ ] When hover over collapsed stripe, don't show the pointer for selecting hours
 - [ ] editing availability as - add input field to write the name over Available
 - [ ] on the event page, "Show all hours" should be over "Hide if needed times"
+- [x] remove Add availability, leave just edit availability
+   No. In this case, we won't be able to add availability for someone
+- [ ] Everyone should be unavailable in responses when hover over red, light-grey, or dark-grey
+- [ ] switch to when2meet in the repo
+- [ ] make the app name configurable and when2meet by default
+- [ ] why grey without grid in <http://127.0.0.1:4173/e/Eb67A> at gmt+9?
+- [ ] reduce the number of columns on mobile so that the event can fit into that
 
 ## MUST
 
