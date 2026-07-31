@@ -88,7 +88,6 @@ describe("Landing minimal mode", () => {
           AuthUserMenu: true,
           FAQ: { template: '<div data-test="faq" />' },
           Footer: { template: '<footer data-test="landing-footer" />' },
-          FormerlyKnownAs: { template: '<div data-test="formerly-known-as" />' },
           Header: PassThroughStub,
           HowItWorksDialog: true,
           LandingPageHeader: PassThroughStub,

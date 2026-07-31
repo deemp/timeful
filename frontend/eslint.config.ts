@@ -129,6 +129,14 @@ const config: ConfigArray = [
     },
   },
 
+  // OpenAPI Typescript emits index signatures for map schemas.
+  {
+    files: ['src/types/api.ts'],
+    rules: {
+      '@typescript-eslint/consistent-indexed-object-style': 'off',
+    },
+  },
+
   // Disable type-checked rules for config/build files and plain JS (not covered by tsconfig)
   // eslint.config.ts is included here so type-checked rules don't run on the config itself
   {

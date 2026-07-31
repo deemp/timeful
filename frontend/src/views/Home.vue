@@ -1,10 +1,7 @@
 <template>
   <span>
-    <FormerlyKnownAs
-      class="tw-mx-auto tw-mb-10 tw-mt-3 tw-max-w-6xl tw-pl-4 sm:tw-pl-12"
-    />
     <div
-      class="tw-mx-auto tw-mb-24 tw-mt-4 tw-max-w-6xl tw-space-y-4 sm:tw-mb-12 sm:tw-mt-7"
+      class="tw-mx-auto tw-mb-24 tw-mt-7 tw-max-w-6xl tw-space-y-4 sm:tw-mb-12"
     >
       <!-- Preload images -->
       <div class="tw-hidden">
@@ -103,7 +100,6 @@ import Dashboard from "@/components/home/Dashboard.vue"
 import { useMainStore } from "@/stores/main"
 import { useDisplayHelpers } from "@/utils/useDisplayHelpers"
 import { posthog } from "@/plugins/posthog"
-import FormerlyKnownAs from "@/components/FormerlyKnownAs.vue"
 import type { EventDraft } from "@/composables/event/types"
 import { hasEventDraftData } from "@/composables/event/draftBoundary"
 import { fetchAuthUserProfile } from "@/utils/services/UserService"

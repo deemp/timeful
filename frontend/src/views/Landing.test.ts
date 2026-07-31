@@ -3,7 +3,6 @@
 import { flushPromises, shallowMount } from "@vue/test-utils"
 import { ref } from "vue"
 import { describe, expect, it, vi } from "vitest"
-import FormerlyKnownAs from "@/components/FormerlyKnownAs.vue"
 import Landing from "./Landing.vue"
 
 vi.mock("@unhead/vue", () => ({
@@ -87,7 +86,6 @@ describe("Landing", () => {
           AuthUserMenu: true,
           FAQ: true,
           Footer: true,
-          FormerlyKnownAs: false,
           Header: PassThroughStub,
           HowItWorksDialog: true,
           LandingPageHeader: PassThroughStub,
@@ -108,7 +106,7 @@ describe("Landing", () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain("Create event")
-    expect(wrapper.findAll(".reddit-comment .rdt-h")).toHaveLength(5)
+    expect(wrapper.findAll(".reddit-comment .rdt-h")).toHaveLength(2)
     expect(wrapper.html()).not.toContain("v-html")
   })
 
@@ -119,7 +117,6 @@ describe("Landing", () => {
           AuthUserMenu: true,
           FAQ: true,
           Footer: true,
-          FormerlyKnownAs: true,
           Header: PassThroughStub,
           HowItWorksDialog: true,
           LandingPageHeader: PassThroughStub,
@@ -146,7 +143,7 @@ describe("Landing", () => {
     expect(iconButtons.length).toBeGreaterThanOrEqual(1)
   })
 
-  it("keeps the landing hero style hooks for calendar, CTA, and legacy note parity", async () => {
+  it("keeps the landing hero style hooks for calendar and CTA", async () => {
     const landingWrapper = shallowMount(Landing, {
       global: {
         stubs: {
@@ -170,22 +167,12 @@ describe("Landing", () => {
       },
     })
 
-    const legacyNoteWrapper = shallowMount(FormerlyKnownAs, {
-      global: {
-        stubs: {
-          "v-icon": true,
-        },
-      },
-    })
-
     await flushPromises()
 
     const calendarLink = landingWrapper.get(".landing-calendar-link")
-    const legacyNote = legacyNoteWrapper.get(".formerly-known-as-link")
     const primaryCta = landingWrapper.get(".landing-primary-cta")
 
     expect(calendarLink.text()).toBe("calendar")
-    expect(legacyNote.text()).toContain('Formerly known as "Schej"')
     expect(primaryCta.classes()).toContain("tw-text-white")
   })
 
@@ -196,7 +183,6 @@ describe("Landing", () => {
           AuthUserMenu: true,
           FAQ: true,
           Footer: { template: '<footer data-test="landing-footer" />' },
-          FormerlyKnownAs: { template: '<div data-test="formerly-known-as" />' },
           Header: PassThroughStub,
           HowItWorksDialog: true,
           LandingPageHeader: PassThroughStub,
@@ -216,7 +202,6 @@ describe("Landing", () => {
 
     await flushPromises()
 
-    expect(wrapper.find('[data-test="formerly-known-as"]').exists()).toBe(true)
     expect(wrapper.find("#how-it-works").exists()).toBe(false)
     expect(wrapper.find('[data-test="landing-footer"]').exists()).toBe(true)
     expect(wrapper.text()).toContain("People love us on Reddit!")

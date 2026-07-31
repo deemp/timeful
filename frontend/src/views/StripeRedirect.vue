@@ -10,8 +10,8 @@
       <template v-else>
         <div class="tw-flex tw-flex-col tw-items-center tw-gap-4">
           <v-img
-            alt="schejie heart"
-            src="@/assets/schejie/heart.png"
+            alt="Timeful mascot with a heart"
+            src="@/assets/mascot/heart.png"
             transition="fade-transition"
             contain
             class="tw-mb-0 tw-h-[150px] tw-flex-none sm:tw-h-[200px]"

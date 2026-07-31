@@ -38,14 +38,6 @@
               ></a
             >
             <a
-              href="https://www.linkedin.com/company/schejit"
-              aria-label="LinkedIn"
-              target="_blank"
-              ><v-icon class="tw-text-white/80 hover:tw-text-white"
-                >mdi-linkedin</v-icon
-              ></a
-            >
-            <a
               href="https://www.reddit.com/r/timefulapp/"
               target="_blank"
               aria-label="Reddit"
@@ -118,11 +110,6 @@
         <!-- Articles -->
         <div class="tw-flex tw-flex-col tw-gap-2">
           <div class="tw-mb-1 tw-font-bold">Articles</div>
-          <div>
-            <a href="/blog/schej-is-now-timeful/" class="tw-text-sm"
-              >Schej is now Timeful</a
-            >
-          </div>
           <div>
             <a href="/blog/about/" class="tw-text-sm"
               >Welcome to the Timeful blog!</a

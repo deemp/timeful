@@ -52,7 +52,6 @@
           </LandingPageHeader>
         </div>
 
-        <FormerlyKnownAs v-if="richLandingEnabled" />
       </div>
 
       <div class="tw-flex tw-flex-col tw-items-center">
@@ -251,7 +250,6 @@ import { posthog } from "@/plugins/posthog"
 import { richLandingEnabled } from "@/utils/landingAvailability"
 import { signInEnabled } from "@/utils/signInAvailability"
 import AuthUserMenu from "@/components/AuthUserMenu.vue"
-import FormerlyKnownAs from "@/components/FormerlyKnownAs.vue"
 import eventImage from "@/assets/demo/event.webp"
 import type { User } from "@/types"
 
@@ -276,7 +274,7 @@ interface FaqEntry {
   authRequired?: boolean
 }
 
-useHead({ title: "Timeful (formerly Schej) - Find a time to meet" })
+useHead({ title: "Timeful - Find a time to meet" })
 
 const router = useRouter()
 const display = useDisplay()
@@ -369,39 +367,6 @@ const redditComments: RedditComment[] = [
   },
   {
     paragraphs: [[
-      { text: "It's almost " },
-      { text: "comically easy", highlight: true },
-      { text: " to schedule meetings with Timeful." },
-    ]],
-    author: "u/stuffingmybrain",
-    link: "https://www.reddit.com/r/schej/comments/1drs26z/comment/lb8rvty",
-    picture:
-      "https://styles.redditmedia.com/t5_qqojf/styles/profileIcon_snooa54a8eae-bc7f-406f-9778-b3b9dfb818e5-headshot.png?width=64&height=64&frame=1&auto=webp&crop=&s=a0a91575ff7cfc3b6698cac69da6c012c7deb8d6",
-  },
-  {
-    paragraphs: [[
-      { text: "Timeful is everything I've ever wanted and more. On top of that, " },
-      { text: "community support is the best I've seen", highlight: true },
-      { text: " of any app or software, ever." },
-    ]],
-    author: "u/DMODD",
-    link: "https://www.reddit.com/r/schej/comments/1drs26z/comment/lb8udud",
-    picture:
-      "https://www.redditstatic.com/avatars/defaults/v2/avatar_default_6.png",
-  },
-  {
-    paragraphs: [[
-      { text: "With Timeful, " },
-      { text: "I'm very quickly able to figure out the optimal time", highlight: true },
-      { text: " to schedule online extra help sessions before an exam." },
-    ]],
-    author: "u/crackwurst",
-    link: "https://www.reddit.com/r/schej/comments/1drs26z/comment/lb9dmbe",
-    picture:
-      "https://www.redditstatic.com/avatars/defaults/v2/avatar_default_3.png",
-  },
-  {
-    paragraphs: [[
       { text: "Exactly what I was looking for! Clear and clean interface, also on mobile (" },
       { text: "Doodle is a disaster", highlight: true },
       { text: ")." },
@@ -423,7 +388,7 @@ const redditComments: RedditComment[] = [
 function loadRiveAnimation() {
   // if (!rive.value) {
   //   rive.value = new Rive({
-  //     src: "/rive/schej.riv",
+  //     src: "/rive/timeful.riv",
   //     canvas: document.querySelector("canvas"),
   //     autoplay: false,
   //     stateMachines: "wave",
@@ -432,7 +397,7 @@ function loadRiveAnimation() {
   //     },
   //   })
   //   setTimeout(() => {
-  //     showSchejy.value = true
+  //     showTimefulMascot.value = true
   //     setTimeout(() => {
   //       rive.value.play("wave")
   //     }, 1000)

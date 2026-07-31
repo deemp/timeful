@@ -3,8 +3,6 @@
  * Do not make direct changes to the file.
  */
 
-/* eslint-disable @typescript-eslint/consistent-indexed-object-style */
-
 export interface paths {
     "/analytics/downgrade-user": {
         parameters: {
@@ -15,7 +13,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Downgrades the specified user to Schej Free */
+        /** Downgrades the specified user to Timeful Free */
         post: {
             parameters: {
                 query?: never;
@@ -268,7 +266,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Upgrades the specified user to Schej Premium */
+        /** Upgrades the specified user to Timeful Premium */
         post: {
             parameters: {
                 query?: never;
@@ -655,7 +653,7 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            /** @description Object containing info about the event to create */
+            /** @description Timed events require the complete canonical slot contract; day-only events require dates */
             requestBody: {
                 content: {
                     "application/json": {
@@ -664,7 +662,6 @@ export interface paths {
                         blindAvailabilityEnabled?: boolean;
                         dates?: string[];
                         daysOnly?: boolean;
-                        duration?: number;
                         enabledSlots?: string[];
                         eventTimezone?: string;
                         isSignUpForm?: boolean;
@@ -674,7 +671,6 @@ export interface paths {
                         sendEmailAfterXResponses?: number;
                         signUpBlocks?: components["schemas"]["models.SignUpBlock"][];
                         slotGeneration?: components["schemas"]["models.SlotGeneration"];
-                        timeIncrement?: number;
                         timedRecurrence?: components["schemas"]["models.TimedRecurrence"];
                         type?: components["schemas"]["models.EventType"];
                         when2meetHref?: string;
@@ -743,7 +739,7 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            /** @description Object containing info about the event to update */
+            /** @description Timed events require the complete canonical slot contract; day-only events require dates */
             requestBody: {
                 content: {
                     "application/json": {
@@ -753,7 +749,6 @@ export interface paths {
                         dates?: string[];
                         daysOnly?: boolean;
                         description?: string;
-                        duration?: number;
                         enabledSlots?: string[];
                         eventTimezone?: string;
                         name?: string;
@@ -762,7 +757,6 @@ export interface paths {
                         sendEmailAfterXResponses?: number;
                         signUpBlocks?: components["schemas"]["models.SignUpBlock"][];
                         slotGeneration?: components["schemas"]["models.SlotGeneration"];
-                        timeIncrement?: number;
                         timedRecurrence?: components["schemas"]["models.TimedRecurrence"];
                         type?: components["schemas"]["models.EventType"];
                     };

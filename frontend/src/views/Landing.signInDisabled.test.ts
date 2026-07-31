@@ -90,7 +90,6 @@ describe("Landing sign-in disabled", () => {
           AuthUserMenu: true,
           FAQ: true,
           Footer: true,
-          FormerlyKnownAs: true,
           Header: PassThroughStub,
           HowItWorksDialog: true,
           LandingPageHeader: PassThroughStub,

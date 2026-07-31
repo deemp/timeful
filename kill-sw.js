@@ -1,4 +1,4 @@
-// /schej.it/kill-sw.js
+// /timeful/kill-sw.js
 self.addEventListener("install", function (e) {
   self.skipWaiting();
 });

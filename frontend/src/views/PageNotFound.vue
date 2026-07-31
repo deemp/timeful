@@ -3,8 +3,8 @@
     class="tw-flex tw-h-full tw-flex-col tw-items-center tw-justify-center tw-p-2"
   >
     <v-img
-      alt="schejie sad"
-      src="@/assets/schej/sad.png"
+      alt="Timeful mascot looking sad"
+      src="@/assets/mascot/sad.png"
       transition="fade-transition"
       contain
       class="tw-mb-6 tw-h-[150px] tw-flex-none sm:tw-h-[200px]"

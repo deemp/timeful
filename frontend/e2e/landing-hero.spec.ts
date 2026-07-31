@@ -45,13 +45,11 @@ test.describe("landing hero", () => {
     const subtitle = page.locator(".landing-hero-subtitle")
     const cta = page.getByRole("button", { name: "Create event" })
     const calendarLink = page.locator(".landing-calendar-link")
-    const legacyNote = page.getByRole("link", { name: 'Formerly known as "Schej"' })
 
     await expect(heading).toBeVisible()
     await expect(subtitle).toBeVisible()
     await expect(cta).toBeVisible()
     await expect(calendarLink).toBeVisible()
-    await expect(legacyNote).toBeVisible()
 
     await expect(heading).toHaveCSS("font-size", "48px")
     await expect(heading).toHaveCSS("font-weight", "500")
@@ -63,16 +61,12 @@ test.describe("landing hero", () => {
     await expect(calendarLink).toHaveCSS("border-bottom-style", "dashed")
     await expect(calendarLink).toHaveCSS("text-decoration-line", "none")
     await expect(calendarLink).toHaveCSS("outline-style", "none")
-    await expect(legacyNote).toHaveCSS("text-decoration-line", "none")
-    await expect(legacyNote).toHaveCSS("outline-style", "none")
 
     const headingBox = await heading.boundingBox()
     const subtitleBox = await subtitle.boundingBox()
-    const legacyNoteBox = await legacyNote.boundingBox()
 
     expect(assertPresent(headingBox, "Expected landing hero heading box").y).toBeCloseTo(280, 0)
     expect(assertPresent(subtitleBox, "Expected landing hero subtitle box").y).toBeCloseTo(344, 0)
-    expect(assertPresent(legacyNoteBox, "Expected landing hero legacy note box").y).toBeCloseTo(118, 0)
 
     await expect(page.locator(".landing-hero-copy")).toHaveScreenshot(
       "landing-hero-copy-desktop.png",

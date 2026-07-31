@@ -1,8 +1,5 @@
 <template>
   <span>
-    <FormerlyKnownAs
-      class="tw-mx-auto tw-mb-10 tw-mt-3 tw-max-w-6xl tw-pl-4 sm:tw-pl-12"
-    />
     <!-- Video Ad (desktop only, when ads enabled) -->
     <div v-if="!isPhone && showAds" ref="videoAdContainer"></div>
     <div v-if="eventLoadStatus === 'ready' && event" class="tw-mt-8 tw-h-full">
@@ -932,7 +929,6 @@ import MarkAvailabilityDialog from "@/components/calendar_permission_dialogs/Mar
 import InvitationDialog from "@/components/groups/InvitationDialog.vue"
 import HelpDialog from "@/components/HelpDialog.vue"
 import EventDescription from "@/components/event/EventDescription.vue"
-import FormerlyKnownAs from "@/components/FormerlyKnownAs.vue"
 import EventOptions from "@/components/schedule_overlap/EventOptions.vue"
 import { AsyncPubliftAd } from "@/components/event/asyncPubliftAd"
 import { freemiumEnabled } from "@/utils/freemium"
