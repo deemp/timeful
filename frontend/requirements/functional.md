@@ -115,3 +115,14 @@ When `Show all hours` is disabled, the grid shall collapse inactive runs based o
 - Collapse bands shall align to complete hours and require at least three consecutive inactive hours.
 - The left time axis shall show each collapsed band's start boundary and day-boundary labels such as `00:00`.
 - Wrapped overnight ranges shall retain their split-gap behavior and shall not receive same-day filler slots.
+
+## FR-024
+
+Anyone with the event link can schedule a selected time range on Timeful:
+
+- The Schedule menu shall list `Timeful` first, with a Timeful icon, followed by Google Calendar and Outlook.
+- The mobile Schedule action shall offer the same three destinations.
+- Selecting Timeful shall persist the selected range and render it as a blue event-name block that is narrower than its day column, so availability remains visible behind it.
+- Anyone with the event link can schedule, reschedule, or clear the Timeful schedule.
+- After saving a Timeful schedule, viewers shall see `Reschedule event` and `Clear` actions.
+- Starting rescheduling shall hide the saved block; saving a new Timeful range shall replace the prior schedule.
