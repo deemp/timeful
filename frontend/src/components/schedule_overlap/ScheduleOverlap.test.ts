@@ -1545,6 +1545,79 @@ describe("ScheduleOverlap", () => {
     )
   })
 
+  it("keeps inactive specific-time hours collapsed while scheduling", async () => {
+    localStorage.setItem("showAllHours", "false")
+    const wrapper = mountScheduleOverlap({
+      props: {
+        event: {
+          ...buildScheduleOverlapProps().event,
+          dates: [
+            Temporal.PlainDate.from("2026-01-01"),
+            Temporal.PlainDate.from("2026-01-02"),
+          ],
+          timeSeed: zdt("2026-01-01T09:00:00Z"),
+          hasSpecificTimes: true,
+          startTime: Temporal.PlainTime.from("09:00"),
+          duration: Temporal.Duration.from({ hours: 8 }),
+          timeIncrement: Temporal.Duration.from({ hours: 1 }),
+          enabledSlots: [
+            ...buildUtcSpecificTimes("2026-01-01", [
+              "09:00:00",
+              "10:00:00",
+              "11:00:00",
+              "12:00:00",
+              "13:00:00",
+              "14:00:00",
+              "15:00:00",
+              "16:00:00",
+            ]),
+            ...buildUtcSpecificTimes("2026-01-02", [
+              "09:00:00",
+              "10:00:00",
+              "11:00:00",
+              "12:00:00",
+              "13:00:00",
+              "14:00:00",
+              "15:00:00",
+              "16:00:00",
+            ]),
+          ],
+          activeSlots: [
+            ...buildUtcSpecificTimes("2026-01-01", ["09:00:00", "16:00:00"]),
+            ...buildUtcSpecificTimes("2026-01-02", ["09:00:00", "16:00:00"]),
+          ],
+          times: [
+            ...buildUtcSpecificTimes("2026-01-01", ["09:00:00", "16:00:00"]),
+            ...buildUtcSpecificTimes("2026-01-02", ["09:00:00", "16:00:00"]),
+          ],
+        },
+        alwaysShowCalendarEvents: false,
+        sampleCalendarEventsByDay: [],
+        initialTimezone: utcTimezone,
+      },
+    })
+
+    const vm = wrapper.vm as unknown as {
+      state: (typeof states)[keyof typeof states]
+      scheduleEvent: () => void
+      renderedRows: {
+        kind: "timeslot" | "collapsed" | "filler" | "split-gap"
+        startLabel?: string
+        endLabel?: string
+      }[]
+    }
+
+    vm.scheduleEvent()
+    await nextTick()
+
+    expect(vm.state).toBe(states.SCHEDULE_EVENT)
+    expect(vm.renderedRows.filter((row) => row.kind === "collapsed")).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ startLabel: "10:00", endLabel: "16:00" }),
+      ])
+    )
+  })
+
   it("collapses the omitted day boundaries around a saved specific-times window", () => {
     const wrapper = mountScheduleOverlap({
       props: {
