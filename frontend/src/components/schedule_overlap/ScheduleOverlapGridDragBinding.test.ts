@@ -416,6 +416,34 @@ describe("ScheduleOverlap grid drag bindings", () => {
     expect(wrapper.findAll(".scheduled-event-block")).toHaveLength(1)
   })
 
+  it("keeps the saved event visible while viewing availability", () => {
+    const { timedGrid } = createTimeGridViewModel()
+    timedGrid.state = states.HEATMAP
+    timedGrid.savedScheduledEvent = { row: 0, col: 0, numRows: 1 }
+    timedGrid.scheduledEventStyles = [{ top: "0px", height: "60px" }]
+
+    const wrapper = mount(ScheduleOverlapTimeGrid, {
+      props: { timedGrid },
+      global,
+    })
+
+    expect(wrapper.findAll(".scheduled-event-block")).toHaveLength(1)
+  })
+
+  it("hides a saved scheduled event while editing availability", () => {
+    const { timedGrid } = createTimeGridViewModel()
+    timedGrid.state = states.EDIT_AVAILABILITY
+    timedGrid.savedScheduledEvent = { row: 0, col: 0, numRows: 1 }
+    timedGrid.scheduledEventStyles = [{ top: "0px", height: "60px" }]
+
+    const wrapper = mount(ScheduleOverlapTimeGrid, {
+      props: { timedGrid },
+      global,
+    })
+
+    expect(wrapper.findAll(".scheduled-event-block")).toHaveLength(0)
+  })
+
   it("renders one structural interior collapsed-hours row and forwards expansion clicks", async () => {
     const { timedGrid, actions } = createNonConsecutiveTimeGridViewModel()
     timedGrid.state = states.HEATMAP

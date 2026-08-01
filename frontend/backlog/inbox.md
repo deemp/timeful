@@ -242,6 +242,7 @@ Semi-structured TODO list
 - [x] don't uncollapse rows when scheduling
 - [x] show event when rescheduling
 - [x] Schedule button on mobile should be filled blueish when clicked
+- [x] When there's a scheduled event and I edit availability, I shold draw only with green cells, not blue cells (scheduled)
 
 ## MUST
 

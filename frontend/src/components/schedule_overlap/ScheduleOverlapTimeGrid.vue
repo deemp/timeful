@@ -187,9 +187,7 @@
                         </template>
                       </template>
 
-                      <div
-                        v-if="timedGrid.state === timedGrid.states.SCHEDULE_EVENT || timedGrid.savedScheduledEvent"
-                      >
+                      <div v-if="timedGrid.state !== timedGrid.states.EDIT_AVAILABILITY">
                         <template
                           v-if="
                             (timedGrid.dragStart && timedGrid.dragStart.col === d) ||
