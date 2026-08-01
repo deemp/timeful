@@ -105,6 +105,7 @@ Only use:
 - explain the changes in the commit body, including why they were made
 - mention the active harness and current LLM model in the commit message
 - immediately before committing, verify that the LLM model name is current
+- do not include literal `\n` character sequences anywhere in a commit message; use actual newline characters for all line breaks
 - do not mention unrelated changes
 - end the commit message with two newline-separated co-author trailers: first `Co-authored-by: OpenCode <noreply@opencode.ai>`, then `Co-authored-by: <current model name> <noreply@openai.com>` as the second and final trailer for OpenAI models
 - if the active model is not an OpenAI model, ask the user for the correct second trailer before committing
