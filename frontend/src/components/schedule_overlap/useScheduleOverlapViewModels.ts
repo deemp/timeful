@@ -31,7 +31,7 @@ import type {
 } from "./scheduleOverlapViewModels"
 import type {
   ClassStyle,
-  OverlaidAvailabilityBlock,
+  RenderedOverlayAvailabilityFragment,
 } from "./scheduleOverlapRendering"
 import type { User } from "@/types"
 import type { ZdtMap } from "@/utils"
@@ -133,7 +133,7 @@ interface UseScheduleOverlapViewModelsOptions {
   scheduledEventStyles: ComputedRef<Record<string, string>[]>
   signUpBlockBeingDraggedStyle: Ref<Record<string, string>>
   newSignUpBlockName: Ref<string>
-  overlaidAvailability: ComputedRef<OverlaidAvailabilityBlock[][]>
+  overlaidAvailability: ComputedRef<RenderedOverlayAvailabilityFragment[][]>
   timeslotClassStyle: ComputedRef<ClassStyle[]>
   timeslotVon: ComputedRef<Record<string, () => void>[]>
   noEventNames: ComputedRef<boolean>

@@ -284,6 +284,56 @@ describe("scheduleOverlapRendering", () => {
     ])
   })
 
+  it("positions overlays from the selected slot rows instead of their time offsets", () => {
+    const fragments = buildRenderedOverlayAvailability({
+      renderedRows: [
+        {
+          id: "time-0",
+          kind: "timeslot",
+          height: 30,
+          rowTop: 0,
+          baseRowIndex: 0,
+        },
+        {
+          id: "time-1",
+          kind: "timeslot",
+          height: 30,
+          rowTop: 30,
+          baseRowIndex: 1,
+        },
+      ],
+      overlaidAvailability: [
+        [
+          {
+            // The offset is deliberately 45 minutes earlier than the selected row.
+            hoursOffset: Temporal.Duration.from({ hours: 7, minutes: 15 }),
+            hoursLength: Temporal.Duration.from({ minutes: 30 }),
+            type: availabilityTypes.AVAILABLE,
+            startBaseRowIndex: 1,
+          },
+        ],
+      ],
+      splitTimes: [
+        [
+          { hoursOffset: Temporal.Duration.from({ hours: 8 }) },
+          { hoursOffset: Temporal.Duration.from({ hours: 8, minutes: 30 }) },
+        ],
+        [],
+      ],
+      timeslotDuration: Temporal.Duration.from({ minutes: 30 }),
+    })
+
+    expect(fragments).toEqual([
+      [
+        {
+          top: "30px",
+          height: "30px",
+          type: availabilityTypes.AVAILABLE,
+        },
+      ],
+    ])
+  })
+
   it("builds timed-grid class styles across both splits and marks missing dates disabled", () => {
     const first = zdt("2026-01-01T09:00:00Z")
     const second = zdt("2026-01-01T09:15:00Z")

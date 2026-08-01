@@ -356,13 +356,13 @@ describe("ScheduleOverlap grid drag bindings", () => {
     timedGrid.overlaidAvailability = [
       [
         {
-          hoursOffset: Temporal.Duration.from({ hours: 9 }),
-          hoursLength: Temporal.Duration.from({ minutes: 30 }),
+          top: "0px",
+          height: "30px",
           type: "available",
         },
         {
-          hoursOffset: Temporal.Duration.from({ hours: 10 }),
-          hoursLength: Temporal.Duration.from({ minutes: 30 }),
+          top: "30px",
+          height: "30px",
           type: "if_needed",
         },
       ],

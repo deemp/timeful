@@ -82,6 +82,7 @@ import Tooltip from "../Tooltip.vue"
 import {
   buildDayGridTimeslotClassStyles,
   buildOverlaidAvailability,
+  buildRenderedOverlayAvailability,
   buildRenderedTimeBlockFragments,
   buildTimeGridTimeslotClassStyles,
   formatTooltipContent,
@@ -911,7 +912,7 @@ const collapsedPageSegments = computed<CollapsedPageSegment[]>(() => {
   return segments
 })
 
-const overlaidAvailability = computed(() => {
+const overlaidAvailabilityBlocks = computed(() => {
   return buildOverlaidAvailability({
     daysLength: days.value.length,
     firstSplitTimes: splitTimes.value[0],
@@ -1200,6 +1201,17 @@ const scheduledEventStyles = computed(() => {
     coveredBaseRowCount: scheduledEvent.numRows,
   })
 })
+
+const overlaidAvailability = computed(() =>
+  buildRenderedOverlayAvailability({
+    renderedRows: renderedRows.value,
+    overlaidAvailability: overlaidAvailabilityBlocks.value,
+    splitTimes: splitTimes.value,
+    timeslotDuration: timeslotDuration.value,
+    isBaseRowVisibleOnDay: (baseRowIndex, dayIndex) =>
+      getDateFromRowCol(baseRowIndex, dayIndex) !== null,
+  })
+)
 
 const timeslotClassStyle = computed(() =>
   renderedRows.value.flatMap((row) =>

@@ -249,7 +249,7 @@
                           v-for="(timeBlock, tb) in timedGrid.overlaidAvailability[d]"
                           :key="tb"
                           class="tw-absolute tw-w-full tw-select-none tw-p-px"
-                          :style="timedGrid.getRenderedTimeBlockStyle(timeBlock)"
+                          :style="{ top: timeBlock.top, height: timeBlock.height }"
                           style="pointer-events: none"
                         >
                           <div

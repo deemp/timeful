@@ -23,6 +23,7 @@ import type { ZdtMap } from "@/utils"
 import type {
   ClassStyle,
   OverlaidAvailabilityBlock,
+  RenderedOverlayAvailabilityFragment,
 } from "./scheduleOverlapRendering"
 
 export interface ScheduleOverlapToolRowActions {
@@ -225,7 +226,7 @@ export interface ScheduleOverlapTimeGridViewModel {
   signUpBlocksByDay: SignUpBlockLite[][]
   signUpBlocksToAddByDay: SignUpBlockLite[][]
   overlayAvailability: boolean
-  overlaidAvailability: OverlaidAvailabilityBlock[][]
+  overlaidAvailability: RenderedOverlayAvailabilityFragment[][]
   timeslotClassStyle: ClassStyle[]
   timeslotVon: Record<string, () => void>[]
   noEventNames: boolean
