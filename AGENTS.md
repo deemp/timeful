@@ -103,5 +103,8 @@ Only use:
 - write conventional commit messages
 - for frontend changes, use the `frontend` scope
 - explain the changes in the commit body, including why they were made
+- mention the active harness and current LLM model in the commit message
+- immediately before committing, verify that the LLM model name is current
 - do not mention unrelated changes
-- add co-authored at the end of the commit message
+- end the commit message with two newline-separated co-author trailers: first `Co-authored-by: OpenCode <noreply@opencode.ai>`, then `Co-authored-by: <current model name> <noreply@openai.com>` as the second and final trailer for OpenAI models
+- if the active model is not an OpenAI model, ask the user for the correct second trailer before committing
