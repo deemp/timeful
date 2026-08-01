@@ -12,7 +12,7 @@ Monorepo for Timeful, a group availability/scheduling app.
 - `PLUGIN_API_README.md` — `window.postMessage` API used by browser plugins to read/write availability on the frontend.
 
 The Go module path is `timeful/server` and is local to this application. The application database is
-configured through `MONGODB_DATABASE` and defaults to `timeful`.
+configured through `MONGODB_DATABASE` and defaults to `timeful-development`.
 
 ## Common commands
 
@@ -29,7 +29,7 @@ configured through `MONGODB_DATABASE` and defaults to `timeful`.
 - `go test ./...` — run all Go tests.
 - `go test ./db -run TestName` — run a single test (e.g. `./services/microsoftgraph`, `./services/gcloud`, `./services/listmonk`).
 - `go run github.com/swaggo/swag/cmd/swag@v1.16.1 init --parseDependency` (in `server/`) — regenerate Swagger docs in `server/docs/` after editing route comments. Then run `npm run gen:api` in `frontend/`. Swagger UI is served at `http://localhost:3002/swagger/index.html`.
-- MongoDB backup/restore: `mongodump --host=localhost:27017 --db=timeful` / `mongorestore --uri mongodb://localhost:27017 ./dump --drop`.
+- MongoDB backup/restore: `mongodump --host=localhost:27017 --db=timeful-development` / `mongorestore --uri mongodb://localhost:27017 ./dump --drop`.
 
 ### Required env vars for local server boot
 `SESSION_SECRET` (≥32 chars) is enforced at startup. `CLIENT_ID`/`CLIENT_SECRET` (Google OAuth) and `ENCRYPTION_KEY` are required for most flows. See `server/.env.template` and `DEPLOYMENT.md` for the full list (Stripe, Microsoft, Listmonk, Slack, Discord, Gmail, etc.).

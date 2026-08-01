@@ -253,7 +253,8 @@ Development and test Compose stacks use unauthenticated, isolated MongoDB instan
 Staging and production require separate root and application credentials. Their overlays
 create the root account and an application account with `readWrite` access only to the configured
 `MONGODB_DATABASE`; Compose constructs the server connection URI from the application credentials.
-The new default database name is `timeful`.
+The environment defaults are `timeful-development`, `timeful-staging`, and
+`timeful-production`.
 
 Changing `MONGODB_DATABASE` selects a different database; it does not rename or copy existing
 data. Migrate a populated deployment by backing up the old database, restoring it under the new
@@ -277,7 +278,7 @@ credentials in the selected env file and run the bootstrap script against the cu
 running unauthenticated stack:
 
 ```sh
-./scripts/mongo/bootstrap-existing-users.sh .env.production
+./scripts/mongo/bootstrap-existing-users.sh production
 ```
 
 Then stop the existing stack and start it with the appropriate authenticated overlay.

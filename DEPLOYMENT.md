@@ -211,7 +211,7 @@ See `docs/environments.md` for the full contract and development commands.
 | `APP_BASE_URL` | Canonical public HTTPS origin used in generated links and payment redirects |
 | `MONGODB_ROOT_USERNAME` / `MONGODB_ROOT_PASSWORD` | MongoDB administrative account for backups and maintenance |
 | `MONGODB_APP_USERNAME` / `MONGODB_APP_PASSWORD` | MongoDB application account with access only to `MONGODB_DATABASE` |
-| `MONGODB_DATABASE` | Application database name; defaults to `timeful` |
+| `MONGODB_DATABASE` | Application database name; defaults are environment-specific (`timeful-staging` and `timeful-production`) |
 
 `CADDY_PRODUCTION_DOMAIN` and `CADDY_PRODUCTION_WWW_DOMAIN`, or their staging equivalents, are
 required by the Caddy edge that serves that environment.

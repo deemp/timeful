@@ -1,4 +1,4 @@
-name: timeful
+name: timeful-development
 
 services:
   mongo:
@@ -83,7 +83,7 @@ services:
       MAILJET_LIST_ID: ${MAILJET_LIST_ID:-}
       MICROSOFT_CLIENT_ID: ${MICROSOFT_CLIENT_ID:-}
       MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET:-}
-      MONGODB_DATABASE: ${MONGODB_DATABASE:-timeful}
+      MONGODB_DATABASE: ${MONGODB_DATABASE:-timeful-development}
       MONGODB_URI: ${MONGODB_URI:-mongodb://mongo:27017}
       TIMEFUL_EMAIL_ADDRESS: ${TIMEFUL_EMAIL_ADDRESS:-}
       SERVICE_ACCOUNT_KEY_PATH: ${SERVICE_ACCOUNT_KEY_PATH:-}
