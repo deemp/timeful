@@ -25,6 +25,8 @@ Create a handoff only when the user explicitly requests one. Do not create one a
 
 Capture only facts established during the current session. The handoff must be useful without the chat transcript and must not invent completion, verification, risks, or decisions.
 
+Do not duplicate material already captured in a specification, plan, ADR, issue, commit, diff, or test. Reference the artifact by repository path or URL and record only the current status or implication. Redact secrets and personal data; never include credentials, tokens, or other sensitive values.
+
 Use this structure, omitting sections with no content:
 
 ```markdown
@@ -42,10 +44,17 @@ Use this structure, omitting sections with no content:
 
 ## Remaining Work
 
+## Handoff Relationships
+
+## Suggested Skills
+
 ## Relevant Files
 ```
 
 - Include exact commands and their outcomes in **Validation** when they affect confidence in the work.
 - Include changed or inspected paths in **Relevant Files** when they provide useful continuation context.
 - Describe unresolved work concretely in **Remaining Work**, including blockers or prerequisites.
+- Tailor **Remaining Work** to the user's stated next-session focus when one is provided.
+- In **Handoff Relationships**, use `Continues` for unresolved work from a prior handoff and `Supersedes` only for conclusions or next steps that are no longer current. Reference the durable artifact that governs the work when useful. Omit the section when there is no meaningful relationship.
+- In **Suggested Skills**, name only repository skills that are relevant and known to exist. Omit the section otherwise.
 - Keep entries concise, factual, and actionable.
