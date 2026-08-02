@@ -14,13 +14,6 @@ Unless the user explicitly asks for server changes:
 - prefer adding regression tests before fixing frontend bugs
 - keep repo-tracked frontend browser checks under `frontend/e2e`
 - newly added regression tests may fail when they are meant to expose an existing bug
-- first confirm that the finding you plan to work on still reproduces
-- update the relevant findings handoff file when adding or refining reproductions
-- suggest new findings if you notice them
-
-Canonical findings location:
-
-- `findings/*.md`
 
 ## Server Test Workflow
 
