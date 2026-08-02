@@ -30,7 +30,6 @@ export const DRAG_TYPES = {
 } as const
 export type DragType = (typeof DRAG_TYPES)[keyof typeof DRAG_TYPES]
 
-export const SPLIT_GAP_HEIGHT = 40
 export const SPLIT_GAP_WIDTH = 20
 export const HOUR_HEIGHT = 60
 export const COLLAPSED_HOURS_ROW_HEIGHT = 44
@@ -74,7 +73,7 @@ export interface RenderedTimeGridRowCell {
 
 export interface RenderedTimeGridRow {
   id: string
-  kind: "timeslot" | "collapsed" | "filler" | "split-gap"
+  kind: "timeslot" | "collapsed" | "filler"
   height: number
   rowTop: number
   timeText?: string

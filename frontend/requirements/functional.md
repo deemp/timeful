@@ -80,7 +80,7 @@ Grid colors shall use context-specific labels:
 - In the event availability grid: pale red is `Unavailable, select in Add/Edit availability`, light grey is `Unavailable, select in Edit event`, and dark grey is `Unavailable, padding`.
 - The event availability legend shall show light grey and dark grey when there are no active slots or responses; add pale red when there are active slots; show all colors while adding availability or after receiving a response.
 - Specific-times enabled inactive cells shall remain editable, while dark-grey padding cells outside the enabled domain shall be non-editable.
-- Full-day padding rows shall retain the grid's vertical, hourly, and half-hour separators. A trailing padding row immediately after a timeslot shall share one boundary with that timeslot.
+- Padding shall appear only in cells without an enabled slot for that display-date column. It shall not be created by rounding the time axis or by page-wide filler rows.
 
 ## FR-019
 
@@ -115,7 +115,7 @@ When `Show all hours` is disabled, the grid shall collapse inactive runs based o
 - Leading, interior, and trailing inactive runs shall be eligible for collapse.
 - Collapse bands shall align to complete hours and require at least three consecutive inactive hours.
 - The left time axis shall show each collapsed band's start boundary and day-boundary labels such as `00:00`.
-- Wrapped overnight ranges shall retain their split-gap behavior and shall not receive same-day filler slots.
+- Wrapped overnight ranges shall use a continuous time axis without a structural split gap.
 - Schedule drags shall end only on active slots; moving into an enabled inactive slot shall retain the last active endpoint.
 - Calendar, selected, and saved scheduled-event overlays shall render as contiguous visible fragments and shall not cross collapsed rows.
 
@@ -130,3 +130,12 @@ Anyone with the event link can schedule a selected time range on Timeful:
 - After saving a Timeful schedule, viewers shall see `Reschedule event` and `Clear` actions.
 - Starting rescheduling shall hide the saved block; saving a new Timeful range shall replace the prior schedule.
 - The legend shall permanently include a blue `Scheduled event` item matching the scheduled-event indicator.
+
+## FR-025
+
+Canonical timed-event grids shall preserve projected slot ownership when the display timezone changes:
+
+- Display-date columns shall be derived from enabled slots projected into the selected display timezone.
+- A slot shall render only in its display-local date column. The grid shall add adjacent date columns needed for post-midnight projected slots.
+- The time axis shall use exact slot boundaries and shall not round to whole hours. For example, a `09:30-17:30` projected slot range shall start at `09:30` and end at `17:30`.
+- Wrapped projected ranges shall remain continuous and shall not duplicate rows, labels, or slots.

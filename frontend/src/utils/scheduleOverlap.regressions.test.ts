@@ -392,7 +392,7 @@ describe("schedule-overlap Temporal regressions", () => {
       curTimezoneOffset: scheduleTimezoneOffset,
     })
     googleScheduling.curScheduledEvent.value = { row: 0, col: 0, numRows: 1 }
-    googleScheduling.confirmScheduleEvent(true)
+    void googleScheduling.confirmScheduleEvent(true)
 
     const googleUrl = openMock.mock.calls[0]?.[0]
     expect(typeof googleUrl).toBe("string")
@@ -404,7 +404,7 @@ describe("schedule-overlap Temporal regressions", () => {
       curTimezoneOffset: scheduleTimezoneOffset,
     })
     outlookScheduling.curScheduledEvent.value = { row: 0, col: 0, numRows: 1 }
-    outlookScheduling.confirmScheduleEvent(false)
+    void outlookScheduling.confirmScheduleEvent(false)
 
     const outlookUrl = openMock.mock.calls[1]?.[0]
     expect(typeof outlookUrl).toBe("string")
@@ -434,7 +434,7 @@ describe("schedule-overlap Temporal regressions", () => {
     })
     scheduling.curScheduledEvent.value = { row: 0, col: 0, numRows: 1 }
 
-    scheduling.confirmScheduleEvent(true)
+    void scheduling.confirmScheduleEvent(true)
 
     const url = openMock.mock.calls[0]?.[0]
     expect(typeof url).toBe("string")
@@ -486,7 +486,7 @@ describe("schedule-overlap Temporal regressions", () => {
     })
   })
 
-  it("anchors the scheduling preview to the earliest dragged row", () => {
+  it("anchors the scheduling preview to the earliest dragged row without a split offset", () => {
     const dragging = ref(true)
     const dragStart = ref({ row: 8, col: 0 })
     const dragCur = ref({ row: 5, col: 0 })
@@ -529,7 +529,7 @@ describe("schedule-overlap Temporal regressions", () => {
     })
 
     expect(scheduling.scheduledEventStyle.value).toEqual({
-      top: "calc(5 * 16px + 40px)",
+      top: "calc(5 * 16px)",
       height: "calc(4 * 16px)",
     })
   })

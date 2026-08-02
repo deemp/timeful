@@ -108,7 +108,6 @@ import {
   states,
   COLLAPSED_HOURS_ROW_HEIGHT,
   MIN_COLLAPSIBLE_HIDDEN_SPAN_HOURS,
-  SPLIT_GAP_HEIGHT,
   getScheduledEventFromDragRange,
 } from "@/composables/schedule_overlap/types"
 import type {
@@ -774,41 +773,6 @@ const pageSlots = computed<PageSlot[]>(() => {
     })
   }
 
-  const firstStartMinutes = slots[0]?.startMinutes
-  const lastEndMinutes = slots.at(-1)?.endMinutes
-  const fitsWithinSingleLocalDay =
-    splitTimes.value[1].length === 0 &&
-    typeof firstStartMinutes === "number" &&
-    typeof lastEndMinutes === "number" &&
-    firstStartMinutes >= 0 &&
-    lastEndMinutes <= 24 * 60
-
-  if (fitsWithinSingleLocalDay) {
-    const leadingSlots: PageSlot[] = []
-    for (let startMinutes = 0; startMinutes < firstStartMinutes; startMinutes += slotMinutes) {
-      leadingSlots.push({
-        id: `filler-${String(startMinutes)}`,
-        kind: "filler",
-        startMinutes,
-        endMinutes: startMinutes + slotMinutes,
-      })
-    }
-    slots.unshift(...leadingSlots)
-
-    for (
-      let startMinutes = lastEndMinutes;
-      startMinutes < 24 * 60;
-      startMinutes += slotMinutes
-    ) {
-      slots.push({
-        id: `filler-${String(startMinutes)}`,
-        kind: "filler",
-        startMinutes,
-        endMinutes: startMinutes + slotMinutes,
-      })
-    }
-  }
-
   return slots
 })
 
@@ -1131,16 +1095,6 @@ const renderedRows = computed<RenderedTimeGridRow[]>(() => {
     return rowTop + COLLAPSED_HOURS_ROW_HEIGHT
   }
 
-  const appendSplitGapRow = (rowTop: number): number => {
-    rows.push({
-      id: "split-gap",
-      kind: "split-gap",
-      height: SPLIT_GAP_HEIGHT,
-      rowTop,
-    })
-    return rowTop + SPLIT_GAP_HEIGHT
-  }
-
   const collapsedSegmentByStartIndex = new Map<number, CollapsedPageSegment>()
   for (const segment of collapsedPageSegments.value) {
     if (!expandedCollapsedSpanIds.value.has(segment.id)) {
@@ -1164,13 +1118,6 @@ const renderedRows = computed<RenderedTimeGridRow[]>(() => {
 
     const slot = pageSlots.value[slotIndex]
     if (slot.kind === "timeslot" && typeof slot.baseRowIndex === "number") {
-      if (
-        splitTimes.value[1].length > 0 &&
-        slot.baseRowIndex === splitTimes.value[0].length &&
-        rows.at(-1)?.kind !== "split-gap"
-      ) {
-        rowTop = appendSplitGapRow(rowTop)
-      }
       pushTimeslotRow(slot.baseRowIndex, rowTop)
     } else {
       pushFillerRow(slot, rowTop, rows.at(-1)?.kind === "timeslot")
@@ -1604,8 +1551,6 @@ function getRenderedTimeBlockStyleForTemplate(
   return getTimeBlockStyle({
     timeBlock,
     firstSplitTimes: splitTimes.value[0],
-    secondSplitTimes: splitTimes.value[1],
-    timeslotHeight: timeslotHeight.value,
   })
 }
 

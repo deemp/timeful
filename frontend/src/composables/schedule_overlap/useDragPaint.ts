@@ -20,7 +20,6 @@ import {
 } from "@/constants"
 import {
   DRAG_TYPES,
-  SPLIT_GAP_HEIGHT,
   getScheduledEventFromDragRange,
   states,
   type DragType,
@@ -188,14 +187,7 @@ export function useDragPaint(opts: UseDragPaintOptions) {
         }
       }
     }
-    let row = Math.floor(y / height)
-
-    if (!opts.event.value.daysOnly && row > opts.splitTimes.value[0].length) {
-      const adjustedRow = Math.floor((y - SPLIT_GAP_HEIGHT) / height)
-      if (adjustedRow >= opts.splitTimes.value[0].length) {
-        row = adjustedRow
-      }
-    }
+    const row = Math.floor(y / height)
 
     return { row: clampRow(row), col: clampCol(col) }
   }

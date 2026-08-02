@@ -7,7 +7,6 @@ import {
   type TimeType,
 } from "@/constants"
 import {
-  compareDuration,
   getDateInTimezone,
   lightOrDark,
   removeTransparencyFromHex,
@@ -27,7 +26,6 @@ import type {
 import {
   DRAG_TYPES,
   HOUR_HEIGHT,
-  SPLIT_GAP_HEIGHT,
   states,
 } from "@/composables/schedule_overlap/types"
 
@@ -912,58 +910,23 @@ export const formatTooltipContent = ({
   return `${startDateStr} ${startTimeStr} to ${endTimeStr}`
 }
 
-export const getIsTimeBlockInFirstSplit = (
-  timeBlock: { hoursOffset: Temporal.Duration },
-  firstSplitTimes: TimeItem[],
-): boolean =>
-  firstSplitTimes.length > 0 &&
-  compareDuration(timeBlock.hoursOffset, firstSplitTimes[0].hoursOffset) >= 0 &&
-  compareDuration(
-    timeBlock.hoursOffset,
-    firstSplitTimes[firstSplitTimes.length - 1].hoursOffset,
-  ) <= 0
-
 export const getTimeBlockStyle = ({
   timeBlock,
   firstSplitTimes,
-  secondSplitTimes,
-  timeslotHeight,
 }: {
   timeBlock: {
     hoursOffset?: Temporal.Duration
     hoursLength?: Temporal.Duration
   }
   firstSplitTimes: TimeItem[]
-  secondSplitTimes: TimeItem[]
-  timeslotHeight: number
 }): Record<string, string> => {
   const style: Record<string, string> = {}
   const hoursOffset = timeBlock.hoursOffset ?? durations.ZERO
   const hoursLength = timeBlock.hoursLength ?? durations.ZERO
 
-  if (
-    secondSplitTimes.length === 0 ||
-    getIsTimeBlockInFirstSplit(
-      timeBlock as { hoursOffset: Temporal.Duration },
-      firstSplitTimes,
-    )
-  ) {
-    style.top = `calc(${String(
-      hoursOffset
-        .subtract(firstSplitTimes[0]?.hoursOffset ?? durations.ZERO)
-        .total("hours"),
-    )} * ${String(HOUR_HEIGHT)}px)`
-    style.height = `calc(${String(hoursLength.total("hours"))} * ${String(
-      HOUR_HEIGHT,
-    )}px)`
-    return style
-  }
-
-  style.top = `calc(${String(firstSplitTimes.length)} * ${String(
-    timeslotHeight,
-  )}px + ${String(SPLIT_GAP_HEIGHT)}px + ${String(
+  style.top = `calc(${String(
     hoursOffset
-      .subtract(secondSplitTimes[0]?.hoursOffset ?? durations.ZERO)
+      .subtract(firstSplitTimes[0]?.hoursOffset ?? durations.ZERO)
       .total("hours"),
   )} * ${String(HOUR_HEIGHT)}px)`
   style.height = `calc(${String(hoursLength.total("hours"))} * ${String(

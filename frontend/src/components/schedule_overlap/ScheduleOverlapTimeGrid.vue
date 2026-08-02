@@ -30,7 +30,7 @@
           :style="{ height: `${row.height}px` }"
         >
             <span
-              v-if="row.kind !== 'split-gap' && row.timeText"
+              v-if="row.timeText"
               class="tw-absolute tw-right-1 tw-top-0 -tw-translate-y-1/2 sm:tw-right-2"
             >
               {{ row.timeText }}
@@ -119,10 +119,6 @@
                     <span>{{ row.startLabel }}-{{ row.endLabel }}</span>
                     <v-icon size="18">mdi-chevron-down</v-icon>
                   </button>
-                  <div
-                    v-else-if="row.kind === 'split-gap'"
-                    class="schedule-overlap-split-gap tw-w-full"
-                  ></div>
                   <template v-else>
                     <template v-for="(day, d) in timedGrid.days" :key="`${row.id}-${d}`">
                       <div

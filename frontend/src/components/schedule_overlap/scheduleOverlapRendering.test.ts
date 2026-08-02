@@ -5,7 +5,6 @@ import { ZdtMap, ZdtSet } from "@/utils"
 import {
   DRAG_TYPES,
   HOUR_HEIGHT,
-  SPLIT_GAP_HEIGHT,
   states,
 } from "@/composables/schedule_overlap/types"
 import {
@@ -211,7 +210,7 @@ describe("scheduleOverlapRendering", () => {
     ])
   })
 
-  it("projects wrapped split overlay fragments from their semantic base rows", () => {
+  it("projects overlay fragments from continuous semantic base rows", () => {
     const fragments = buildRenderedOverlayAvailability({
       renderedRows: [
         {
@@ -229,16 +228,10 @@ describe("scheduleOverlapRendering", () => {
           baseRowIndex: 1,
         },
         {
-          id: "split-gap",
-          kind: "split-gap",
-          height: SPLIT_GAP_HEIGHT,
-          rowTop: 60,
-        },
-        {
           id: "time-2",
           kind: "timeslot",
           height: 30,
-          rowTop: 100,
+          rowTop: 60,
           baseRowIndex: 2,
         },
       ],
@@ -276,7 +269,7 @@ describe("scheduleOverlapRendering", () => {
           type: availabilityTypes.AVAILABLE,
         },
         {
-          top: "100px",
+          top: "60px",
           height: "30px",
           type: availabilityTypes.AVAILABLE,
         },
@@ -373,7 +366,6 @@ describe("scheduleOverlapRendering", () => {
       inDragRange: () => false,
       animateTimeslotAlways: false,
       availabilityAnimEnabled: false,
-      timeslotHeight: 15,
       timezoneOffset: Temporal.Duration.from({ minutes: 0 }),
       curTimeslot: { row: -1, col: -1 },
       editing: false,
@@ -381,6 +373,7 @@ describe("scheduleOverlapRendering", () => {
       daysLength: 1,
       firstSplitLength: 2,
       lastRow: 2,
+      timeslotHeight: 15,
     })
 
     expect(styles).toHaveLength(3)
@@ -809,7 +802,7 @@ describe("scheduleOverlapRendering", () => {
     )
   })
 
-  it("positions second-split blocks after the split gap", () => {
+  it("positions timed blocks on the continuous row axis", () => {
     const style = getTimeBlockStyle({
       timeBlock: {
         hoursOffset: Temporal.Duration.from({ hours: 13 }),
@@ -819,14 +812,10 @@ describe("scheduleOverlapRendering", () => {
         { hoursOffset: Temporal.Duration.from({ hours: 9 }) },
         { hoursOffset: Temporal.Duration.from({ hours: 9, minutes: 15 }) },
       ],
-      secondSplitTimes: [
-        { hoursOffset: Temporal.Duration.from({ hours: 13 }) },
-      ],
-      timeslotHeight: 15,
     })
 
     expect(style.top).toBe(
-      `calc(2 * 15px + ${String(SPLIT_GAP_HEIGHT)}px + 0 * ${String(HOUR_HEIGHT)}px)`,
+      `calc(4 * ${String(HOUR_HEIGHT)}px)`,
     )
     expect(style.height).toBe(`calc(0.5 * ${String(HOUR_HEIGHT)}px)`)
   })

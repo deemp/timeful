@@ -37,7 +37,6 @@ import {
 } from "@/constants"
 import {
   HOUR_HEIGHT,
-  SPLIT_GAP_HEIGHT,
   SPLIT_GAP_WIDTH,
   states,
   type DayItem,
@@ -223,6 +222,22 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
 
   const specificTimesCoverageSlots = computed<Temporal.ZonedDateTime[]>(
     () => specificTimesEnabledSlots.value,
+  )
+
+  const canonicalTimedSlots = computed<Temporal.ZonedDateTime[]>(() => {
+    if (!hasCanonicalTimedSlots(event.value)) {
+      return []
+    }
+
+    return sortAndUniqueSlots(
+      event.value.enabledSlots?.length
+        ? event.value.enabledSlots
+        : event.value.activeSlots,
+    )
+  })
+
+  const canonicalTimedSlotSet = computed<ZdtSet>(() =>
+    new ZdtSet(canonicalTimedSlots.value),
   )
 
   const specificTimesVisibleSet = computed<ZdtSet>(() => {
@@ -421,22 +436,23 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
       return [buildTimeRange(startMinutes, endMinutes), []]
     }
 
-    const displayStartMinutes = Math.floor(localStartMinutes / 60) * 60
-    const displayEndMinutes = Math.ceil(localEndMinutes / 60) * 60
-
-    if (displayEndMinutes > 24 * 60) {
-      const wrappedEndMinutes = displayEndMinutes - 24 * 60
-      const overlapsOrTouchesInDisplayedLocalDay =
-        displayStartMinutes <= wrappedEndMinutes
-
-      if (overlapsOrTouchesInDisplayedLocalDay) {
-        split[0] = buildTimeRange(24 * 60, 48 * 60)
-      } else {
-        split[0] = buildTimeRange(24 * 60, displayEndMinutes)
-        split[1] = buildTimeRange(displayStartMinutes, 24 * 60)
-      }
-    } else {
+    if (canonicalTimedSlots.value.length > 0) {
+      const displayedSlotMinutes = canonicalTimedSlots.value.map((slot) => {
+        const displayedTime = getDateInTimezone(slot, curTimezone.value).toPlainTime()
+        return displayedTime.hour * 60 + displayedTime.minute
+      })
+      const displayStartMinutes = Math.min(...displayedSlotMinutes)
+      const displayEndMinutes = Math.min(
+        24 * 60,
+        Math.max(...displayedSlotMinutes) + timeslotDurationMinutes,
+      )
       split[0] = buildTimeRange(displayStartMinutes, displayEndMinutes)
+    } else {
+      const wrapsLocalDay =
+        localStartMinutes < 0 || localEndMinutes > 24 * 60
+      split[0] = wrapsLocalDay
+        ? buildTimeRange(0, 24 * 60)
+        : buildTimeRange(localStartMinutes, localEndMinutes)
     }
 
     return split
@@ -494,7 +510,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
       let dateString = ""
       let dayString = ""
       let offsetZDT: Temporal.ZonedDateTime
-      if (isSpecificTimes.value) {
+      if (isSpecificTimes.value || hasCanonicalTimedSlots(event.value)) {
         offsetZDT = getDateInTimezone(date, curTimezone.value)
       } else {
         offsetZDT = date.add(dayOffset.value)
@@ -577,7 +593,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
 
     if (hasCanonicalTimedSlots(event.value)) {
       for (const day of getSpecificTimesDayStarts(
-        eventDates,
+        canonicalTimedSlots.value,
         curTimezone.value,
       )) {
         const { dayString, dateString } = getDateString(day.dateObject)
@@ -890,16 +906,22 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
         if (!zdtSetHas(slotSet, date)) return null
       }
     } else {
-      const intervals = timedGridIntervalsByLocalDay.value.get(
-        getLocalDayKey(day.dateObject),
-      )
-      const isInInterval = intervals?.some(
-        ({ start, end }) =>
-          Temporal.ZonedDateTime.compare(date, start) >= 0 &&
-          Temporal.ZonedDateTime.compare(date, end) < 0,
-      )
-      if (!isInInterval) {
-        return null
+      if (hasCanonicalTimedSlots(event.value)) {
+        if (!zdtSetHas(canonicalTimedSlotSet.value, date)) {
+          return null
+        }
+      } else {
+        const intervals = timedGridIntervalsByLocalDay.value.get(
+          getLocalDayKey(day.dateObject),
+        )
+        const isInInterval = intervals?.some(
+          ({ start, end }) =>
+            Temporal.ZonedDateTime.compare(date, start) >= 0 &&
+            Temporal.ZonedDateTime.compare(date, end) < 0,
+        )
+        if (!isInInterval) {
+          return null
+        }
       }
     }
     return date
@@ -1079,7 +1101,6 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     getLocalTimezone,
     getMinMaxHoursFromTimes,
     // constants exposed for templates
-    SPLIT_GAP_HEIGHT,
     SPLIT_GAP_WIDTH,
     HOUR_HEIGHT,
   }

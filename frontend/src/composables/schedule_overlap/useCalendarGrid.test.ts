@@ -16,7 +16,7 @@ describe("useCalendarGrid", () => {
     vi.stubGlobal("localStorage", createLocalStorageMock())
   })
 
-  it("renders specific-time grids from integer local hours for existing events", () => {
+  it("renders existing specific-time grids from their exact projected slots", () => {
     const event = ref<ScheduleOverlapEvent>({
       _id: "evt-1",
       shortId: "grid123",
@@ -52,9 +52,6 @@ describe("useCalendarGrid", () => {
       isPhone: ref(false),
     })
 
-    const renderedLabels = grid.splitTimes.value[0]
-      .map((time) => time.text)
-      .filter(Boolean)
     const firstRenderedTime = grid.splitTimes.value[0][0]
     const secondRenderedTime = grid.splitTimes.value[0][1]
     expect(firstRenderedTime).toBeDefined()
@@ -63,21 +60,20 @@ describe("useCalendarGrid", () => {
     const firstDisplayedSlot = grid.getDisplayDateFromRowCol(0, 0)
     const firstIncludedSlot = grid.getDateFromDayTimeIndex(0, 1)
 
-    expect(renderedLabels[0]).toBe("9 am")
-    expect(renderedLabels).not.toContain("9:15 am")
     expect(
       firstDisplayedSlot
         ?.withTimeZone("Europe/Moscow")
         .toPlainTime()
         .toString(),
-    ).toBe("09:00:00")
-    expect(secondRenderedTime.hoursOffset.total("minutes")).toBe(0)
+    ).toBe("09:15:00")
+    expect(firstRenderedTime.absoluteMinutes).toBe(9 * 60 + 15)
+    expect(secondRenderedTime.absoluteMinutes).toBe(9 * 60 + 30)
     expect(
       firstIncludedSlot?.withTimeZone("Europe/Moscow").toPlainTime().toString(),
-    ).toBe("09:15:00")
+    ).toBe("09:30:00")
   })
 
-  it("builds split times for half-hour-offset timezones without fractional-hour Duration errors", () => {
+  it("builds slot-aligned rows for half-hour-offset timezones", () => {
     const event = ref<ScheduleOverlapEvent>({
       _id: "evt-2",
       shortId: "grid-half-hour",
@@ -114,14 +110,10 @@ describe("useCalendarGrid", () => {
 
     expect(grid.splitTimes.value[0]).not.toHaveLength(0)
     expect(grid.times.value).not.toHaveLength(0)
-    expect(
-      grid.splitTimes.value
-        .flat()
-        .some((time) => time.hoursOffset.total("minutes") === -30),
-    ).toBe(true)
+    expect(grid.splitTimes.value[0][0]?.absoluteMinutes).toBe(11 * 60 + 30)
   })
 
-  it("rounds weird-offset timed grids to whole local hours", () => {
+  it("preserves exact rows in quarter-hour-offset timed grids", () => {
     const event = ref<ScheduleOverlapEvent>({
       _id: "evt-3",
       shortId: "grid-quarter-hour",
@@ -161,24 +153,23 @@ describe("useCalendarGrid", () => {
     const lastRenderedTime =
       grid.splitTimes.value[0][grid.splitTimes.value[0].length - 1]
 
-    expect(firstRenderedTime.text).toBe("11 am")
-    expect(firstRenderedTime.hoursOffset.total("minutes")).toBe(-15)
-    expect(secondRenderedTime.hoursOffset.total("minutes")).toBe(0)
+    expect(firstRenderedTime.absoluteMinutes).toBe(11 * 60 + 15)
+    expect(secondRenderedTime.absoluteMinutes).toBe(11 * 60 + 30)
     expect(
       grid
         .getDateFromDayHoursOffset(0, firstRenderedTime.hoursOffset)
         ?.withTimeZone("Asia/Kathmandu")
         .toPlainTime()
         .toString(),
-    ).toBe("11:00:00")
+    ).toBe("11:15:00")
     expect(
       grid
         .getDateFromDayTimeIndex(0, 1)
         ?.withTimeZone("Asia/Kathmandu")
         .toPlainTime()
         .toString(),
-    ).toBe("11:15:00")
-    expect(lastRenderedTime.hoursOffset.total("minutes")).toBe(510)
+    ).toBe("11:30:00")
+    expect(lastRenderedTime.absoluteMinutes).toBe(19 * 60)
     expect(
       grid
         .getDateFromDayHoursOffset(
@@ -188,7 +179,7 @@ describe("useCalendarGrid", () => {
         ?.withTimeZone("Asia/Kathmandu")
         .toPlainTime()
         .toString(),
-    ).toBe("20:00:00")
+    ).toBe("19:15:00")
   })
 
   it("renders saved specific-time windows from the selected instants instead of a broader duration", () => {
@@ -227,10 +218,10 @@ describe("useCalendarGrid", () => {
       isPhone: ref(false),
     })
 
-    expect(grid.splitTimes.value[0]).toHaveLength(36)
+    expect(grid.splitTimes.value[0]).toHaveLength(33)
     expect(grid.splitTimes.value[0][0]?.text).toBe("9 am")
     expect(grid.splitTimes.value[0][32]?.text).toBe("5 pm")
-    expect(grid.splitTimes.value[0][35]?.absoluteMinutes).toBe(17 * 60 + 45)
+    expect(grid.splitTimes.value[0][32]?.absoluteMinutes).toBe(17 * 60)
   })
 
   it("returns a display date for grey specific-time gaps without treating them as event times", () => {
@@ -345,7 +336,7 @@ describe("useCalendarGrid", () => {
     }
   })
 
-  it("keeps ordinary timed columns aligned to localized event seeds without inventing a trailing day", () => {
+  it("derives ordinary timed columns from their projected enabled slots", () => {
     const event = ref<ScheduleOverlapEvent>({
       _id: "evt-ee4cb",
       shortId: "ee4Cb",
@@ -409,7 +400,7 @@ describe("useCalendarGrid", () => {
           .toPlainDate()
           .toString(),
       ),
-    ).toEqual(["2026-06-10", "2026-06-11"])
+    ).toEqual(["2026-06-10", "2026-06-11", "2026-06-12"])
 
     const tokyoGrid = useCalendarGrid({
       event,
@@ -587,6 +578,99 @@ describe("useCalendarGrid", () => {
     expect(grid.splitTimes.value[0][31]?.absoluteMinutes).toBe(16 * 60 + 45)
     expect(grid.getDateFromRowCol(31, 0)?.toInstant().toString()).toBe(
       "2026-06-11T16:45:00Z",
+    )
+  })
+
+  it("keeps canonical timed slots unsplit and in their projected date columns", () => {
+    const eventTimezone = "Asia/Baghdad"
+    const enabledSlots = ["2026-08-06", "2026-08-07"].flatMap((day) =>
+      Array.from({ length: 32 }, (_, index) =>
+        Temporal.ZonedDateTime.from({
+          timeZone: eventTimezone,
+          year: Number(day.slice(0, 4)),
+          month: Number(day.slice(5, 7)),
+          day: Number(day.slice(8, 10)),
+          hour: 9 + Math.floor(index / 4),
+          minute: (index % 4) * 15,
+        }),
+      ),
+    )
+    const event = ref<ScheduleOverlapEvent>({
+      _id: "evt-projected-columns",
+      shortId: "projected-columns",
+      name: "Projected columns",
+      type: eventTypes.SPECIFIC_DATES,
+      dates: [
+        Temporal.PlainDate.from("2026-08-06"),
+        Temporal.PlainDate.from("2026-08-07"),
+      ],
+      timeSeed: enabledSlots[0],
+      startTime: Temporal.PlainTime.from("09:00"),
+      duration: Temporal.Duration.from({ hours: 8 }),
+      hasSpecificTimes: false,
+      enabledSlots,
+      activeSlots: enabledSlots,
+      eventTimezone,
+      slotGeneration: {
+        startTimeLocal: Temporal.PlainTime.from("09:00"),
+        endTimeLocal: Temporal.PlainTime.from("17:00"),
+        timeIncrement: durations.FIFTEEN_MINUTES,
+      },
+      timedRecurrence: {
+        kind: "specific_dates",
+        selectedDays: [
+          Temporal.PlainDate.from("2026-08-06"),
+          Temporal.PlainDate.from("2026-08-07"),
+        ],
+        selectedDaysOfWeek: [],
+        startOnMonday: true,
+      },
+      notificationsEnabled: false,
+      blindAvailabilityEnabled: false,
+      daysOnly: false,
+      sendEmailAfterXResponses: -1,
+      collectEmails: false,
+      startOnMonday: true,
+      timeIncrement: durations.FIFTEEN_MINUTES,
+      creatorPosthogId: "creator-projected-columns",
+      remindees: [],
+    })
+    const makeGrid = (value: string, offset: Temporal.Duration) =>
+      useCalendarGrid({
+        event,
+        weekOffset: ref(0),
+        curTimezone: ref({
+          value,
+          offset,
+          label: value,
+          gmtString: value,
+        }),
+        state: ref(states.HEATMAP),
+        isPhone: ref(false),
+      })
+
+    const baghdadGrid = makeGrid(eventTimezone, Temporal.Duration.from({ hours: -3 }))
+    expect(baghdadGrid.splitTimes.value[0][0]?.absoluteMinutes).toBe(9 * 60)
+    expect(baghdadGrid.splitTimes.value[1]).toEqual([])
+
+    const tehranGrid = makeGrid("Asia/Tehran", Temporal.Duration.from({ minutes: -210 }))
+    expect(tehranGrid.splitTimes.value[0][0]?.absoluteMinutes).toBe(9 * 60 + 30)
+    expect(tehranGrid.splitTimes.value.at(-1)).toEqual([])
+
+    const fijiGrid = makeGrid("Pacific/Fiji", Temporal.Duration.from({ hours: -12 }))
+    expect(fijiGrid.splitTimes.value).toHaveLength(2)
+    expect(fijiGrid.splitTimes.value[1]).toEqual([])
+    expect(
+      fijiGrid.days.value.map((day) => day.dateObject.toPlainDate().toString()),
+    ).toEqual(["2026-08-06", "2026-08-07", "2026-08-08"])
+    expect(fijiGrid.getDateFromRowCol(72, 0)?.toInstant().toString()).toBe(
+      "2026-08-06T06:00:00Z",
+    )
+    expect(fijiGrid.getDateFromRowCol(0, 1)?.toInstant().toString()).toBe(
+      "2026-08-06T12:00:00Z",
+    )
+    expect(fijiGrid.getDateFromRowCol(0, 2)?.toInstant().toString()).toBe(
+      "2026-08-07T12:00:00Z",
     )
   })
 
@@ -1043,7 +1127,7 @@ describe("useCalendarGrid", () => {
     )
   })
 
-  it("keeps wrapped UTC+3:30 rows owned by their header date", () => {
+  it("keeps wrapped UTC+3:30 rows continuous and owned by their header date", () => {
     const event = ref<ScheduleOverlapEvent>({
       _id: "evt-6",
       shortId: "grid-wrap-split-gap",
@@ -1082,12 +1166,12 @@ describe("useCalendarGrid", () => {
     })
 
     expect(grid.splitTimes.value[0]).not.toHaveLength(0)
-    expect(grid.splitTimes.value[1]).not.toHaveLength(0)
+    expect(grid.splitTimes.value[1]).toEqual([])
     expect(grid.splitTimes.value[0][0]?.text).toBe("12 am")
-    expect(grid.splitTimes.value[0][0]?.absoluteMinutes).toBe(24 * 60)
-    expect(grid.splitTimes.value[1][0]?.text).toBe("11 pm")
-    expect(grid.splitTimes.value[1][0]?.absoluteMinutes).toBe(23 * 60)
-    expect(grid.splitTimes.value[1][1]?.absoluteMinutes).toBe(23 * 60 + 30)
+    expect(grid.splitTimes.value[0][0]?.absoluteMinutes).toBe(0)
+    expect(grid.splitTimes.value[0].at(-1)?.absoluteMinutes).toBe(
+      23 * 60 + 30,
+    )
 
     const totalRows =
       grid.splitTimes.value[0].length + grid.splitTimes.value[1].length

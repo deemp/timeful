@@ -27,7 +27,6 @@ import {
 } from "@/utils/timedEventSlots"
 import {
   HOUR_HEIGHT,
-  SPLIT_GAP_HEIGHT,
   getScheduledEventFromDragRange,
   states,
   type RowCol,
@@ -129,7 +128,6 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
     const style: Record<string, string> = {}
     let top: number
     let height: number
-    let isSecondSplit: boolean
     if (opts.dragging.value && opts.dragStart.value && opts.dragCur.value) {
       const scheduledEvent = getScheduledEventFromDragRange(
         opts.dragStart.value,
@@ -141,27 +139,18 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
 
       top = scheduledEvent.row
       height = scheduledEvent.numRows
-      isSecondSplit = scheduledEvent.row >= opts.splitTimes.value[0].length
     } else if (curScheduledEvent.value ?? savedScheduledEvent.value) {
       const scheduledEvent = curScheduledEvent.value ?? savedScheduledEvent.value
       if (!scheduledEvent) return style
       top = scheduledEvent.row
       height = scheduledEvent.numRows
-      isSecondSplit =
-        scheduledEvent.row >= opts.splitTimes.value[0].length
     } else {
       return style
     }
 
-    if (isSecondSplit) {
-      style.top = `calc(${String(top)} * ${String(
-        opts.timeslotHeight.value
-      )}px + ${String(SPLIT_GAP_HEIGHT)}px)`
-    } else {
-      style.top = `calc(${String(top)} * ${String(
-        opts.timeslotHeight.value
-      )}px)`
-    }
+    style.top = `calc(${String(top)} * ${String(
+      opts.timeslotHeight.value
+    )}px)`
     style.height = `calc(${String(height)} * ${String(
       opts.timeslotHeight.value
     )}px)`
