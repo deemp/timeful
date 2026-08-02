@@ -65,6 +65,12 @@ export interface TimeItem {
   displayedMinutes?: number
 }
 
+export type TimedCellState =
+  | "active"
+  | "enabled_inactive"
+  | "outside_range"
+  | "padding"
+
 export interface RenderedTimeGridRowCell {
   class: string
   style: Record<string, string>

@@ -137,6 +137,13 @@ export const buildSpecificTimesEditDraft = ({
 
   const resetExistingTimes =
     !hasCanonicalTimedState(event) || !slotWindowMatches
+  const specificTimesSchedule = fullDaySpecificTimesSchedule(
+    {
+      ...schedule,
+      timedRecurrence: preservedTimedRecurrence,
+    },
+    timeIncrementMinutes,
+  )
   const nextActiveSlots = resetExistingTimes
     ? []
     : mergeActiveSlotsByMembershipDay({
@@ -144,38 +151,38 @@ export const buildSpecificTimesEditDraft = ({
           event.enabledSlots ?? event.activeSlots ?? event.times,
         priorActiveSlots:
           event.activeSlots ?? event.times ?? schedule.activeSlots,
-        nextEnabledSlots: schedule.enabledSlots,
-        timeZone: schedule.eventTimezone,
-        slotGeneration: schedule.slotGeneration,
+        nextEnabledSlots: specificTimesSchedule.enabledSlots,
+        timeZone: specificTimesSchedule.eventTimezone,
+        slotGeneration: specificTimesSchedule.slotGeneration,
         priorMembershipDays:
           getTimedRecurrence(event).kind === "specific_dates"
             ? getTimedRecurrence(event).selectedDays
             : undefined,
         nextMembershipDays:
           preservedTimedRecurrence.kind === "specific_dates"
-            ? schedule.normalizedSelectedDays
+            ? specificTimesSchedule.normalizedSelectedDays
             : undefined,
       })
   const normalizedSlots = normalizeActiveSlots({
-    enabledSlots: schedule.enabledSlots,
+    enabledSlots: specificTimesSchedule.enabledSlots,
     activeSlots: nextActiveSlots,
   })
 
   return {
     dates: [...schedule.normalizedSelectedDays],
     timeSeed: schedule.dates[0]?.withTimeZone(UTC),
-    duration: schedule.duration,
+    duration: specificTimesSchedule.duration,
     enabledSlots: normalizedSlots.enabledSlots,
     activeSlots: normalizedSlots.activeSlots,
-    eventTimezone: schedule.eventTimezone,
+    eventTimezone: specificTimesSchedule.eventTimezone,
     timedRecurrence:
       preservedTimedRecurrence.kind === "specific_dates"
         ? {
             ...preservedTimedRecurrence,
-            selectedDays: schedule.normalizedSelectedDays,
+            selectedDays: specificTimesSchedule.normalizedSelectedDays,
           }
         : preservedTimedRecurrence,
-    slotGeneration: schedule.slotGeneration,
+    slotGeneration: specificTimesSchedule.slotGeneration,
     timeIncrementMinutes,
     resetExistingTimes,
   }

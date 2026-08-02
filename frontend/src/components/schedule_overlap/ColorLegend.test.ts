@@ -12,13 +12,12 @@ describe("ColorLegend", () => {
         activeSlotsCount: 0,
         responseCount: 0,
         isAddingAvailability: false,
+        isSpecificTimes: false,
         ...props,
       },
     })
 
   const expectStructuralColors = (wrapper: ReturnType<typeof mountLegend>) => {
-    expect(wrapper.text()).toContain("Unavailable, select in Edit event")
-    expect(wrapper.html()).toContain("tw-bg-light-gray-stroke")
     expect(wrapper.text()).toContain("Unavailable, padding")
     expect(wrapper.html()).toContain("tw-bg-gray")
     expect(wrapper.text()).toContain("Scheduled event")
@@ -35,7 +34,6 @@ describe("ColorLegend", () => {
 
     expectStructuralColors(wrapper)
     expect(labels(wrapper)).toEqual([
-      "Unavailable, select in Edit event",
       "Unavailable, padding",
       "Scheduled event",
     ])
@@ -48,7 +46,6 @@ describe("ColorLegend", () => {
     expectStructuralColors(wrapper)
     expect(labels(wrapper)).toEqual([
       "Unavailable, select in Add/Edit availability",
-      "Unavailable, select in Edit event",
       "Unavailable, padding",
       "Scheduled event",
     ])
@@ -65,7 +62,7 @@ describe("ColorLegend", () => {
     expect(wrapper.html()).toContain("tw-bg-yellow")
     expect(wrapper.text()).toContain("Unavailable, select in Add/Edit availability")
     expect(wrapper.html()).toContain("tw-bg-[#F9CCCC]")
-    expect(labels(wrapper)).toHaveLength(6)
+    expect(labels(wrapper)).toHaveLength(5)
   })
 
   it("shows the full palette while adding availability", () => {
@@ -74,25 +71,24 @@ describe("ColorLegend", () => {
     expect(wrapper.text()).toContain("Available")
     expect(wrapper.text()).toContain("If needed")
     expect(wrapper.text()).toContain("Unavailable, select in Add/Edit availability")
-    expect(labels(wrapper)).toHaveLength(6)
+    expect(labels(wrapper)).toHaveLength(5)
   })
 
   it("uses the respondent checkbox control geometry for each indicator", () => {
     const wrapper = mountLegend({ responseCount: 1 })
 
     const indicatorSlots = wrapper.findAll(".color-legend__indicator-slot")
-    expect(indicatorSlots).toHaveLength(6)
+    expect(indicatorSlots).toHaveLength(5)
 
     for (const indicatorSlot of indicatorSlots) {
       expect(indicatorSlot.find(".tw-h-4.tw-w-4").exists()).toBe(true)
     }
   })
 
-  it("splits Edit availability and Edit event onto a new line from the medium breakpoint", () => {
-    const wrapper = mountLegend({ activeSlotsCount: 1 })
+  it("shows the edit-event item only for specific-times events", () => {
+    const wrapper = mountLegend({ isSpecificTimes: true })
 
-    const responsiveBreaks = wrapper.findAll("br.tw-hidden.md\\:tw-block")
-
-    expect(responsiveBreaks).toHaveLength(2)
+    expect(wrapper.text()).toContain("Unavailable, select in Edit event")
+    expect(wrapper.html()).toContain("tw-bg-light-gray-stroke")
   })
 })

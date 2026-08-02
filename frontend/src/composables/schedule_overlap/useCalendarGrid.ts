@@ -22,6 +22,7 @@ import {
 } from "@/utils"
 import {
   generateTimedSlotsForDay,
+  getLocalSlotDomainDay,
   getTimedEventTimezone,
   getTimedSlotGeneration,
   hasCanonicalTimedSlots,
@@ -44,6 +45,7 @@ import {
   type ScheduleOverlapEvent,
   type ScheduleOverlapState,
   type TimeItem,
+  type TimedCellState,
   type Timezone,
 } from "./types"
 
@@ -360,6 +362,137 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     return { minHours, maxHours }
   }
 
+  const timedGridSlotProjection = computed(() => {
+    if (event.value.daysOnly || !hasCanonicalTimedSlots(event.value)) {
+      return [] as {
+        slot: Temporal.ZonedDateTime
+        membershipKey: string
+        displayDateKey: string
+        displayedMinutes: number
+        axisMinutes: number
+        occurrence: number
+      }[]
+    }
+
+    const slots = isSpecificTimes.value
+      ? specificTimesEnabledSlots.value
+      : canonicalTimedSlots.value
+    const eventTimezone = getTimedEventTimezone(event.value)
+    const slotGeneration = getTimedSlotGeneration(event.value)
+    const occurrences = new Map<string, Temporal.ZonedDateTime[]>()
+    const projected = slots.map((slot) => {
+      const membershipDate = getLocalSlotDomainDay({
+        slot,
+        timeZone: eventTimezone,
+        slotGeneration,
+      })
+      const displayed = getDateInTimezone(slot, curTimezone.value)
+      const displayedMinutes = displayed.hour * 60 + displayed.minute
+      const displayDate = displayed.toPlainDate()
+      const axisMinutes = displayedMinutes
+      const occurrenceKey = `${membershipDate.toString()}:${displayDate.toString()}:${String(displayedMinutes)}`
+      occurrences.set(occurrenceKey, [...(occurrences.get(occurrenceKey) ?? []), slot])
+      return {
+        slot,
+        membershipKey: membershipDate.toString(),
+        displayDateKey: displayDate.toString(),
+        displayedMinutes,
+        axisMinutes,
+        occurrence: 0,
+      }
+    })
+
+    for (const item of projected) {
+      const grouped = occurrences.get(
+        `${item.membershipKey}:${item.displayDateKey}:${String(item.displayedMinutes)}`,
+      )
+      item.occurrence = sortAndUniqueSlots(grouped).findIndex((slot) =>
+        slot.toInstant().equals(item.slot.toInstant()),
+      )
+    }
+
+    return projected
+  })
+
+  const timedGridRows = computed<TimeItem[]>(() => {
+    if (event.value.daysOnly || !hasCanonicalTimedSlots(event.value)) {
+      return []
+    }
+
+    const incrementMinutes = Math.round(timeslotDuration.value.total("minutes"))
+    const rowsByKey = new Map<string, TimeItem>()
+    const duplicateSlotInstants = new Set<string>()
+
+    // A repeated civil clock value has two distinct instants. Give each an
+    // occurrence ordinal so it cannot overwrite its sibling during projection.
+    const occurrenceGroups = new Map<string, Temporal.ZonedDateTime[]>()
+    for (const item of timedGridSlotProjection.value) {
+      const key = `${item.membershipKey}:${item.displayDateKey}:${String(item.displayedMinutes)}`
+      occurrenceGroups.set(key, [...(occurrenceGroups.get(key) ?? []), item.slot])
+    }
+    for (const groupedSlots of occurrenceGroups.values()) {
+      sortAndUniqueSlots(groupedSlots).forEach((slot) => {
+        if (groupedSlots.length > 1) {
+          duplicateSlotInstants.add(slot.toInstant().toString())
+        }
+      })
+    }
+
+    for (const item of timedGridSlotProjection.value) {
+      const id = `${String(item.axisMinutes)}:${String(item.occurrence)}`
+      if (!rowsByKey.has(id)) {
+        rowsByKey.set(id, {
+          id,
+          hoursOffset: durationFromMinutesNumber(item.axisMinutes),
+          absoluteMinutes: item.axisMinutes,
+          displayedMinutes: item.displayedMinutes,
+          text:
+            duplicateSlotInstants.has(item.slot.toInstant().toString())
+              ? `${timeNumToTimeText(
+                  item.displayedMinutes / 60,
+                  timeType.value === timeTypes.HOUR12,
+                )} ${getDateInTimezone(item.slot, curTimezone.value).offset}`
+              : item.displayedMinutes % 60 === 0
+                ? timeNumToTimeText(
+                    item.displayedMinutes / 60,
+                    timeType.value === timeTypes.HOUR12,
+                  )
+                : undefined,
+        })
+      }
+    }
+
+    if (!isSpecificTimes.value && rowsByKey.size > 0) {
+      const minutes = [...rowsByKey.values()].map((row) => row.absoluteMinutes ?? 0)
+      const start = Math.floor(Math.min(...minutes) / 60) * 60
+      const end = Math.ceil((Math.max(...minutes) + incrementMinutes) / 60) * 60
+      for (let minute = start; minute < end; minute += incrementMinutes) {
+        const id = `${String(minute)}:0`
+        if (!rowsByKey.has(id)) {
+          rowsByKey.set(id, {
+            id,
+            hoursOffset: durationFromMinutesNumber(minute),
+            absoluteMinutes: minute,
+            displayedMinutes: minute,
+            text:
+              minute % 60 === 0
+                ? timeNumToTimeText(
+                    minute / 60,
+                    timeType.value === timeTypes.HOUR12,
+                  )
+                : undefined,
+          })
+        }
+      }
+    }
+
+    return [...rowsByKey.values()].sort(
+      (left, right) =>
+        (left.displayedMinutes ?? 0) - (right.displayedMinutes ?? 0) ||
+        (left.id ?? "").localeCompare(right.id ?? ""),
+    )
+  })
+
   const splitTimes = computed<TimeItem[][]>(() => {
     const split: TimeItem[][] = [[], []]
     const preferredSpecificTimesWindow = savedSpecificTimesWindow.value
@@ -423,6 +556,9 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     }
 
     if (state.value === states.SET_SPECIFIC_TIMES) {
+      if (timedGridRows.value.length > 0) {
+        return [timedGridRows.value, []]
+      }
       if (specificTimesVisibleSlots.value.length === 0) {
         return split
       }
@@ -437,6 +573,9 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     }
 
     if (canonicalTimedSlots.value.length > 0) {
+      if (timedGridRows.value.length > 0) {
+        return [timedGridRows.value, []]
+      }
       const displayedSlotMinutes = canonicalTimedSlots.value.map((slot) => {
         const displayedTime = getDateInTimezone(slot, curTimezone.value).toPlainTime()
         return displayedTime.hour * 60 + displayedTime.minute
@@ -874,6 +1013,60 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
       .withTimeZone(day.dateObject.timeZoneId)
   }
 
+  const timedCellByRowCol = computed<
+    Map<string, { slot: Temporal.ZonedDateTime | null; state: TimedCellState }>
+  >(() => {
+    const cells = new Map<
+      string,
+      { slot: Temporal.ZonedDateTime | null; state: TimedCellState }
+    >()
+    if (!hasCanonicalTimedSlots(event.value)) return cells
+
+    const rowsById = new Map(
+      timedGridRows.value.map((row, index) => [row.id ?? String(index), index]),
+    )
+    const columnsByDisplayDate = new Map(
+      allDays.value.map((day, index) => [
+        getDateInTimezone(day.dateObject, curTimezone.value).toPlainDate().toString(),
+        index,
+      ]),
+    )
+    const activeSlots = isSpecificTimes.value
+      ? specificTimesActiveSlots.value
+      : sortAndUniqueSlots(event.value.activeSlots ?? canonicalTimedSlots.value)
+    const activeInstants = new Set(
+      activeSlots.map((slot) => slot.toInstant().toString()),
+    )
+    for (const item of timedGridSlotProjection.value) {
+      const col = columnsByDisplayDate.get(item.displayDateKey)
+      if (col == null) continue
+      const row = rowsById.get(
+        `${String(item.axisMinutes)}:${String(item.occurrence)}`,
+      )
+      if (row == null) continue
+      cells.set(`${String(row)}:${String(col)}`, {
+        slot: item.slot,
+        state: activeInstants.has(item.slot.toInstant().toString())
+          ? "active"
+          : "enabled_inactive",
+      })
+    }
+
+    if (!isSpecificTimes.value) {
+      for (let row = 0; row < timedGridRows.value.length; row += 1) {
+        for (let col = 0; col < allDays.value.length; col += 1) {
+          const key = `${String(row)}:${String(col)}`
+          if (!cells.has(key)) cells.set(key, { slot: null, state: "outside_range" })
+        }
+      }
+    }
+    return cells
+  })
+
+  const getTimedCellState = (row: number, col: number): TimedCellState =>
+    timedCellByRowCol.value.get(`${String(row)}:${String(col)}`)?.state ??
+    "padding"
+
   const getDateFromDayTimeIndexInternal = (
     dayIndex: number,
     timeIndex: number,
@@ -882,6 +1075,25 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     const time = (displayedTimes.value as (TimeItem | undefined)[])[timeIndex]
     const day = (allDays.value as (DayItem | undefined)[])[dayIndex]
     if (!day || !time) return null
+
+    if (hasCanonicalTimedSlots(event.value)) {
+      const cell = timedCellByRowCol.value.get(
+        `${String(timeIndex)}:${String(dayIndex)}`,
+      )
+      if (!cell?.slot) return null
+      if (specificTimesDomain === "unbounded") return cell.slot
+      if (specificTimesDomain === "enabled") {
+        return cell.state === "active" || cell.state === "enabled_inactive"
+          ? cell.slot
+          : null
+      }
+      if (state.value === states.SET_SPECIFIC_TIMES) {
+        return cell.state === "active" || cell.state === "enabled_inactive"
+          ? cell.slot
+          : null
+      }
+      return cell.state === "active" ? cell.slot : null
+    }
 
     const date =
       typeof time.absoluteMinutes === "number"
@@ -1092,6 +1304,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     getDateFromDayTimeIndex,
     getDisplayDateFromRowCol,
     getEnabledDateFromRowCol,
+    getTimedCellState,
     getDateFromRowCol,
     setTimeslotSize,
     onResize,

@@ -185,9 +185,9 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
     const { col, row, numRows } = curScheduledEvent.value
     let startDate = opts.getDateFromRowCol(row, col)
     if (!startDate) return
-    let endDate = startDate.add({
-      minutes: opts.timeslotDuration.value.total("minutes") * numRows,
-    })
+    const lastSlot = opts.getDateFromRowCol(row + numRows - 1, col)
+    if (!lastSlot) return
+    let endDate = lastSlot.add(opts.timeslotDuration.value)
 
     if (opts.isWeekly.value || opts.isGroup.value) {
       const eventDates = getEventDateSeeds(opts.event.value)

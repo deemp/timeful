@@ -654,7 +654,7 @@ describe("useCalendarGrid", () => {
     expect(baghdadGrid.splitTimes.value[1]).toEqual([])
 
     const tehranGrid = makeGrid("Asia/Tehran", Temporal.Duration.from({ minutes: -210 }))
-    expect(tehranGrid.splitTimes.value[0][0]?.absoluteMinutes).toBe(9 * 60 + 30)
+    expect(tehranGrid.splitTimes.value[0][0]?.absoluteMinutes).toBe(9 * 60)
     expect(tehranGrid.splitTimes.value.at(-1)).toEqual([])
 
     const fijiGrid = makeGrid("Pacific/Fiji", Temporal.Duration.from({ hours: -12 }))

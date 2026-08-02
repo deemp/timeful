@@ -18,7 +18,7 @@
       <span class="tw-text-sm">If needed</span>
     </div>
     <div
-      v-if="showResponsePalette || activeSlotsCount > 0"
+      v-if="isSpecificTimes"
       class="tw-flex tw-items-start"
     >
       <div class="color-legend__indicator-slot">
@@ -66,6 +66,7 @@ const props = defineProps<{
   activeSlotsCount: number
   responseCount: number
   isAddingAvailability: boolean
+  isSpecificTimes: boolean
 }>()
 
 const showResponsePalette = computed(

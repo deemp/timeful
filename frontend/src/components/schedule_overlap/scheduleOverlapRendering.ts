@@ -20,6 +20,7 @@ import type {
   RenderedTimeGridRow,
   ResponsesFormatted,
   ScheduleOverlapState,
+  TimedCellState,
   TimeItem,
   Timezone,
 } from "@/composables/schedule_overlap/types"
@@ -303,6 +304,7 @@ interface BuildTimeGridTimeslotClassStylesArgs extends Omit<
     row: number,
     col: number,
   ) => Temporal.ZonedDateTime | null
+  getTimedCellState?: (row: number, col: number) => TimedCellState
 }
 
 export const getTimeGridTimeslotClassStyle = ({
@@ -434,6 +436,7 @@ export const buildTimeGridTimeslotClassStyles = ({
   secondSplitTimes,
   getDateFromRowCol,
   getEnabledDateFromRowCol,
+  getTimedCellState,
   ...sharedArgs
 }: BuildTimeGridTimeslotClassStylesArgs): ClassStyle[] => {
   const out: ClassStyle[] = []
@@ -445,6 +448,7 @@ export const buildTimeGridTimeslotClassStyles = ({
     for (let row = 0; row < firstSplitTimes.length; row += 1) {
       const date = getDateFromRowCol(row, col)
       const enabledDate = getEnabledDateFromRowCol?.(row, col) ?? date
+      const cellState = getTimedCellState?.(row, col)
       const classStyle = getTimeGridTimeslotClassStyle({
         ...sharedArgs,
         date,
@@ -456,6 +460,9 @@ export const buildTimeGridTimeslotClassStyles = ({
         isFirstSplit: true,
         isDisabled: !enabledDate,
       })
+      if (cellState === "outside_range") {
+        classStyle.class += "tw-bg-gray "
+      }
       if (!date && enabledDate) {
         classStyle.class += "tw-bg-light-gray-stroke "
       }
@@ -470,6 +477,7 @@ export const buildTimeGridTimeslotClassStyles = ({
       const row = secondSplitRow + firstSplitTimes.length
       const date = getDateFromRowCol(row, col)
       const enabledDate = getEnabledDateFromRowCol?.(row, col) ?? date
+      const cellState = getTimedCellState?.(row, col)
       const classStyle = getTimeGridTimeslotClassStyle({
         ...sharedArgs,
         date,
@@ -481,6 +489,9 @@ export const buildTimeGridTimeslotClassStyles = ({
         isFirstSplit: false,
         isDisabled: !enabledDate,
       })
+      if (cellState === "outside_range") {
+        classStyle.class += "tw-bg-gray "
+      }
       if (!date && enabledDate) {
         classStyle.class += "tw-bg-light-gray-stroke "
       }

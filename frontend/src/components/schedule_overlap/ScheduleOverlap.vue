@@ -546,7 +546,7 @@ const {
   splitTimes, times, allDays, days, monthDays, monthDayIncluded,
   curMonthText, columnOffsets: _columnOffsets, showLeftZigZag: _showLeftZigZag, showRightZigZag: _showRightZigZag, hasNextPage, hasPrevPage, hasPages: _hasPages,
   maxDaysPerPage, isColConsecutive, getDateFromDayHoursOffset: _getDateFromDayHoursOffset, getDateFromDayTimeIndex: _getDateFromDayTimeIndex,
-  getDisplayDateFromRowCol, getEnabledDateFromRowCol, getDateFromRowCol, setTimeslotSize, onResize, onCalendarScroll, getLocalTimezone: _getLocalTimezone,
+   getDisplayDateFromRowCol, getEnabledDateFromRowCol, getTimedCellState, getDateFromRowCol, setTimeslotSize, onResize, onCalendarScroll, getLocalTimezone: _getLocalTimezone,
   getMinMaxHoursFromTimes: _getMinMaxHoursFromTimes,
 } = grid
 
@@ -905,6 +905,8 @@ const baseTimeslotClassStyle = computed(() => {
     secondSplitTimes: splitTimes.value[1],
     getDateFromRowCol,
     getEnabledDateFromRowCol,
+    getTimedCellState: (row, col) =>
+      getTimedCellState(row, maxDaysPerPage.value * page.value + col),
     state: state.value,
     overlayAvailability: overlayAvailability.value,
     dragType: dragType.value,
@@ -1008,10 +1010,11 @@ const renderedRows = computed<RenderedTimeGridRow[]>(() => {
       height: timeslotHeight.value,
       rowTop,
       timeText:
-        typeof timeItem.absoluteMinutes === "number" &&
+        (timeItem.text?.match(/ [+-]\d{2}:\d{2}$/) ? timeItem.text : undefined) ??
+        (typeof timeItem.absoluteMinutes === "number" &&
         timeItem.absoluteMinutes % 60 === 0
           ? formatAbsoluteMinutes(timeItem.absoluteMinutes)
-          : timeItem.text,
+          : undefined),
       baseRowIndex,
       cells,
     })
