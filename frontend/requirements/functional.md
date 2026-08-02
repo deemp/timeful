@@ -133,9 +133,29 @@ Anyone with the event link can schedule a selected time range on Timeful:
 
 ## FR-025
 
-Canonical timed-event grids shall preserve projected slot ownership when the display timezone changes:
+Canonical timed-event grids shall preserve slot instants when the display timezone changes:
 
-- Display-date columns shall be derived from enabled slots projected into the selected display timezone.
-- A slot shall render only in its display-local date column. The grid shall add adjacent date columns needed for post-midnight projected slots.
-- The time axis shall use exact slot boundaries and shall not round to whole hours. For example, a `09:30-17:30` projected slot range shall start at `09:30` and end at `17:30`.
-- Wrapped projected ranges shall remain continuous and shall not duplicate rows, labels, or slots.
+- Changing `Shown in` shall not change an enabled or active slot's instant.
+- A slot's displayed clock label and tooltip shall use the selected display timezone.
+- A slot shall render at most once in a grid and shall not be duplicated because its displayed time crosses midnight.
+- Wrapped ranges shall remain continuous without structural split gaps.
+
+## FR-026
+
+Timed grids shall distinguish the enabled-slot domain from the active-slot selection according to the editing mode. This requirement supersedes FR-021's display-timezone column-projection rules where they conflict.
+
+- A grid column represents a date picked in the date picker, interpreted in the event timezone. Changing `Shown in` shall not add, remove, or reassign picked-date columns.
+- `Shown in` changes a slot's displayed clock time and tooltip date/time only. A slot remains owned by its picked-date column even when its displayed instant crosses midnight.
+- While setting specific times, every increment from `00:00` inclusive through the next `00:00` exclusive shall be an enabled slot for every picked date. The grid shall show that full-day domain. Selected slots are active; enabled inactive slots remain editable; cells outside the enabled domain are non-editable padding.
+- On the event page for a specific-times event, the grid shall show its complete enabled domain, with inactive spans eligible for the existing collapsed-hours behavior. Active slots are respondent-selectable. Enabled inactive slots are not respondent-selectable and shall not be presented as padding.
+- On the event page for a range event, only increments in the selected range are enabled and active. The grid shall render the selected range with hour-aligned axis boundaries; it need not render the rest of the day. Any rendered slot outside the range is non-enabled and shall be labelled as outside the selected range, not padding.
+- The legend shall name cells by their domain state: active, enabled but inactive, outside the selected range, or padding outside the enabled domain. It shall not use `Unavailable, padding` for an enabled inactive slot or for a slot omitted solely because a range grid does not render the rest of the day.
+
+## FR-027
+
+Timed grids shall preserve every enabled slot on daylight-saving-time transition days.
+
+- A grid cell's identity shall be its instant, not its displayed clock label.
+- When clocks move backward and a local clock time occurs twice, the grid shall render both slots in chronological order and distinguish their labels with the applicable timezone offset or abbreviation.
+- When clocks move forward and local clock times do not exist, the grid shall not render nonexistent slots.
+- The same instant-preserving behavior applies to enabled-slot membership, active-slot selection, availability responses, drag selection, scheduling, and tooltips.
