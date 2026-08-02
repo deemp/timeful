@@ -7,6 +7,12 @@ description: Session handoff, handoff notes, or handoff file: use when the user 
 
 Create a handoff only when the user explicitly requests one. Do not create one automatically at task completion.
 
+<!--
+Content guidance adapted from Matt Pocock's handoff skill:
+https://github.com/mattpocock/skills/blob/main/skills/productivity/handoff/SKILL.md
+Licensed under MIT.
+-->
+
 ## Create The File
 
 1. Immediately before writing the handoff, capture the most recently updated OpenCode session in the current project directory. Use:
