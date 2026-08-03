@@ -1,6 +1,10 @@
 <template>
   <span>
-    <Tooltip :content="tooltipContent" :position-override="tooltipPosition">
+    <Tooltip
+      :content="visibleTooltipContent"
+      :position-override="tooltipPosition"
+      :force-visible="Boolean(isPhone && selectedTooltipSlot)"
+    >
       <div class="tw-select-none tw-py-4" style="-webkit-touch-callout: none">
         <div
           class="schedule-overlap-layout tw-flex"
@@ -613,6 +617,10 @@ const {
   toggleShowEditOptions, onShowBestTimesChange,
   updateOverlayAvailability, closeHint,
 } = ui
+
+const visibleTooltipContent = computed(() =>
+  !isPhone.value || selectedTooltipSlot.value ? tooltipContent.value : ""
+)
 
 useScheduleOverlapController({
   event: eventReadonly,
@@ -1373,28 +1381,20 @@ function getTimedGridSlotFromEvent(e: PointerEvent | MouseEvent): RowCol | null 
       return null
     }
 
-    const { left, right, top, bottom } = cell.getBoundingClientRect()
-    if (
-      e.clientX < left ||
-      e.clientX > right ||
-      e.clientY < top ||
-      e.clientY > bottom
-    ) {
-      return null
-    }
-
     const row = Number.parseInt(cell.dataset.row ?? "", 10)
     const col = Number.parseInt(cell.dataset.col ?? "", 10)
     return Number.isFinite(row) && Number.isFinite(col) ? { row, col } : null
   }
 
-  return getSlotFromElement(document.elementFromPoint(e.clientX, e.clientY))
+  const targetSlot = getSlotFromElement(
+    e.target instanceof Element ? e.target : null
+  )
+  return targetSlot ?? getSlotFromElement(document.elementFromPoint(e.clientX, e.clientY))
 }
 
 function updateSelectedTooltipSlot(e: PointerEvent | MouseEvent) {
   if (
     !isPhone.value ||
-    !("pointerId" in e) ||
     !dragging.value ||
     !dragCur.value
   ) {
@@ -1411,24 +1411,30 @@ function updateSelectedTooltipSlot(e: PointerEvent | MouseEvent) {
   }
 }
 
+function setTooltipPositionForSelectedSlot() {
+  const selectedSlot = selectedTooltipSlot.value
+  if (!selectedSlot) {
+    return
+  }
+
+  const { row, col } = selectedSlot
+  const cell = document.querySelector<HTMLElement>(
+    `#drag-section .timeslot[data-row="${String(row)}"][data-col="${String(col)}"]`
+  )
+  if (!cell) {
+    return
+  }
+
+  const { left, top, width, height } = cell.getBoundingClientRect()
+  tooltipPosition.value = {
+    x: left + width / 2,
+    y: top + height / 2,
+  }
+}
+
 function setTooltipPositionForDrag(e: PointerEvent | MouseEvent) {
   if (isPhone.value) {
-    const selectedSlot = selectedTooltipSlot.value
-    if (!selectedSlot) {
-      return
-    }
-
-    const { row, col } = selectedSlot
-    const cell = document.querySelector<HTMLElement>(
-      `#drag-section .timeslot[data-row="${String(row)}"][data-col="${String(col)}"]`
-    )
-    if (cell) {
-      const { left, top, width, height } = cell.getBoundingClientRect()
-      tooltipPosition.value = {
-        x: left + width / 2,
-        y: top + height / 2,
-      }
-    }
+    setTooltipPositionForSelectedSlot()
     return
   }
 
@@ -1596,6 +1602,11 @@ function getTimeslotVon(row: number, col: number): Record<string, () => void> {
   return {
     click: () => {
       showAvailability(row, col)
+      if (isPhone.value && !props.event.daysOnly) {
+        selectedTooltipSlot.value = { row, col }
+        setTooltipPositionForSelectedSlot()
+        setTooltipForRowCol(row, col)
+      }
     },
     mousedown: () => {
       if (

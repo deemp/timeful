@@ -73,4 +73,20 @@ describe("Tooltip", () => {
     expect(tooltip.attributes("style")).toContain("left: 40px;")
     expect(tooltip.attributes("style")).toContain("top: 172px;")
   })
+
+  it("renders immediately when visibility is explicitly forced", async () => {
+    const wrapper = mount(Tooltip, {
+      props: {
+        content: "Hello",
+        forceVisible: true,
+      },
+      slots: {
+        default: "<button>Trigger</button>",
+      },
+    })
+
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find(".tw-fixed").exists()).toBe(true)
+  })
 })

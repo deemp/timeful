@@ -22,6 +22,7 @@ import {
 import { formatTooltipContent } from "./scheduleOverlapRendering"
 import { ZdtMap } from "@/utils"
 import ScheduleOverlap from "./ScheduleOverlap.vue"
+import Tooltip from "../Tooltip.vue"
 import scheduleOverlapSource from "./ScheduleOverlap.vue?raw"
 import scheduleOverlapSidebarSource from "./ScheduleOverlapSidebar.vue?raw"
 import scheduleOverlapTimeGridSource from "./ScheduleOverlapTimeGrid.vue?raw"
@@ -1970,6 +1971,95 @@ describe("ScheduleOverlap", () => {
     vm.getTimeslotVon(1, 0).mouseleave()
 
     expect(vm.tooltipPosition).toBeNull()
+  })
+
+  it("does not render a mobile tooltip from hover before a timeslot is selected", async () => {
+    viewportWidth.value = 375
+    const wrapper = mountScheduleOverlap({
+      global: {
+        stubs: {
+          Tooltip,
+        },
+      },
+    })
+    const vm = wrapper.vm as unknown as {
+      getTimeslotVon: (row: number, col: number) => Record<string, () => void>
+    }
+
+    vm.getTimeslotVon(1, 0).mouseover()
+    await wrapper.get(".tw-relative").trigger("mouseenter")
+    await nextTick()
+
+    expect(wrapper.find(".tw-fixed.tw-z-50").exists()).toBe(false)
+  })
+
+  it("shows the mobile tooltip after selecting a timeslot by click", async () => {
+    viewportWidth.value = 375
+    const cell = document.createElement("div")
+    cell.className = "timeslot"
+    cell.dataset.row = "1"
+    cell.dataset.col = "0"
+    cell.getBoundingClientRect = () =>
+      ({ left: 40, top: 80, width: 120, height: 20 }) as DOMRect
+    const dragSection = document.createElement("div")
+    dragSection.id = "drag-section"
+    dragSection.append(cell)
+    document.body.append(dragSection)
+
+    const wrapper = mountScheduleOverlap({
+      global: {
+        stubs: {
+          Tooltip,
+        },
+      },
+    })
+    const vm = wrapper.vm as unknown as {
+      getTimeslotVon: (row: number, col: number) => Record<string, () => void>
+      selectedTooltipSlot: { row: number; col: number } | null
+    }
+
+    vm.getTimeslotVon(1, 0).click()
+    await nextTick()
+
+    expect(vm.selectedTooltipSlot).toEqual({ row: 1, col: 0 })
+    expect(wrapper.find(".tw-fixed.tw-z-50").exists()).toBe(true)
+
+    wrapper.unmount()
+    dragSection.remove()
+  })
+
+  it("records the mobile tooltip anchor from a compatibility mouse press", () => {
+    viewportWidth.value = 375
+    const cell = document.createElement("div")
+    cell.className = "timeslot"
+    cell.dataset.row = "1"
+    cell.dataset.col = "0"
+    const dragSection = document.createElement("div")
+    dragSection.id = "drag-section"
+    dragSection.append(cell)
+    document.body.append(dragSection)
+
+    const wrapper = mountScheduleOverlap()
+    const vm = wrapper.vm as unknown as {
+      dragging: boolean
+      dragCur: { row: number; col: number } | null
+      selectedTooltipSlot: { row: number; col: number } | null
+      updateSelectedTooltipSlot: (event: PointerEvent | MouseEvent) => void
+    }
+    vi.spyOn(document, "elementFromPoint").mockReturnValue(null)
+    vm.dragging = true
+    vm.dragCur = { row: 1, col: 0 }
+
+    vm.updateSelectedTooltipSlot({
+      target: cell,
+      clientX: 900,
+      clientY: 700,
+    } as unknown as MouseEvent)
+
+    expect(vm.selectedTooltipSlot).toEqual({ row: 1, col: 0 })
+
+    wrapper.unmount()
+    dragSection.remove()
   })
 
   it("keeps the mobile tooltip anchored to the last selected timeslot after drag completion", () => {

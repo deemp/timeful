@@ -7,7 +7,7 @@
   >
     <slot></slot>
     <div
-      v-if="isVisible && content"
+      v-if="(isVisible || forceVisible) && content"
       class="tw-pointer-events-none tw-fixed tw-z-50 tw-rounded-lg tw-bg-dark-gray tw-px-1.5 tw-py-1 tw-text-xs tw-text-white tw-shadow-lg tw-transition-opacity tw-duration-200"
       :style="style"
     >
@@ -26,8 +26,9 @@ const props = withDefaults(
   defineProps<{
     content?: string
     positionOverride?: { x: number; y: number } | null
+    forceVisible?: boolean
   }>(),
-  { content: "", positionOverride: null }
+  { content: "", positionOverride: null, forceVisible: false }
 )
 
 const { handleMouseEnter, handleMouseLeave, handleMouseMove, isVisible, style, position } =

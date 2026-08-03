@@ -23,6 +23,84 @@ import {
 
 test.describe.configure({ mode: "serial" })
 
+test("mobile grid does not show a tooltip after reload before a slot is selected", async ({
+  page,
+}) => {
+  await createSpecificTimesEventFromDialog(
+    page,
+    "Mobile unselected tooltip reload regression"
+  )
+  await page.setViewportSize({ width: 375, height: 900 })
+
+  const gridSlot = page.locator(
+    '#drag-section .timeslot[data-row="1"][data-col="0"]'
+  )
+  await gridSlot.scrollIntoViewIfNeeded()
+  const gridSlotBox = await gridSlot.boundingBox()
+  expect(gridSlotBox).not.toBeNull()
+  if (!gridSlotBox) {
+    throw new Error("Expected a visible grid slot before reload")
+  }
+
+  await page.mouse.move(
+    gridSlotBox.x + gridSlotBox.width / 2,
+    gridSlotBox.y + gridSlotBox.height / 2
+  )
+  await page.reload({ waitUntil: "domcontentloaded" })
+  await dismissConsent(page)
+  await expect(gridSlot).toBeVisible()
+  await page.waitForTimeout(800)
+
+  await expect(page.locator(".tw-fixed.tw-z-50")).toHaveCount(0)
+})
+
+test("mobile compatibility mouse press shows the selected-slot tooltip", async ({
+  page,
+}) => {
+  await createSpecificTimesEventFromDialog(
+    page,
+    "Mobile compatibility mouse tooltip regression"
+  )
+  await page.setViewportSize({ width: 375, height: 900 })
+
+  const selectedSlot = page.locator(
+    '#drag-section .timeslot[data-row="1"][data-col="0"]'
+  )
+  await selectedSlot.scrollIntoViewIfNeeded()
+  const selectedSlotBox = await selectedSlot.boundingBox()
+  expect(selectedSlotBox).not.toBeNull()
+  if (!selectedSlotBox) {
+    throw new Error("Expected selected grid slot to be visible")
+  }
+
+  await selectedSlot.dispatchEvent("mousedown", {
+    clientX: selectedSlotBox.x + selectedSlotBox.width / 2,
+    clientY: selectedSlotBox.y + selectedSlotBox.height / 2,
+  })
+
+  const tooltip = page.locator(".tw-fixed.tw-z-50")
+  await expect(tooltip).toBeVisible()
+  expect(await tooltip.textContent()).not.toBe("")
+})
+
+test("mobile timeslot click shows the selected-slot tooltip", async ({ page }) => {
+  await createSpecificTimesEventFromDialog(
+    page,
+    "Mobile click tooltip regression"
+  )
+  await page.setViewportSize({ width: 375, height: 900 })
+
+  const selectedSlot = page.locator(
+    '#drag-section .timeslot[data-row="1"][data-col="0"]'
+  )
+  await selectedSlot.scrollIntoViewIfNeeded()
+  await selectedSlot.dispatchEvent("click")
+
+  const tooltip = page.locator(".tw-fixed.tw-z-50")
+  await expect(tooltip).toBeVisible()
+  expect(await tooltip.textContent()).not.toBe("")
+})
+
 test("mobile grid tooltip stays beside the selected slot while a press moves outside it", async ({
   page,
 }) => {
