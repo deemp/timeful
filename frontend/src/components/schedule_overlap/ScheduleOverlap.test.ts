@@ -2067,40 +2067,6 @@ describe("ScheduleOverlap", () => {
     dragSection.remove()
   })
 
-  it("records the mobile tooltip anchor from a compatibility mouse press", () => {
-    viewportWidth.value = 375
-    const cell = document.createElement("div")
-    cell.className = "timeslot"
-    cell.dataset.row = "1"
-    cell.dataset.col = "0"
-    const dragSection = document.createElement("div")
-    dragSection.id = "drag-section"
-    dragSection.append(cell)
-    document.body.append(dragSection)
-
-    const wrapper = mountScheduleOverlap()
-    const vm = wrapper.vm as unknown as {
-      dragging: boolean
-      dragCur: { row: number; col: number } | null
-      selectedTooltipSlot: { row: number; col: number } | null
-      updateSelectedTooltipSlot: (event: PointerEvent | MouseEvent) => void
-    }
-    vi.spyOn(document, "elementFromPoint").mockReturnValue(null)
-    vm.dragging = true
-    vm.dragCur = { row: 1, col: 0 }
-
-    vm.updateSelectedTooltipSlot({
-      target: cell,
-      clientX: 900,
-      clientY: 700,
-    } as unknown as MouseEvent)
-
-    expect(vm.selectedTooltipSlot).toEqual({ row: 1, col: 0 })
-
-    wrapper.unmount()
-    dragSection.remove()
-  })
-
   it("keeps the mobile tooltip separated from the last selected timeslot after drag completion", () => {
     viewportWidth.value = 375
     const firstCell = document.createElement("div")

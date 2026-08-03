@@ -55,8 +55,6 @@ import {
   shallowRef,
   computed,
   nextTick,
-  onBeforeUnmount,
-  onMounted,
   watch,
   watchEffect,
   type ComputedRef,
@@ -65,7 +63,6 @@ import {
 import { useDisplay } from "vuetify"
 import { Temporal } from "temporal-polyfill"
 import {
-  post,
   ZdtSet,
   getTimezoneReferenceDateForEvent,
   normalizeOptionalTimezone,
@@ -86,14 +83,8 @@ import ScheduleOverlapTimeGrid from "./ScheduleOverlapTimeGrid.vue"
 import ToolRow from "./ToolRow.vue"
 import Tooltip from "../Tooltip.vue"
 import {
-  buildDayGridTimeslotClassStyles,
-  buildOverlaidAvailability,
-  buildRenderedOverlayAvailability,
-  buildRenderedTimeBlockFragments,
-  buildTimeGridTimeslotClassStyles,
   formatTooltipContent,
   getSignUpBlockStyle,
-  getTimeBlockStyle,
 } from "./scheduleOverlapRendering"
 import { useCalendarGrid } from "@/composables/schedule_overlap/useCalendarGrid"
 import { useCalendarEvents } from "@/composables/schedule_overlap/useCalendarEvents"
@@ -102,7 +93,6 @@ import { useDragPaint } from "@/composables/schedule_overlap/useDragPaint"
 import { useEventScheduling } from "@/composables/schedule_overlap/useEventScheduling"
 import { useSignUpForm } from "@/composables/schedule_overlap/useSignUpForm"
 import {
-  canGuestEditResponse,
   useScheduleOverlapUI,
 } from "@/composables/schedule_overlap/useScheduleOverlapUI"
 import { useOwnedTimezone } from "@/composables/timezone/useOwnedTimezone"
@@ -110,15 +100,14 @@ import type { SpecificTimesEditDraft } from "@/composables/event/specificTimesEd
 import { useScheduleOverlapController } from "./useScheduleOverlapController"
 import { useScheduleOverlapPreferences } from "./useScheduleOverlapPreferences"
 import { useScheduleOverlapViewModels } from "./useScheduleOverlapViewModels"
+import { useTimedGridPresentation } from "./useTimedGridPresentation"
+import { useTimedGridInteractions } from "./useTimedGridInteractions"
+import { useGuestAvailabilityActions } from "./useGuestAvailabilityActions"
 import {
   states,
-  COLLAPSED_HOURS_ROW_HEIGHT,
-  MIN_COLLAPSIBLE_HIDDEN_SPAN_HOURS,
-  getScheduledEventFromDragRange,
 } from "@/composables/schedule_overlap/types"
 import type {
-  FetchedResponse, RenderedTimeGridRow, RenderedTimeGridRowCell, RowCol, Timezone, ScheduleOverlapState, ScheduleOverlapEvent, NormalizedCalendarEvent, CalendarEventsByDay, CalendarEventsMap,
-  ScheduleOverlapResponse,
+  FetchedResponse, RowCol, Timezone, ScheduleOverlapState, ScheduleOverlapEvent, NormalizedCalendarEvent, CalendarEventsByDay, CalendarEventsMap,
   SignUpBlockLite,
 } from "@/composables/schedule_overlap/types"
 import type {
@@ -128,7 +117,6 @@ import type {
 } from "./scheduleOverlapViewModels"
 import type { ScheduleOverlapSidebarExposed as ScheduleOverlapSidebarContract } from "./scheduleOverlapContracts"
 import {
-  appendGuestIdentityQuery,
   readShowAllHoursPreference,
   writeShowAllHoursPreference,
 } from "@/composables/schedule_overlap/scheduleOverlapStorage"
@@ -330,12 +318,6 @@ const allowDrag = computed(
 const dragging = ref(false)
 const dragStart = ref<RowCol | null>(null)
 const dragCur = ref<RowCol | null>(null)
-const selectedTooltipSlot = ref<RowCol | null>(null)
-const tooltipPosition = ref<{
-  x: number
-  y: number
-  placement?: "above" | "below"
-} | null>(null)
 const fetchedResponses = ref<Record<string, FetchedResponse | undefined>>({})
 const loadingResponses = ref({
   loading: false,
@@ -552,17 +534,17 @@ const ui = useScheduleOverlapUI({
 // ── Destructure composable returns for template access ─────────────────
 const {
   page, mobileNumDays, pageHasChanged, timeslot: _timeslot, calendarScrollLeft: _calendarScrollLeft, calendarMaxScroll: _calendarMaxScroll,
-  timeType, startCalendarOnMonday, isSpecificDates, isWeekly, isSpecificTimes,
-  daysOfWeek, timezoneOffset, timezoneReferenceDate, dayOffset: _dayOffset, timeslotDuration, timeslotHeight,
-  splitTimes, times, allDays, days, monthDays, monthDayIncluded,
-  curMonthText, columnOffsets: _columnOffsets, showLeftZigZag: _showLeftZigZag, showRightZigZag: _showRightZigZag, hasNextPage, hasPrevPage, hasPages: _hasPages,
-  maxDaysPerPage, isColConsecutive, getDateFromDayHoursOffset: _getDateFromDayHoursOffset, getDateFromDayTimeIndex: _getDateFromDayTimeIndex,
-    getDisplayDateFromRowCol, getEnabledDateFromRowCol, getDateFromRowCol, setTimeslotSize, onResize, onCalendarScroll, getLocalTimezone: _getLocalTimezone,
+  timeType, startCalendarOnMonday, isSpecificDates: _isSpecificDates, isWeekly: _isWeekly, isSpecificTimes,
+  daysOfWeek: _daysOfWeek, timezoneReferenceDate: _timezoneReferenceDate, dayOffset: _dayOffset, timeslotDuration, timeslotHeight: _timeslotHeight,
+  splitTimes: _splitTimes, times: _times, allDays, days: _days, monthDays: _monthDays, monthDayIncluded: _monthDayIncluded,
+  curMonthText: _curMonthText, columnOffsets: _columnOffsets, showLeftZigZag: _showLeftZigZag, showRightZigZag: _showRightZigZag, hasNextPage: _hasNextPage, hasPrevPage: _hasPrevPage, hasPages: _hasPages,
+  maxDaysPerPage: _maxDaysPerPage, getDateFromDayHoursOffset: _getDateFromDayHoursOffset, getDateFromDayTimeIndex: _getDateFromDayTimeIndex,
+    getDisplayDateFromRowCol, getDateFromRowCol, setTimeslotSize, onResize, onCalendarScroll, getLocalTimezone: _getLocalTimezone,
   getMinMaxHoursFromTimes: _getMinMaxHoursFromTimes,
 } = grid
 
 const {
-  sharedCalendarAccounts, bufferTime, workingHours, hasRefreshedAuthUser: _hasRefreshedAuthUser,
+  sharedCalendarAccounts: _sharedCalendarAccounts, bufferTime, workingHours, hasRefreshedAuthUser: _hasRefreshedAuthUser,
   calendarEventsByDay, groupCalendarEventsByDay: _groupCalendarEventsByDay, initSharedCalendarAccounts,
   toggleCalendarAccount: _toggleCalendarAccount, toggleSubCalendarAccount: _toggleSubCalendarAccount, getAvailabilityFromCalendarEvents: _getAvailabilityFromCalendarEvents,
   fetchResponses, refreshAuthUser: _refreshAuthUser,
@@ -584,9 +566,9 @@ const toggleSubCalendarAccount = (payload: { email?: string; calendarType?: stri
 const {
   availability, ifNeeded, tempTimes, availabilityAnimEnabled, availabilityAnimTimeouts: _availabilityAnimTimeouts,
   unsavedChanges, hideIfNeeded, manualAvailability: _manualAvailability,
-  responsesFormatted, curTimeslot, curTimeslotAvailability, timeslotSelected,
+  responsesFormatted: _responsesFormatted, curTimeslot: _curTimeslot, curTimeslotAvailability, timeslotSelected,
   availabilityArray: _availabilityArray, ifNeededArray: _ifNeededArray,
-  parsedResponses, respondents, respondentSaveAllowed, userHasResponded, max,
+  parsedResponses, respondents, respondentSaveAllowed, userHasResponded, max: _max,
   getRespondentsForHoursOffset: _getRespondentsForHoursOffset, getResponsesFormatted, populateUserAvailability,
   resetCurUserAvailability, animateAvailability: _animateAvailability, stopAvailabilityAnim,
   setAvailabilityAutomatically: _setAvailabilityAutomatically, reanimateAvailability, isTouched: _isTouched, getAvailabilityForColumn: _getAvailabilityForColumn,
@@ -595,61 +577,34 @@ const {
 } = avail
 
 const {
-  curScheduledEvent, savedScheduledEvent, allowScheduleEvent, scheduledEventStyle, signUpBlockBeingDraggedStyle,
+  curScheduledEvent, savedScheduledEvent: _savedScheduledEvent, allowScheduleEvent, scheduledEventStyle: _scheduledEventStyle, signUpBlockBeingDraggedStyle: _signUpBlockBeingDraggedStyle,
   scheduleEvent, cancelScheduleEvent, confirmScheduleEvent, clearScheduledEvent, saveTempTimes,
 } = eventSched
 
 const {
-  signUpBlocksByDay, signUpBlocksToAddByDay, newSignUpBlockName, maxSignUpBlockRowSize: _maxSignUpBlockRowSize,
-  alreadyRespondedToSignUpForm, createSignUpBlock: _createSignUpBlock, editSignUpBlock, deleteSignUpBlock,
+  signUpBlocksByDay: _signUpBlocksByDay, signUpBlocksToAddByDay: _signUpBlocksToAddByDay, newSignUpBlockName: _newSignUpBlockName, maxSignUpBlockRowSize: _maxSignUpBlockRowSize,
+  alreadyRespondedToSignUpForm: _alreadyRespondedToSignUpForm, createSignUpBlock: _createSignUpBlock, editSignUpBlock, deleteSignUpBlock,
   resetSignUpForm: _resetSignUpForm, resetSignUpBlocksToAddByDay: _resetSignUpBlocksToAddByDay, submitNewSignUpBlocks: _submitNewSignUpBlocks, handleSignUpBlockClick,
 } = signUpForm
 
 const {
-  dragType, normalizeXY: _normalizeXY, clampRow: _clampRow, clampCol: _clampCol,
-  getRowColFromXY: _getRowColFromXY, inDragRange, startDrag, moveDrag, endDrag,
+  normalizeXY: _normalizeXY, clampRow: _clampRow, clampCol: _clampCol,
+  getRowColFromXY: _getRowColFromXY, startDrag, moveDrag, endDrag,
 } = drag
 
 const {
-  showEditOptions, showCalendarEvents,
-  overlayAvailability, deleteAvailabilityDialog, calendarOptionsDialog, editGuestNameDialog,
+  showEditOptions: _showEditOptions, showCalendarEvents,
+  overlayAvailability, deleteAvailabilityDialog: _deleteAvailabilityDialog, calendarOptionsDialog, editGuestNameDialog,
   newGuestName, tooltipContent, optionsVisible: _optionsVisible, scrolledToRespondents: _scrolledToRespondents,
-  delayedShowStickyRespondents, delayedShowStickyRespondentsTimeout, hintState: _hintState, curRespondent,
-  curRespondents, editing, scheduling: _scheduling, curRespondentsSet, rightSideWidth,
+  delayedShowStickyRespondents, delayedShowStickyRespondentsTimeout, hintState: _hintState, curRespondent: _curRespondent,
+  curRespondents: _curRespondents, editing, scheduling: _scheduling, curRespondentsSet, rightSideWidth: _rightSideWidth,
   showStickyRespondents: _showStickyRespondents,
-  hintStateLocalStorageKey: _hintStateLocalStorageKey, hintText, hintClosed: _hintClosed, hintTextShown, showOverlayAvailabilityToggle,
-  selectedGuestRespondent: _selectedGuestRespondent, canEditGuestName, mouseOverRespondent, mouseLeaveRespondent,
+  hintStateLocalStorageKey: _hintStateLocalStorageKey, hintText: _hintText, hintClosed: _hintClosed, hintTextShown: _hintTextShown, showOverlayAvailabilityToggle: _showOverlayAvailabilityToggle,
+  selectedGuestRespondent: _selectedGuestRespondent, canEditGuestName: _canEditGuestName, mouseOverRespondent, mouseLeaveRespondent,
   clickRespondent, deselectRespondents, isGuest: _isGuest, checkElementsVisible, onScroll,
   toggleShowEditOptions, onShowBestTimesChange,
   updateOverlayAvailability, closeHint,
 } = ui
-
-const visibleTooltipContent = computed(() =>
-  !isPhone.value || selectedTooltipSlot.value ? tooltipContent.value : ""
-)
-
-function dismissMobileTooltipOnOutsideGridClick(event: MouseEvent) {
-  if (
-    !isPhone.value ||
-    !selectedTooltipSlot.value ||
-    (event.target instanceof Element && event.target.closest("#drag-section"))
-  ) {
-    return
-  }
-
-  selectedTooltipSlot.value = null
-  tooltipPosition.value = null
-  tooltipContent.value = ""
-}
-
-onMounted(() => {
-  // Capture clicks from the mobile overlay, which stops bubbling interactions.
-  document.addEventListener("click", dismissMobileTooltipOnOutsideGridClick, true)
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener("click", dismissMobileTooltipOnOutsideGridClick, true)
-})
 
 useScheduleOverlapController({
   event: eventReadonly,
@@ -727,523 +682,84 @@ const formattedAttendees = computed(() =>
   props.event.attendees as { email: string; declined?: boolean }[] | undefined
 )
 
-function formatAbsoluteMinutes(absoluteMinutes: number | undefined): string {
-  if (typeof absoluteMinutes !== "number") {
-    return ""
-  }
-
-  const normalizedMinutes =
-    ((absoluteMinutes % (24 * 60)) + 24 * 60) % (24 * 60)
-  const hours = Math.floor(normalizedMinutes / 60)
-  const minutes = normalizedMinutes % 60
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`
-}
-
-function ceilToHourMinutes(absoluteMinutes: number): number {
-  return Math.ceil(absoluteMinutes / 60) * 60
-}
-
-function floorToHourMinutes(absoluteMinutes: number): number {
-  return Math.floor(absoluteMinutes / 60) * 60
-}
-
-interface PageSlot {
-  id: string
-  kind: "timeslot" | "filler"
-  startMinutes: number
-  endMinutes: number
-  baseRowIndex?: number
-}
-
-interface CollapsedPageSegment {
-  id: string
-  hiddenStartIndex: number
-  hiddenEndIndex: number
-  startMinutes: number
-  endMinutes: number
-}
-
-function getBaseRowTimeItem(baseRowIndex: number) {
-  const firstSplitLength = splitTimes.value[0].length
-  return baseRowIndex < firstSplitLength
-    ? splitTimes.value[0][baseRowIndex]
-    : splitTimes.value[1][baseRowIndex - firstSplitLength]
-}
-
-function isBaseRowInactiveOnEveryVisibleDay(baseRowIndex: number): boolean {
-  for (let visibleDayIndex = 0; visibleDayIndex < days.value.length; visibleDayIndex += 1) {
-    const activeDate = getDateFromRowCol(baseRowIndex, visibleDayIndex)
-    if (activeDate) {
-      return false
-    }
-  }
-
-  return true
-}
-
-const pageSlots = computed<PageSlot[]>(() => {
-  const slots: PageSlot[] = []
-  const slotMinutes = Math.round(timeslotDuration.value.total("minutes"))
-  const firstSplitLength = splitTimes.value[0].length
-  const totalBaseRows = firstSplitLength + splitTimes.value[1].length
-
-  for (let baseRowIndex = 0; baseRowIndex < firstSplitLength; baseRowIndex += 1) {
-    const time = splitTimes.value[0][baseRowIndex]
-    const startMinutes = time.absoluteMinutes ?? 0
-    slots.push({
-      id: `time-${String(baseRowIndex)}`,
-      kind: "timeslot",
-      startMinutes,
-      endMinutes: startMinutes + slotMinutes,
-      baseRowIndex,
-    })
-  }
-
-  for (let baseRowIndex = firstSplitLength; baseRowIndex < totalBaseRows; baseRowIndex += 1) {
-    const time = splitTimes.value[1][baseRowIndex - firstSplitLength]
-    const startMinutes = time.absoluteMinutes ?? 0
-    slots.push({
-      id: `time-${String(baseRowIndex)}`,
-      kind: "timeslot",
-      startMinutes,
-      endMinutes: startMinutes + slotMinutes,
-      baseRowIndex,
-    })
-  }
-
-  return slots
+const timedGridInteractions = useTimedGridInteractions({
+  isPhone,
+  daysOnly: computed(() => Boolean(props.event.daysOnly)),
+  interactable: computed(() => props.interactable),
+  dragging,
+  dragCur,
+  timeslotSelected,
+  tooltipContent,
+  startDrag: drag.startDrag,
+  moveDrag: drag.moveDrag,
+  endDrag: drag.endDrag,
+  showAvailability,
+  shouldHighlightAvailability: () =>
+    state.value === defaultState.value &&
+    ((!isPhone.value &&
+      !(userHasResponded.value || guestAddedAvailability.value)) ||
+      respondents.value.length === 0),
+  highlightAvailability: () => { emit("highlightAvailabilityBtn"); },
+  getTooltipContent: (row, col) => {
+    const date =
+      getDateFromRowCol(row, col) ?? getDisplayDateFromRowCol(row, col)
+    return date
+      ? formatTooltipContent({
+          date,
+          curTimezone: curTimezone.value,
+          timeslotDuration: timeslotDuration.value,
+          timeType: timeType.value,
+          isSpecificDates: grid.isSpecificDates.value,
+        })
+      : undefined
+  },
 })
+const {
+  selectedTooltipSlot,
+  tooltipPosition,
+  visibleTooltipContent,
+  getTimeslotVon,
+  startTimedGridDrag,
+  moveTimedGridDrag,
+  endTimedGridDrag,
+} = timedGridInteractions
 
-const pageGreyFlags = computed(() =>
-  pageSlots.value.map((slot) =>
-    slot.kind === "filler"
-      ? true
-      : isBaseRowInactiveOnEveryVisibleDay(slot.baseRowIndex ?? -1)
-  )
-)
-
-const collapsedPageSegments = computed<CollapsedPageSegment[]>(() => {
-  if (!canCollapseTimes.value) {
-    return []
-  }
-
-  const slotMinutes = Math.round(timeslotDuration.value.total("minutes"))
-  const minimumSlotsToCollapse = Math.ceil(
-    (MIN_COLLAPSIBLE_HIDDEN_SPAN_HOURS * 60) / slotMinutes
-  )
-  const slots = pageSlots.value
-  const greyFlags = pageGreyFlags.value
-  const startIndex = 0
-  const endIndex = slots.length
-  const segments: CollapsedPageSegment[] = []
-
-  const buildCollapsedSegmentFromRun = (
-    runStartIndex: number,
-    runEndIndex: number
-  ): CollapsedPageSegment | null => {
-    const runStartMinutes = slots[runStartIndex]?.startMinutes
-    const runEndMinutes = slots[runEndIndex - 1]?.endMinutes
-
-    if (
-      typeof runStartMinutes !== "number" ||
-      typeof runEndMinutes !== "number"
-    ) {
-      return null
-    }
-
-    const roundedRunStartMinutes = ceilToHourMinutes(runStartMinutes)
-    const collapsedStartMinutes = roundedRunStartMinutes
-    const collapsedEndMinutes = floorToHourMinutes(runEndMinutes)
-    if (collapsedEndMinutes <= collapsedStartMinutes) {
-      return null
-    }
-
-    const hiddenStartIndex = slots.findIndex(
-      (slot, slotIndex) =>
-        slotIndex >= runStartIndex && slotIndex < runEndIndex &&
-        slot.startMinutes === collapsedStartMinutes
-    )
-    const hiddenEndIndex = slots.findIndex(
-      (slot, slotIndex) =>
-        slotIndex >= runStartIndex && slotIndex < runEndIndex &&
-        slot.endMinutes === collapsedEndMinutes
-    )
-
-    if (hiddenStartIndex === -1 || hiddenEndIndex === -1) {
-      return null
-    }
-
-    if (hiddenEndIndex + 1 - hiddenStartIndex < minimumSlotsToCollapse) {
-      return null
-    }
-
-    return {
-      id: `collapsed-${String(collapsedStartMinutes)}-${String(collapsedEndMinutes)}`,
-      hiddenStartIndex,
-      hiddenEndIndex: hiddenEndIndex + 1,
-      startMinutes: collapsedStartMinutes,
-      endMinutes: collapsedEndMinutes,
-    }
-  }
-
-  let runStartIndex: number | null = null
-
-  const flushRun = (runEndIndex: number) => {
-    if (runStartIndex == null) {
-      return
-    }
-
-    const segment = buildCollapsedSegmentFromRun(runStartIndex, runEndIndex)
-    if (segment) {
-      segments.push(segment)
-    }
-
-    runStartIndex = null
-  }
-
-  for (let slotIndex = startIndex; slotIndex < endIndex; slotIndex += 1) {
-    if (greyFlags[slotIndex]) {
-      runStartIndex ??= slotIndex
-      continue
-    }
-
-    flushRun(slotIndex)
-  }
-
-  flushRun(endIndex)
-  return segments
+const timedGridPresentation = useTimedGridPresentation({
+  event: eventReadonly,
+  state,
+  defaultState,
+  isSignUp,
+  showAllHours,
+  availabilityType,
+  curGuestId: computed(() => props.curGuestId),
+  authUserId: computed(() => mainStore.authUser?._id),
+  animateTimeslotAlways: computed(() => props.animateTimeslotAlways),
+  availabilityAnimEnabled,
+  curRespondentsMax,
+  dragging,
+  dragStart,
+  dragCur,
+  getTimeslotVon,
+  grid,
+  avail,
+  drag,
+  scheduling: eventSched,
+  ui,
 })
-
-const overlaidAvailabilityBlocks = computed(() => {
-  return buildOverlaidAvailability({
-    daysLength: days.value.length,
-    firstSplitTimes: splitTimes.value[0],
-    secondSplitTimes: splitTimes.value[1],
-    timeslotDuration: timeslotDuration.value,
-    getDateFromRowCol,
-    dragging: dragging.value,
-    inDragRange,
-    dragType: dragType.value,
-    availabilityType: availabilityType.value,
-    availability: availability.value,
-    ifNeeded: ifNeeded.value,
-  })
-})
-
-const baseTimeslotClassStyle = computed(() => {
-  if (isSignUp.value) {
-    return Array.from(
-      { length: days.value.length * times.value.length },
-      () => ({ class: "tw-bg-light-gray ", style: {} })
-    )
-  }
-
-  return buildTimeGridTimeslotClassStyles({
-    firstSplitTimes: splitTimes.value[0],
-    secondSplitTimes: splitTimes.value[1],
-    getDateFromRowCol,
-    getEnabledDateFromRowCol,
-    getTimedCellState: (row, col) =>
-      grid.getTimedCellState(row, maxDaysPerPage.value * page.value + col),
-    state: state.value,
-    overlayAvailability: overlayAvailability.value,
-    dragType: dragType.value,
-    availabilityType: availabilityType.value,
-    availability: availability.value,
-    ifNeeded: ifNeeded.value,
-    tempTimes: tempTimes.value,
-    responsesFormatted: responsesFormatted.value,
-    parsedResponses: parsedResponses.value,
-    curRespondent: curRespondent.value,
-    curRespondents: curRespondents.value,
-    curRespondentsSet: curRespondentsSet.value,
-    respondents: respondents.value,
-    curRespondentsMax: curRespondentsMax.value,
-    max: max.value,
-    defaultState: defaultState.value,
-    userHasResponded: userHasResponded.value,
-    curGuestId: props.curGuestId,
-    authUserId: mainStore.authUser?._id,
-    inDragRange,
-    animateTimeslotAlways: props.animateTimeslotAlways,
-    availabilityAnimEnabled: availabilityAnimEnabled.value,
-    timeslotHeight: timeslotHeight.value,
-    timezoneOffset: timezoneOffset.value,
-    curTimeslot: curTimeslot.value,
-    editing: editing.value,
-    isColConsecutive,
-    daysLength: days.value.length,
-    firstSplitLength: splitTimes.value[0].length,
-    lastRow: splitTimes.value[0].length + splitTimes.value[1].length - 1,
-  })
-})
-
-const dayTimeslotClassStyle = computed(() =>
-  buildDayGridTimeslotClassStyles({
-    monthDays: monthDays.value.map((day) => day.dateObject),
-    state: state.value,
-    overlayAvailability: overlayAvailability.value,
-    dragType: dragType.value,
-    availabilityType: availabilityType.value,
-    availability: availability.value,
-    ifNeeded: ifNeeded.value,
-    tempTimes: tempTimes.value,
-    responsesFormatted: responsesFormatted.value,
-    parsedResponses: parsedResponses.value,
-    curRespondent: curRespondent.value,
-    curRespondents: curRespondents.value,
-    curRespondentsSet: curRespondentsSet.value,
-    respondents: respondents.value,
-    curRespondentsMax: curRespondentsMax.value,
-    max: max.value,
-    defaultState: defaultState.value,
-    userHasResponded: userHasResponded.value,
-    curGuestId: props.curGuestId,
-    authUserId: mainStore.authUser?._id,
-    inDragRange,
-    monthDayIncluded: monthDayIncluded.value,
-    curTimeslot: curTimeslot.value,
-    lastMonthRow: Math.floor(monthDays.value.length / 7),
-  })
-)
-
-const baseTimeslotVon = computed(() => {
-  const vons: Record<string, () => void>[] = []
-  for (let d = 0; d < days.value.length; ++d)
-    for (let t = 0; t < times.value.length; ++t)
-      vons.push(getTimeslotVon(t, d))
-  return vons
-})
-
-const expandedCollapsedSpanIds = ref<Set<string>>(new Set())
-const canCollapseTimes = computed(
-  () =>
-    !props.event.daysOnly &&
-    state.value !== states.EDIT_SIGN_UP_BLOCKS &&
-    state.value !== states.SET_SPECIFIC_TIMES &&
-    !showAllHours.value
-)
-
-const collapseCandidateSpanIds = computed<Set<string>>(() => {
-  return new Set(collapsedPageSegments.value.map((segment) => segment.id))
-})
-
-const renderedRows = computed<RenderedTimeGridRow[]>(() => {
-  const rows: RenderedTimeGridRow[] = []
-
-  const pushTimeslotRow = (baseRowIndex: number, rowTop: number) => {
-    const timeItem = getBaseRowTimeItem(baseRowIndex)
-    const cells: RenderedTimeGridRowCell[] = []
-    for (let dayIndex = 0; dayIndex < days.value.length; dayIndex += 1) {
-      const cellIndex = dayIndex * times.value.length + baseRowIndex
-      cells.push({
-        class: baseTimeslotClassStyle.value[cellIndex]?.class ?? "",
-        style: baseTimeslotClassStyle.value[cellIndex]?.style ?? {},
-        von: baseTimeslotVon.value[cellIndex] ?? {},
-      })
-    }
-    rows.push({
-      id: `time-${String(baseRowIndex)}`,
-      kind: "timeslot",
-      height: timeslotHeight.value,
-      rowTop,
-      timeText:
-        (timeItem.text?.match(/ [+-]\d{2}:\d{2}$/) ? timeItem.text : undefined) ??
-        (typeof timeItem.absoluteMinutes === "number" &&
-        timeItem.absoluteMinutes % 60 === 0
-          ? formatAbsoluteMinutes(timeItem.absoluteMinutes)
-          : undefined),
-      baseRowIndex,
-      cells,
-    })
-  }
-
-  const pushFillerRow = (
-    slot: PageSlot,
-    rowTop: number,
-    followsTimeslotRow: boolean
-  ) => {
-    const localMinute = ((slot.startMinutes % 60) + 60) % 60
-    const isHourBoundary = localMinute === 0
-    const isHalfHourBoundary = localMinute === 30
-    const isDayEnd = slot.endMinutes % (24 * 60) === 0
-    const cells: RenderedTimeGridRowCell[] = Array.from(
-      { length: days.value.length },
-      (_, dayIndex) => {
-        const isLeftDateBoundary =
-          dayIndex === 0 || !isColConsecutive(dayIndex)
-        const isRightDateBoundary =
-          dayIndex === days.value.length - 1 ||
-          !isColConsecutive(dayIndex + 1)
-        let cellClass = "tw-bg-light-gray-stroke tw-border-r "
-        const style: Record<string, string> = {
-          height: `${String(timeslotHeight.value)}px`,
-          borderRightStyle: "solid",
-          borderRightWidth: "var(--timeful-grid-line-width)",
-          borderRightColor: "var(--timeful-grid-line-color)",
-        }
-
-        if (isLeftDateBoundary) {
-          cellClass += "tw-border-l "
-          style.borderLeftStyle = "solid"
-          style.borderLeftWidth = "var(--timeful-grid-line-width)"
-          style.borderLeftColor = "var(--timeful-grid-line-color)"
-        }
-        if (isRightDateBoundary) {
-          cellClass += "tw-border-r "
-        }
-        if (!followsTimeslotRow && (isHourBoundary || isHalfHourBoundary)) {
-          cellClass += "tw-border-t "
-          style.borderTopStyle = isHourBoundary ? "solid" : "dashed"
-          style.borderTopWidth = "var(--timeful-grid-line-width)"
-          style.borderTopColor = "var(--timeful-grid-line-color)"
-        }
-        if (isDayEnd) {
-          cellClass += "tw-border-b "
-          style.borderBottomStyle = "solid"
-          style.borderBottomWidth = "var(--timeful-grid-line-width)"
-          style.borderBottomColor = "var(--timeful-grid-line-color)"
-        }
-
-        return { class: cellClass, style, von: {} }
-      }
-    )
-    rows.push({
-      id: slot.id,
-      kind: "filler",
-      height: timeslotHeight.value,
-      rowTop,
-      timeText: slot.startMinutes % 60 === 0 ? formatAbsoluteMinutes(slot.startMinutes) : undefined,
-      cells,
-    })
-  }
-
-  const appendCollapsedRow = (
-    id: string,
-    startMinutes: number,
-    endMinutes: number,
-    rowTop: number
-  ): number => {
-    rows.push({
-      id,
-      kind: "collapsed",
-      height: COLLAPSED_HOURS_ROW_HEIGHT,
-      rowTop,
-      timeText: formatAbsoluteMinutes(startMinutes),
-      startLabel: formatAbsoluteMinutes(startMinutes),
-      endLabel: formatAbsoluteMinutes(endMinutes),
-    })
-    return rowTop + COLLAPSED_HOURS_ROW_HEIGHT
-  }
-
-  const collapsedSegmentByStartIndex = new Map<number, CollapsedPageSegment>()
-  for (const segment of collapsedPageSegments.value) {
-    if (!expandedCollapsedSpanIds.value.has(segment.id)) {
-      collapsedSegmentByStartIndex.set(segment.hiddenStartIndex, segment)
-    }
-  }
-
-  let rowTop = 0
-  for (let slotIndex = 0; slotIndex < pageSlots.value.length; slotIndex += 1) {
-    const collapsedSegment = collapsedSegmentByStartIndex.get(slotIndex)
-    if (collapsedSegment) {
-      rowTop = appendCollapsedRow(
-        collapsedSegment.id,
-        collapsedSegment.startMinutes,
-        collapsedSegment.endMinutes,
-        rowTop
-      )
-      slotIndex = collapsedSegment.hiddenEndIndex - 1
-      continue
-    }
-
-    const slot = pageSlots.value[slotIndex]
-    if (slot.kind === "timeslot" && typeof slot.baseRowIndex === "number") {
-      pushTimeslotRow(slot.baseRowIndex, rowTop)
-    } else {
-      pushFillerRow(slot, rowTop, rows.at(-1)?.kind === "timeslot")
-    }
-    rowTop += timeslotHeight.value
-  }
-
-  return rows
-})
-
-const timeAxisEndText = computed(() => {
-  const endMinutes = pageSlots.value.at(-1)?.endMinutes
-  return typeof endMinutes === "number" && endMinutes % 60 === 0
-    ? formatAbsoluteMinutes(endMinutes)
-    : undefined
-})
-
-const scheduledEventStyles = computed(() => {
-  const scheduledEvent =
-    dragging.value && dragStart.value && dragCur.value
-      ? getScheduledEventFromDragRange(dragStart.value, dragCur.value)
-      : curScheduledEvent.value ?? savedScheduledEvent.value
-  if (!scheduledEvent) return []
-
-  return buildRenderedTimeBlockFragments({
-    renderedRows: renderedRows.value,
-    startBaseRowIndex: scheduledEvent.row,
-    coveredBaseRowCount: scheduledEvent.numRows,
-  })
-})
-
-const overlaidAvailability = computed(() =>
-  buildRenderedOverlayAvailability({
-    renderedRows: renderedRows.value,
-    overlaidAvailability: overlaidAvailabilityBlocks.value,
-    splitTimes: splitTimes.value,
-    timeslotDuration: timeslotDuration.value,
-    isBaseRowVisibleOnDay: (baseRowIndex, dayIndex) =>
-      getDateFromRowCol(baseRowIndex, dayIndex) !== null,
-  })
-)
-
-const timeslotClassStyle = computed(() =>
-  renderedRows.value.flatMap((row) =>
-    row.cells?.map((cell) => ({ class: cell.class, style: cell.style })) ?? []
-  )
-)
-
-const timeslotVon = computed(() =>
-  renderedRows.value.flatMap((row) => row.cells?.map((cell) => cell.von) ?? [])
-)
-
-watch(collapseCandidateSpanIds, (validIds) => {
-  const nextIds = [...expandedCollapsedSpanIds.value].filter((id) =>
-    validIds.has(id)
-  )
-  if (
-    nextIds.length === expandedCollapsedSpanIds.value.size &&
-    nextIds.every((id) => expandedCollapsedSpanIds.value.has(id))
-  ) {
-    return
-  }
-  expandedCollapsedSpanIds.value = new Set(nextIds)
-})
-
-function updateShowAllHours(value: boolean) {
-  showAllHours.value = value
-  if (value) {
-    expandedCollapsedSpanIds.value = new Set()
-  }
-}
-
-function toggleCollapsedSpan(id: string) {
-  const next = new Set(expandedCollapsedSpanIds.value)
-  if (next.has(id)) {
-    next.delete(id)
-  } else {
-    next.add(id)
-  }
-  expandedCollapsedSpanIds.value = next
-}
-
-const dayTimeslotVon = computed(() =>
-  monthDays.value.map((_day, i) => getTimeslotVon(Math.floor(i / 7), i % 7))
-)
+const {
+  dayTimeslotClassStyle: _dayTimeslotClassStyle,
+  dayTimeslotVon: _dayTimeslotVon,
+  getRenderedTimeBlockStyle: _getRenderedTimeBlockStyleForTemplate,
+  getRenderedTimeBlockStyles: _getRenderedTimeBlockStylesForTemplate,
+  overlaidAvailability: _overlaidAvailability,
+  renderedRows: _renderedRows,
+  scheduledEventStyles: _scheduledEventStyles,
+  timeAxisEndText: _timeAxisEndText,
+  timeslotClassStyle: _timeslotClassStyle,
+  timeslotVon: _timeslotVon,
+  toggleCollapsedSpan,
+  updateShowAllHours,
+} = timedGridPresentation
 
 function updateTimeType(value: string) {
   timeType.value = value as typeof timeType.value
@@ -1323,6 +839,37 @@ const toolRowActions = computed<ScheduleOverlapToolRowActions>(() => ({
   clearScheduledEvent,
 }))
 
+const guestAvailabilityActions = useGuestAvailabilityActions({
+  isAuthenticated: computed(() => mainStore.authUser !== null),
+  event: eventReadonly,
+  curGuestId: computed(() => props.curGuestId),
+  parsedResponses,
+  ownedGuestResponseLookupKeys,
+  guestOwnership,
+  guestResponseLookupKey,
+  newGuestName,
+  editGuestNameDialog,
+  selectGuestOwnership,
+  removeGuestOwnership,
+  getOwnedGuestOwnership,
+  setGuestOwnership,
+  startEditing,
+  stopEditing: _stopEditing,
+  populateUserAvailability,
+  setCurGuestId: (id) => { emit("setCurGuestId", id); },
+  guestAvailabilityDeleted: (id) => { emit("guestAvailabilityDeleted", id); },
+  refreshEvent,
+  showInfo: mainStore.showInfo,
+  showError: mainStore.showError,
+})
+const {
+  editGuestAvailability,
+  editOwnedGuestAvailability,
+  handleGuestAvailabilityDeleted,
+  openEditGuestNameDialog,
+  saveGuestName,
+} = guestAvailabilityActions
+
 const sharedRespondentListeners = {
   mouseOverRespondent,
   mouseLeaveRespondent,
@@ -1387,124 +934,13 @@ const daysOnlyGridActions = computed<ScheduleOverlapDaysOnlyGridActions>(() => (
   closeHint,
 }))
 
-function setTooltipForRowCol(row: number, col: number) {
-  const date =
-    getDateFromRowCol(row, col) ?? getDisplayDateFromRowCol(row, col)
-  if (date) {
-    tooltipContent.value = formatTooltipContent({
-      date,
-      curTimezone: curTimezone.value,
-      timeslotDuration: timeslotDuration.value,
-      timeType: timeType.value,
-      isSpecificDates: grid.isSpecificDates.value,
-    })
-  }
-}
-
-function getTimedGridSlotFromEvent(e: PointerEvent | MouseEvent): RowCol | null {
-  const getSlotFromElement = (element: Element | null): RowCol | null => {
-    const cell = element?.closest<HTMLElement>(
-      "#drag-section .timeslot[data-row][data-col]"
-    )
-    if (!cell) {
-      return null
-    }
-
-    const row = Number.parseInt(cell.dataset.row ?? "", 10)
-    const col = Number.parseInt(cell.dataset.col ?? "", 10)
-    return Number.isFinite(row) && Number.isFinite(col) ? { row, col } : null
-  }
-
-  const targetSlot = getSlotFromElement(
-    e.target instanceof Element ? e.target : null
-  )
-  return targetSlot ?? getSlotFromElement(document.elementFromPoint(e.clientX, e.clientY))
-}
-
-function updateSelectedTooltipSlot(e: PointerEvent | MouseEvent) {
-  if (
-    !isPhone.value ||
-    !dragging.value ||
-    !dragCur.value
-  ) {
-    return
-  }
-
-  const slot = getTimedGridSlotFromEvent(e)
-  if (slot == null) {
-    return
-  }
-
-  if (slot.row === dragCur.value.row && slot.col === dragCur.value.col) {
-    selectedTooltipSlot.value = slot
-  }
-}
-
-function setTooltipPositionForSelectedSlot() {
-  const selectedSlot = selectedTooltipSlot.value
-  if (!selectedSlot) {
-    return
-  }
-
-  const { row, col } = selectedSlot
-  const cell = document.querySelector<HTMLElement>(
-    `#drag-section .timeslot[data-row="${String(row)}"][data-col="${String(col)}"]`
-  )
-  if (!cell) {
-    return
-  }
-
-  const { left, top, width, height } = cell.getBoundingClientRect()
-  const placement = top < 100 ? "below" : "above"
-  tooltipPosition.value = {
-    x: left + width / 2,
-    y: placement === "above" ? top : top + height,
-    placement,
-  }
-}
-
-function setTooltipPositionForDrag(e: PointerEvent | MouseEvent) {
-  if (isPhone.value) {
-    setTooltipPositionForSelectedSlot()
-    return
-  }
-
-  tooltipPosition.value = { x: e.clientX, y: e.clientY }
-}
-
 const timedGridActions = computed<ScheduleOverlapTimeGridActions>(() => ({
   prevPage,
   nextPage,
   calendarScroll: onCalendarScroll,
-  startDrag: (e) => {
-    drag.startDrag(e)
-    updateSelectedTooltipSlot(e)
-    setTooltipPositionForDrag(e)
-    if (!props.event.daysOnly && selectedTooltipSlot.value) {
-      setTooltipForRowCol(
-        selectedTooltipSlot.value.row,
-        selectedTooltipSlot.value.col
-      )
-    }
-  },
-  moveDrag: (e) => {
-    drag.moveDrag(e)
-    setTooltipPositionForDrag(e)
-    const tooltipSlot = isPhone.value ? selectedTooltipSlot.value : dragCur.value
-    if (dragging.value && !props.event.daysOnly && tooltipSlot) {
-      setTooltipForRowCol(tooltipSlot.row, tooltipSlot.col)
-    }
-  },
-  endDrag: (e) => {
-    const tooltipSlot = isPhone.value ? selectedTooltipSlot.value : dragCur.value
-    if (!props.event.daysOnly && tooltipSlot) {
-      setTooltipForRowCol(tooltipSlot.row, tooltipSlot.col)
-    }
-    if (e) {
-      setTooltipPositionForDrag(e)
-    }
-    drag.endDrag(e)
-  },
+  startDrag: startTimedGridDrag,
+  moveDrag: moveTimedGridDrag,
+  endDrag: endTimedGridDrag,
   resetCurTimeslot: ui.resetCurTimeslot,
   closeHint,
   signUpForBlock: (block) => {
@@ -1528,189 +964,52 @@ const {
   isGroup,
   isPhone,
   authUser,
-  alreadyRespondedToSignUpForm,
-  signUpBlocksByDay,
-  signUpBlocksToAddByDay,
-  tempTimes,
-  curGuestId: computed(() => props.curGuestId),
-  ownedGuestResponseLookupKeys: computed(() =>
-    ownedGuestResponses.value.map((record) => record.lookupKey)
-  ),
-  guestResponseLookupKey: computed(() => guestResponseLookupKey.value ?? ""),
-  userHasResponded,
-  addingAvailabilityAsGuest: computed(() => props.addingAvailabilityAsGuest),
-  canEditGuestName,
-  newGuestName,
-  editGuestNameDialog,
-  availabilityType,
-  showOverlayAvailabilityToggle,
-  overlayAvailability,
-  calendarPermissionGranted: computed(() => props.calendarPermissionGranted),
-  calendarEventsMap: computed(() => props.calendarEventsMap),
-  sharedCalendarAccounts,
-  showCalendarOptions,
-  showEditOptions,
-  calendarOptionsDialog,
-  bufferTime,
-  workingHours,
-  curTimezone,
-  deleteAvailabilityDialog,
-  showAds,
-  rightSideWidth,
-  allDays,
-  times,
-  getDateFromRowCol,
-  curTimeslot,
-  curRespondent,
-  curRespondents,
-  curTimeslotAvailability,
-  respondents,
-  parsedResponses,
-  attendees: formattedAttendees,
-  responsesFormatted,
-  showCalendarEvents,
-  showBestTimes,
-  hideIfNeeded,
-  showAllHours,
-  guestAddedAvailability,
-  editing,
-  isWeekly,
-  weekOffset: computed(() => props.weekOffset),
-  delayedShowStickyRespondents,
-  toolRowActions,
-  timezoneModified,
-  startCalendarOnMonday,
-  timezoneReferenceDate,
-  mobileNumDays,
-  allowScheduleEvent,
-  timeType,
-  daysOnlyGridActions,
-  curMonthText,
-  hasPrevPage,
-  hasNextPage,
-  daysOfWeek,
-  monthDays,
-  dayTimeslotClassStyle,
-  dayTimeslotVon,
-  calendarOnly: computed(() => props.calendarOnly),
-  timedGridActions,
-  splitTimes,
-  timeslotHeight,
-  renderedRows,
-  timeAxisEndText,
-  days,
-  isSpecificDates,
-  sampleCalendarEventsByDay: computed(() => props.sampleCalendarEventsByDay),
-  showLoader,
-  loadingCalendarEvents: computed(() => props.loadingCalendarEvents),
-  alwaysShowCalendarEvents: computed(() => props.alwaysShowCalendarEvents),
-  calendarEventsByDay,
-  page,
-  maxDaysPerPage,
+  props: {
+    curGuestId: computed(() => props.curGuestId),
+    addingAvailabilityAsGuest: computed(() => props.addingAvailabilityAsGuest),
+    calendarPermissionGranted: computed(() => props.calendarPermissionGranted),
+    calendarEventsMap: computed(() => props.calendarEventsMap),
+    calendarOnly: computed(() => props.calendarOnly),
+    loadingCalendarEvents: computed(() => props.loadingCalendarEvents),
+    sampleCalendarEventsByDay: computed(() => props.sampleCalendarEventsByDay),
+    alwaysShowCalendarEvents: computed(() => props.alwaysShowCalendarEvents),
+    noEventNames: computed(() => props.noEventNames),
+    weekOffset: computed(() => props.weekOffset),
+  },
+  derived: {
+    showAds,
+    showCalendarOptions,
+    showLoader,
+    attendees: formattedAttendees,
+  },
+  rendering: {
+    loadingResponsesLoading: computed(() => loadingResponses.value.loading),
+    getSignUpBlockStyle,
+  },
+  preferences: { showBestTimes, showAllHours },
+  guest: {
+    ownedGuestResponseLookupKeys: computed(() =>
+      ownedGuestResponses.value.map((record) => record.lookupKey)
+    ),
+    guestResponseLookupKey: computed(() => guestResponseLookupKey.value ?? ""),
+    guestAddedAvailability,
+  },
+  timezone: {
+    timezone: curTimezone,
+    modified: timezoneModified,
+    setTimezone: setCurTimezone,
+    resetTimezone: resetCurTimezone,
+  },
+  grid,
+  calendarEvents: calEvents,
+  availability: avail,
+  signUpForm,
+  ui,
+  scheduling: eventSched,
+  presentation: timedGridPresentation,
   dragStart,
-  curScheduledEvent,
-  savedScheduledEvent,
-  scheduledEventStyle,
-  scheduledEventStyles,
-  signUpBlockBeingDraggedStyle,
-  newSignUpBlockName,
-  overlaidAvailability,
-  timeslotClassStyle,
-  timeslotVon,
-  noEventNames: computed(() => props.noEventNames),
-  hintTextShown,
-  hintText,
-  max,
-  fetchedResponses,
-  loadingResponsesLoading: computed(() => loadingResponses.value.loading),
-  getRenderedTimeBlockStyle: getRenderedTimeBlockStyleForTemplate,
-  getRenderedTimeBlockStyles: getRenderedTimeBlockStylesForTemplate,
-  getSignUpBlockStyle,
+  actions: { toolRowActions, daysOnlyGridActions, timedGridActions },
 })
-
-function getTimeslotVon(row: number, col: number): Record<string, () => void> {
-  if (!props.interactable) return {}
-  return {
-    click: () => {
-      showAvailability(row, col)
-      if (isPhone.value && !props.event.daysOnly) {
-        selectedTooltipSlot.value = { row, col }
-        setTooltipPositionForSelectedSlot()
-        setTooltipForRowCol(row, col)
-      }
-    },
-    mousedown: () => {
-      if (
-        state.value === defaultState.value &&
-        ((!isPhone.value &&
-          !(userHasResponded.value || guestAddedAvailability.value)) ||
-          respondents.value.length === 0)
-      ) {
-        emit("highlightAvailabilityBtn")
-      }
-    },
-    mouseover: () => {
-      if (!timeslotSelected.value) {
-        showAvailability(row, col)
-        if (!props.event.daysOnly) {
-          const date =
-            getDateFromRowCol(row, col) ?? getDisplayDateFromRowCol(row, col)
-          if (date) {
-            tooltipContent.value = formatTooltipContent({
-              date,
-              curTimezone: curTimezone.value,
-              timeslotDuration: timeslotDuration.value,
-              timeType: timeType.value,
-              isSpecificDates: grid.isSpecificDates.value,
-            })
-          }
-        }
-      }
-    },
-    mouseleave: () => {
-      if (isPhone.value && selectedTooltipSlot.value) return
-      tooltipPosition.value = null
-      tooltipContent.value = ""
-    },
-  }
-}
-
-function getRenderedTimeBlockStyleForTemplate(
-  timeBlock: { hoursOffset?: Temporal.Duration; hoursLength?: Temporal.Duration }
-): Record<string, string> {
-  return getTimeBlockStyle({
-    timeBlock,
-    firstSplitTimes: splitTimes.value[0],
-  })
-}
-
-function getRenderedTimeBlockStylesForTemplate(
-  timeBlock: { hoursOffset?: Temporal.Duration; hoursLength?: Temporal.Duration }
-): Record<string, string>[] {
-  const style = getRenderedTimeBlockStyleForTemplate(timeBlock)
-  const baseRowIndex = [...splitTimes.value[0], ...splitTimes.value[1]].findIndex(
-    (time) =>
-      time.hoursOffset.total("minutes") ===
-      (timeBlock.hoursOffset?.total("minutes") ?? 0)
-  )
-  if (baseRowIndex === -1) {
-    return [style]
-  }
-
-  const coveredBaseRowCount = Math.round(
-    (timeBlock.hoursLength?.total("minutes") ?? 0) /
-      timeslotDuration.value.total("minutes")
-  )
-  if (coveredBaseRowCount <= 0) {
-    return [style]
-  }
-
-  return buildRenderedTimeBlockFragments({
-    renderedRows: renderedRows.value,
-    startBaseRowIndex: baseRowIndex,
-    coveredBaseRowCount,
-  })
-}
 
 function startEditing() {
   state.value = isSignUp.value ? states.EDIT_SIGN_UP_BLOCKS : states.EDIT_AVAILABILITY
@@ -1733,138 +1032,6 @@ function _stopEditing() {
 
 function refreshEvent() {
   emit("refreshEvent")
-}
-
-function editGuestAvailability(id: string) {
-  if (
-    mainStore.authUser ||
-    !canGuestEditResponse(
-      avail.parsedResponses.value[id],
-      ownedGuestResponseLookupKeys.value
-    )
-  ) {
-    return
-  }
-  const response = avail.parsedResponses.value[id]
-  const ownedLookupKey =
-    response.guestOwnershipMode === "token"
-      ? response.guestId
-      : response.user._id
-  if (ownedLookupKey) {
-    selectGuestOwnership(ownedLookupKey)
-  }
-  startEditing()
-  void nextTick(() => {
-    populateUserAvailability(id)
-    emit("setCurGuestId", id)
-  })
-}
-
-function handleGuestAvailabilityDeleted(userId: string) {
-  if (userId.length === 0) return
-  let ownedLookupKey: string | undefined
-  if (userId in avail.parsedResponses.value) {
-    const response = avail.parsedResponses.value[userId]
-    ownedLookupKey = response.guestOwnershipMode === "token"
-      ? response.guestId
-      : response.user._id
-  }
-  if (ownedLookupKey) {
-    removeGuestOwnership(ownedLookupKey)
-  }
-  if (props.curGuestId === userId) {
-    emit("setCurGuestId", "")
-    _stopEditing()
-  }
-  emit("guestAvailabilityDeleted", userId)
-}
-
-function openEditGuestNameDialog() {
-  newGuestName.value =
-    props.event.responses?.[props.curGuestId]?.name ?? props.curGuestId
-  editGuestNameDialog.value = true
-}
-
-function getRenamedGuestSelectionKey(
-  renamedGuestName: string,
-  currentResponse?: ScheduleOverlapResponse,
-  guestCredentials?: {
-    guestId: string
-  }
-) {
-  const tokenGuestId = guestCredentials?.guestId ?? currentResponse?.guestId
-  if (tokenGuestId && tokenGuestId.length > 0) {
-    return tokenGuestId
-  }
-  return renamedGuestName
-}
-
-async function saveGuestName() {
-  const name = newGuestName.value.trim()
-  const currentGuestName =
-    props.event.responses?.[props.curGuestId]?.name ?? props.curGuestId
-  if (name.length === 0) {
-    mainStore.showError("Guest name cannot be empty")
-    return
-  }
-  if (name === currentGuestName) {
-    editGuestNameDialog.value = false
-    return
-  }
-  try {
-    const currentResponse = props.event.responses?.[props.curGuestId]
-    const response = await post<{
-      guestCredentials?: {
-        name?: string
-        guestId: string
-        guestEditToken: string
-        guestEditPolicy: "protected" | "open"
-        guestOwnershipMode: "token"
-      }
-    }>(
-      appendGuestIdentityQuery(
-        `/events/${props.event._id ?? ""}/rename-user`,
-        guestOwnership.value,
-        guestOwnership.value?.name ?? null
-      ),
-      {
-        oldName: currentGuestName,
-        newName: name,
-        guestId: currentResponse?.guestId,
-        guestEditToken:
-          props.curGuestId === guestResponseLookupKey.value
-            ? guestOwnership.value?.guestEditToken
-            : undefined,
-      }
-    )
-    if (response.guestCredentials) {
-      setGuestOwnership({
-        name,
-        guestId: response.guestCredentials.guestId,
-        guestEditToken: response.guestCredentials.guestEditToken,
-        guestEditPolicy: response.guestCredentials.guestEditPolicy,
-        guestOwnershipMode: response.guestCredentials.guestOwnershipMode,
-      })
-    } else {
-      const existingOwnership = getOwnedGuestOwnership(
-        currentResponse?.guestId ?? props.curGuestId
-      )
-      setGuestOwnership({
-        ...(existingOwnership ?? {}),
-        name,
-      })
-    }
-    mainStore.showInfo("Guest name updated successfully")
-    editGuestNameDialog.value = false
-    emit(
-      "setCurGuestId",
-      getRenamedGuestSelectionKey(name, currentResponse, response.guestCredentials)
-    )
-    refreshEvent()
-  } catch (err: unknown) {
-    const e = err as { parsed?: { error?: string }; message?: string }
-    mainStore.showError(e.parsed?.error ?? e.message ?? "Failed to update guest name")
-  }
 }
 
 defineExpose({
@@ -1894,17 +1061,15 @@ defineExpose({
   updateStartCalendarOnMonday,
   clearSelectedGuestOwnership,
   selectGuestOwnership,
-  editOwnedGuestAvailability: (lookupKey: string) => {
-    selectGuestOwnership(lookupKey)
-    const matchingResponse = Object.entries(avail.parsedResponses.value).find(
-      ([, response]) =>
-        response.guest &&
-        (response.guestId === lookupKey || response.user._id === lookupKey)
-    )
-    if (matchingResponse) {
-      editGuestAvailability(matchingResponse[0])
-    }
-  },
+  days: _days,
+  splitTimes: _splitTimes,
+  responsesFormatted: _responsesFormatted,
+  canEditGuestName: _canEditGuestName,
+  curTimeslot: _curTimeslot,
+  timeslotSelected,
+  renderedRows: _renderedRows,
+  timeAxisEndText: _timeAxisEndText,
+  editOwnedGuestAvailability,
   setAvailabilityAutomatically: _setAvailabilityAutomatically,
   populateUserAvailability,
   submitAvailability: _submitAvailability,

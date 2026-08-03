@@ -33,6 +33,16 @@ import { normalizeTimedResponseSlots } from "@/utils/timedResponseSlots"
 
 type Schemas = components["schemas"]
 
+export interface RenameGuestResponse {
+  guestCredentials?: {
+    name?: string
+    guestId: string
+    guestEditToken: string
+    guestEditPolicy: "protected" | "open"
+    guestOwnershipMode: "token"
+  }
+}
+
 export type RawUser = Schemas["models.User"] & {
   stripeCustomerId?: string
   isPremium?: boolean | null

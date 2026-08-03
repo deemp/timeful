@@ -35,8 +35,16 @@ import type {
 } from "./scheduleOverlapRendering"
 import type { User } from "@/types"
 import type { ZdtMap } from "@/utils"
+import type { useAvailabilityData } from "@/composables/schedule_overlap/useAvailabilityData"
+import type { useCalendarEvents } from "@/composables/schedule_overlap/useCalendarEvents"
+import type { useCalendarGrid } from "@/composables/schedule_overlap/useCalendarGrid"
+import type { useEventScheduling } from "@/composables/schedule_overlap/useEventScheduling"
+import type { useSignUpForm } from "@/composables/schedule_overlap/useSignUpForm"
+import type { useScheduleOverlapUI } from "@/composables/schedule_overlap/useScheduleOverlapUI"
+import type { useOwnedTimezone } from "@/composables/timezone/useOwnedTimezone"
+import type { useTimedGridPresentation } from "./useTimedGridPresentation"
 
-interface UseScheduleOverlapViewModelsOptions {
+interface UseScheduleOverlapViewModelsFlatOptions {
   event: ComputedRef<ScheduleOverlapEvent>
   state: Ref<ScheduleOverlapState>
   states: Record<string, ScheduleOverlapState>
@@ -151,9 +159,90 @@ interface UseScheduleOverlapViewModelsOptions {
   getSignUpBlockStyle: (block: SignUpBlockLite) => Record<string, string>
 }
 
+interface UseScheduleOverlapViewModelsOptions {
+  event: ComputedRef<ScheduleOverlapEvent>
+  state: Ref<ScheduleOverlapState>
+  states: Record<string, ScheduleOverlapState>
+  isSignUp: ComputedRef<boolean>
+  isOwner: ComputedRef<boolean>
+  isGroup: ComputedRef<boolean>
+  isPhone: ComputedRef<boolean>
+  authUser: UseScheduleOverlapViewModelsFlatOptions["authUser"]
+  props: Pick<
+    UseScheduleOverlapViewModelsFlatOptions,
+    | "curGuestId"
+    | "addingAvailabilityAsGuest"
+    | "calendarPermissionGranted"
+    | "calendarEventsMap"
+    | "calendarOnly"
+    | "loadingCalendarEvents"
+    | "sampleCalendarEventsByDay"
+    | "alwaysShowCalendarEvents"
+    | "noEventNames"
+    | "weekOffset"
+  >
+  derived: Pick<
+    UseScheduleOverlapViewModelsFlatOptions,
+    "showAds" | "showCalendarOptions" | "showLoader" | "attendees"
+  >
+  rendering: Pick<
+    UseScheduleOverlapViewModelsFlatOptions,
+    "loadingResponsesLoading" | "getSignUpBlockStyle"
+  >
+  preferences: Pick<
+    UseScheduleOverlapViewModelsFlatOptions,
+    "showBestTimes" | "showAllHours"
+  >
+  guest: Pick<
+    UseScheduleOverlapViewModelsFlatOptions,
+    | "ownedGuestResponseLookupKeys"
+    | "guestResponseLookupKey"
+    | "guestAddedAvailability"
+  >
+  timezone: ReturnType<typeof useOwnedTimezone>
+  grid: ReturnType<typeof useCalendarGrid>
+  calendarEvents: ReturnType<typeof useCalendarEvents>
+  availability: ReturnType<typeof useAvailabilityData>
+  signUpForm: ReturnType<typeof useSignUpForm>
+  ui: ReturnType<typeof useScheduleOverlapUI>
+  scheduling: ReturnType<typeof useEventScheduling>
+  presentation: ReturnType<typeof useTimedGridPresentation>
+  dragStart: Ref<RowCol | null>
+  actions: Pick<
+    UseScheduleOverlapViewModelsFlatOptions,
+    "toolRowActions" | "daysOnlyGridActions" | "timedGridActions"
+  >
+}
+
 export function useScheduleOverlapViewModels(
-  opts: UseScheduleOverlapViewModelsOptions
+  input: UseScheduleOverlapViewModelsOptions
 ) {
+  const opts: UseScheduleOverlapViewModelsFlatOptions = {
+    ...input.props,
+    ...input.derived,
+    ...input.rendering,
+    ...input.preferences,
+    ...input.guest,
+    ...input.grid,
+    ...input.calendarEvents,
+    ...input.availability,
+    ...input.signUpForm,
+    ...input.ui,
+    ...input.scheduling,
+    ...input.presentation,
+    ...input.actions,
+    event: input.event,
+    state: input.state,
+    states: input.states,
+    isSignUp: input.isSignUp,
+    isOwner: input.isOwner,
+    isGroup: input.isGroup,
+    isPhone: input.isPhone,
+    authUser: input.authUser,
+    dragStart: input.dragStart,
+    curTimezone: input.timezone.timezone,
+    timezoneModified: input.timezone.modified,
+  }
   const respondentsPanel = computed<ScheduleOverlapRespondentsPanelViewModel>(
     () => ({
       event: opts.event.value,
