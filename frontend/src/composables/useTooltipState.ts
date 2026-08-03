@@ -1,7 +1,6 @@
-import { computed, onBeforeUnmount, ref, watch, type ComputedRef, type Ref } from "vue"
+import { computed, ref, watch, type ComputedRef, type Ref } from "vue"
 
 export const TOOLTIP_Y_OFFSET_PX = 28
-const TOOLTIP_SHOW_DELAY_MS = 700
 
 export interface TooltipPosition {
   x: number
@@ -20,32 +19,14 @@ export interface TooltipState {
 export const useTooltipState = (content: Ref<string>): TooltipState => {
   const position = ref<TooltipPosition>({ x: 0, y: 0 })
   const isVisible = ref(false)
-  let showTimeout: ReturnType<typeof setTimeout> | null = null
-
-  const clearShowTimeout = () => {
-    if (showTimeout !== null) {
-      clearTimeout(showTimeout)
-      showTimeout = null
-    }
-  }
 
   watch(
     content,
     newContent => {
-      clearShowTimeout()
-      isVisible.value = false
-
-      if (newContent) {
-        showTimeout = setTimeout(() => {
-          isVisible.value = true
-          showTimeout = null
-        }, TOOLTIP_SHOW_DELAY_MS)
-      }
+      isVisible.value = Boolean(newContent)
     },
     { immediate: true }
   )
-
-  onBeforeUnmount(clearShowTimeout)
 
   return {
     handleMouseMove: event => {

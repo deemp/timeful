@@ -1,15 +1,11 @@
 // @vitest-environment happy-dom
 
 import { mount } from "@vue/test-utils"
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { describe, expect, it } from "vitest"
 import Tooltip from "./Tooltip.vue"
 import tooltipSource from "./Tooltip.vue?raw"
 
 describe("Tooltip", () => {
-  afterEach(() => {
-    vi.useRealTimers()
-  })
-
   it("uses declarative pointer listeners instead of manual DOM wiring", () => {
     expect(tooltipSource).toContain('@mouseenter="handleMouseEnter"')
     expect(tooltipSource).toContain('@mouseleave="handleMouseLeave"')
@@ -18,9 +14,7 @@ describe("Tooltip", () => {
     expect(tooltipSource).not.toContain("removeEventListener")
   })
 
-  it("centralizes delayed visibility and pointer placement through the tooltip state helper", async () => {
-    vi.useFakeTimers()
-
+  it("shows new content immediately and positions it through the tooltip state helper", async () => {
     const wrapper = mount(Tooltip, {
       props: {
         content: "",
@@ -36,9 +30,6 @@ describe("Tooltip", () => {
     expect(wrapper.text()).not.toContain("Hello")
 
     await wrapper.setProps({ content: "Hello" })
-    expect(wrapper.text()).not.toContain("Hello")
-
-    vi.advanceTimersByTime(700)
     await wrapper.vm.$nextTick()
 
     expect(wrapper.text()).toContain("Hello")
