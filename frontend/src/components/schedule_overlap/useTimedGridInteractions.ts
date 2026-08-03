@@ -123,6 +123,12 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
     opts.tooltipContent.value = ""
   }
 
+  const repositionMobileTooltip = () => {
+    if (opts.isPhone.value && selectedTooltipSlot.value) {
+      setTooltipPositionForSelectedSlot()
+    }
+  }
+
   const startTimedGridDrag = (event: PointerEvent | MouseEvent) => {
     opts.startDrag(event)
     updateSelectedTooltipSlot(event)
@@ -137,6 +143,7 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
 
   const moveTimedGridDrag = (event: PointerEvent | MouseEvent) => {
     opts.moveDrag(event)
+    updateSelectedTooltipSlot(event)
     setTooltipPositionForDrag(event)
     const tooltipSlot = opts.isPhone.value
       ? selectedTooltipSlot.value
@@ -147,6 +154,7 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
   }
 
   const endTimedGridDrag = (event?: PointerEvent | MouseEvent) => {
+    if (event) updateSelectedTooltipSlot(event)
     const tooltipSlot = opts.isPhone.value
       ? selectedTooltipSlot.value
       : opts.dragCur.value
@@ -174,7 +182,13 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
       mouseover: () => {
         if (!opts.timeslotSelected.value) {
           opts.showAvailability(row, col)
-          if (!opts.daysOnly.value) setTooltipForRowCol(row, col)
+          if (!opts.daysOnly.value) {
+            if (opts.isPhone.value) {
+              selectedTooltipSlot.value = { row, col }
+              setTooltipPositionForSelectedSlot()
+            }
+            setTooltipForRowCol(row, col)
+          }
         }
       },
       mouseleave: () => {
@@ -187,10 +201,20 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
 
   onMounted(() => {
     documentRef.addEventListener("click", dismissMobileTooltipOnOutsideGridClick, true)
+    documentRef.defaultView?.addEventListener(
+      "scroll",
+      repositionMobileTooltip,
+      true
+    )
   })
 
   onBeforeUnmount(() => {
     documentRef.removeEventListener("click", dismissMobileTooltipOnOutsideGridClick, true)
+    documentRef.defaultView?.removeEventListener(
+      "scroll",
+      repositionMobileTooltip,
+      true
+    )
   })
 
   return {

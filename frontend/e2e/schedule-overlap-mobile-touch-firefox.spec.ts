@@ -58,3 +58,51 @@ test("Responses panel prevents touch gestures from reaching the mobile grid", as
     clicks: Number((element as HTMLElement).dataset.clicks),
   }))).toEqual({ pointerDowns: 0, mouseDowns: 0, clicks: 0 })
 })
+
+test("touching a timeslot keeps its mobile tooltip anchored while scrolling", async ({ page }) => {
+  await createSpecificTimesEventFromDialog(
+    page,
+    "Mobile touch selected-slot tooltip regression"
+  )
+
+  const selectedSlot = page.locator(
+    '#drag-section .timeslot[data-row="1"][data-col="0"]'
+  )
+  await selectedSlot.scrollIntoViewIfNeeded()
+  const selectedSlotBox = await selectedSlot.boundingBox()
+  expect(selectedSlotBox).not.toBeNull()
+  if (!selectedSlotBox) {
+    throw new Error("Expected selected grid slot to be visible")
+  }
+
+  await page.touchscreen.tap(
+    selectedSlotBox.x + selectedSlotBox.width / 2,
+    selectedSlotBox.y + selectedSlotBox.height / 2
+  )
+
+  const tooltip = page.locator(".tw-fixed.tw-z-50")
+  await expect(tooltip).toBeVisible()
+  expect(await tooltip.textContent()).not.toBe("")
+
+  await page.evaluate(() => {
+    window.scrollBy({ top: 50 })
+  })
+
+  await expect.poll(async () => {
+    return page.evaluate(() => {
+      const slot = document.querySelector<HTMLElement>(
+        '#drag-section .timeslot[data-row="1"][data-col="0"]'
+      )
+      const tooltipElement = document.querySelector<HTMLElement>(".tw-fixed.tw-z-50")
+      if (!slot || !tooltipElement) return false
+
+      const slotRect = slot.getBoundingClientRect()
+      return Number.parseFloat(tooltipElement.style.left) ===
+          slotRect.left + slotRect.width / 2 &&
+        Number.parseFloat(tooltipElement.style.top) ===
+          (tooltipElement.style.transform.includes("calc")
+            ? slotRect.top
+            : slotRect.top + slotRect.height)
+    })
+  }).toBe(true)
+})

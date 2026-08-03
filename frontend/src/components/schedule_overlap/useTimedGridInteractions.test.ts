@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { computed, defineComponent, ref } from "vue"
+import { computed, defineComponent, nextTick, ref } from "vue"
 import { mount } from "@vue/test-utils"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { useTimedGridInteractions } from "./useTimedGridInteractions"
@@ -70,13 +70,22 @@ const mountInteractions = (phone = false) => {
   }
 }
 
-const appendSlot = (row: number, col: number, top = 80) => {
+const appendSlot = (
+  row: number,
+  col: number,
+  top: number | (() => number) = 80
+) => {
   const cell = document.createElement("div")
   cell.className = "timeslot"
   cell.dataset.row = String(row)
   cell.dataset.col = String(col)
   cell.getBoundingClientRect = () =>
-    ({ left: 40, top, width: 120, height: 20 }) as DOMRect
+    ({
+      left: 40,
+      top: typeof top === "function" ? top() : top,
+      width: 120,
+      height: 20,
+    }) as DOMRect
   const dragSection = document.querySelector("#drag-section") ?? document.createElement("div")
   dragSection.id = "drag-section"
   dragSection.append(cell)
@@ -143,20 +152,67 @@ describe("useTimedGridInteractions", () => {
     expect(interactions.selectedTooltipSlot.value).toEqual({ row: 1, col: 0 })
   })
 
-  it("keeps a mobile drag anchored to the selected cell outside the grid", () => {
+  it("moves a mobile drag anchor to the current grid cell and retains it outside the grid", () => {
     appendSlot(1, 0, 80)
     appendSlot(2, 0, 100)
-    const { interactions, dragging, dragCur } = mountInteractions(true)
+    const { interactions, dragging, dragCur, moveDrag } = mountInteractions(true)
     const outsideGrid = document.createElement("div")
     dragging.value = true
-    dragCur.value = { row: 2, col: 0 }
+    dragCur.value = { row: 1, col: 0 }
     interactions.selectedTooltipSlot.value = { row: 1, col: 0 }
+    moveDrag.mockImplementation(() => {
+      dragCur.value = { row: 2, col: 0 }
+    })
+
+    const currentCell = document.querySelector<HTMLElement>(
+      '#drag-section .timeslot[data-row="2"][data-col="0"]'
+    )
+    if (!currentCell) throw new Error("Expected current grid cell")
+
+    interactions.moveTimedGridDrag({
+      target: currentCell,
+      clientX: 100,
+      clientY: 110,
+    } as unknown as MouseEvent)
+
+    expect(interactions.selectedTooltipSlot.value).toEqual({ row: 2, col: 0 })
+    expect(interactions.tooltipPosition.value).toEqual({
+      x: 100,
+      y: 100,
+      placement: "above",
+    })
 
     interactions.moveTimedGridDrag({
       target: outsideGrid,
       clientX: 900,
       clientY: 700,
     } as unknown as MouseEvent)
+
+    expect(interactions.tooltipPosition.value).toEqual({
+      x: 100,
+      y: 100,
+      placement: "above",
+    })
+  })
+
+  it("shows and repositions the mobile tooltip for the current slot on hover and scroll", async () => {
+    let top = 140
+    appendSlot(1, 0, () => top)
+    const { interactions, tooltipContent } = mountInteractions(true)
+
+    interactions.getTimeslotVon(1, 0).mouseover()
+    await nextTick()
+
+    expect(interactions.selectedTooltipSlot.value).toEqual({ row: 1, col: 0 })
+    expect(tooltipContent.value).toBe("slot-1-0")
+    expect(interactions.tooltipPosition.value).toEqual({
+      x: 100,
+      y: 140,
+      placement: "above",
+    })
+
+    top = 80
+    window.dispatchEvent(new Event("scroll"))
 
     expect(interactions.tooltipPosition.value).toEqual({
       x: 100,

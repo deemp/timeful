@@ -1919,7 +1919,7 @@ describe("ScheduleOverlap", () => {
     ).toBe(timedGrid.splitTimes[0].length)
   })
 
-  it("does not render a mobile tooltip from hover before a timeslot is selected", async () => {
+  it("renders the mobile tooltip for the current hovered timeslot", async () => {
     viewportWidth.value = 375
     const wrapper = mountScheduleOverlap({
       global: {
@@ -1936,7 +1936,7 @@ describe("ScheduleOverlap", () => {
     await wrapper.get(".tw-relative").trigger("mouseenter")
     await nextTick()
 
-    expect(wrapper.find(".tw-fixed.tw-z-50").exists()).toBe(false)
+    expect(wrapper.find(".tw-fixed.tw-z-50").exists()).toBe(true)
   })
 
   it("shows the mobile tooltip after selecting a timeslot by click", async () => {
