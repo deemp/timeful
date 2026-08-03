@@ -350,12 +350,7 @@ export const getTimeGridTimeslotClassStyle = ({
     curTimeslot.col === baseArgs.col &&
     !isDisabled
   ) {
-    cs.class += "tw-border-r tw-z-10 "
-    cs.style.borderRightStyle = "solid"
-    cs.style.borderRightWidth = GRID_LINE_WIDTH
-    cs.style.borderRightColor = GRID_LINE_COLOR
-    cs.style.boxShadow = `inset 0 0 0 2px ${GRID_CURSOR_OUTLINE}`
-    cs.style.backgroundImage = `repeating-linear-gradient(135deg, transparent 0 5px, ${GRID_CURSOR_OUTLINE} 5px 7px, transparent 7px 11px)`
+    cs.class += "tw-relative schedule-overlap-time-grid__selected-timeslot "
   } else {
     const splitStartOffsetMinutes = splitStartHoursOffset?.total("minutes")
     const offsetMinutes = timeHoursOffset?.total("minutes")

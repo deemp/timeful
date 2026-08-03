@@ -368,6 +368,21 @@ defineProps<{
   border-width: 2px;
 }
 
+.schedule-overlap-time-grid__selected-timeslot::after {
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0 5px,
+    var(--timeful-grid-cursor-outline) 5px 7px,
+    transparent 7px 11px
+  );
+  box-shadow: inset 0 0 0 2px var(--timeful-grid-cursor-outline);
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 10;
+}
+
 .time-grid-overlay-block--available {
   background-color: var(--timeful-overlay-availability-available-bg);
   border-color: var(--timeful-overlay-availability-available-border);

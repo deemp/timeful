@@ -1163,7 +1163,7 @@ describe("scheduleOverlapRendering", () => {
     expect(classStyle.class).not.toContain("tw-bg-gray")
   })
 
-  it("draws an inset solid selection stroke for zero-response timed-grid slots in heatmap view", () => {
+  it("marks zero-response timed-grid slots in heatmap view for a foreground selection cursor", () => {
     const slot = zdt("2026-01-01T09:00:00Z")
 
     const classStyle = getTimeGridTimeslotClassStyle({
@@ -1206,23 +1206,11 @@ describe("scheduleOverlapRendering", () => {
       inDragRange: () => false,
     })
 
-    expect(classStyle.class).toContain("tw-border-r")
-    expect(classStyle.class).not.toContain("tw-border-dashed")
-    expect(classStyle.class).not.toContain("tw-border-black")
-    expect(classStyle.style.borderRightStyle).toBe("solid")
-    expect(classStyle.style.borderRightColor).toBe(
-      "var(--timeful-grid-line-color)",
-    )
-    expect(classStyle.style.boxShadow).toBe(
-      "inset 0 0 0 2px var(--timeful-grid-cursor-outline)",
-    )
-    expect(classStyle.style.backgroundImage).toContain(
-      "repeating-linear-gradient",
-    )
-    expect(classStyle.style.backgroundImage).toContain("5px 7px")
-    expect(classStyle.style.backgroundImage).toContain(
-      "var(--timeful-grid-cursor-outline)",
-    )
+    expect(classStyle.class).toContain("tw-relative")
+    expect(classStyle.class).toContain("schedule-overlap-time-grid__selected-timeslot")
+    expect(classStyle.class).not.toContain("tw-z-10")
+    expect(classStyle.style.boxShadow).toBeUndefined()
+    expect(classStyle.style.backgroundImage).toBeUndefined()
   })
 
   it("does not draw the selection border for disabled grey gap cells", () => {
