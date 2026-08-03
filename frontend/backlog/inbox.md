@@ -250,18 +250,28 @@ Semi-structured TODO list
   - ok in gmt+3
   - padding gets added in +3:30 although not needed
   - grid split in +12 although shouldn't
-- [ ] On mobile, the popover for time near cursor in the grid shouldn't move around and must stay near the cursor
 - [ ] Introduce a log of non-architectural decisions with SPEC-NNN identifiers
 - [ ] Introduce an index that tracks the status of SPECs
 - [ ] "select in Add/Edit availability" -> "change in ..."
 - [ ] On mobile, on the event page, when not interacting with the grid, make it scrollable with finger on the grid
-- [ ] set specific times - just select, don't draw scheduled event
-- [ ] on mobile, edit availability is permanently greenish although should be like that only after a click
+- [x] set specific times - just select, don't draw scheduled event
+- [x] on mobile, edit availability is permanently greenish although should be like that only after a click
+  - It's ok - it's disabled
 - [x] on mobile and desktop, there should be no delay between selecting the time slot and seeing the tooltip with time and date
-- [ ] on mobile, I shouldn't be able to click the grid through that Responses offcanvas
-- [ ] on mobile, when no slot is selected, the tooltip shouldn't be visible
-- [ ] on mobile, when scrolling, the tooltip with time should scroll together with selected cell, not scroll with the screen
+- [x] on mobile, I shouldn't be able to click the grid through that Responses offcanvas
+- [x] on mobile, the tooltip should stay near selected timeslot and shouldn't move around
+  - now we store the info about the selected timeslot and render based on its position
 - [x] in commit skill, make the script for session identifier and time a single script
+- [x] on mobile, when scrolling, the tooltip with time should scroll together with selected cell, not stay frozen at the same height of the screen while the screen scrolls
+- [x] on mobile, when no slot is selected, the tooltip shouldn't be visible
+- [x] When a timeslot is selected, it's position is saved.
+      When the page is reloaded, the selection is rendered at the timeslot.
+      However, there's no tooltip near the selection.
+- [x] on mobile, when long press inside the grid changes the selected timeslot, the tooltip must also appear near the selected timeslot
+  - currently, it stays near the previously selected timeslot
+- [x] on mobile, when long press inside the grid makes the timeslot selected, the tooltip must appear near it.
+  - currently, the tooltip doesn't appear
+- [x] on mobile, the tooltip should be under top navbar when the grid gets scrolled up
 
 ## MUST
 
