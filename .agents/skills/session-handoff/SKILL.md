@@ -15,17 +15,35 @@ Licensed under MIT.
 
 ## Create The File
 
-1. Immediately before writing the handoff, capture the most recently updated OpenCode session in the current project directory. Use:
+1. Immediately before writing the handoff, capture the most recently updated OpenCode session and the UTC creation timestamp. Use:
 
    ```sh
-   session_id="$(opencode session list --format json --max-count 1 | python3 -c 'import json, sys; sessions = json.load(sys.stdin); session_id = sessions[0].get("id") if len(sessions) == 1 else None; sys.exit("Could not determine the most recently updated OpenCode session.") if not isinstance(session_id, str) or not session_id.startswith("ses_") else print(session_id)')"
+   python3 <<'PY'
+   import json
+   import subprocess
+   import sys
+   from datetime import UTC, datetime
+
+   result = subprocess.run(
+       ["opencode", "session", "list", "--format", "json", "--max-count", "1"],
+       check=True,
+       capture_output=True,
+       text=True,
+   )
+   sessions = json.loads(result.stdout)
+   session_id = sessions[0].get("id") if len(sessions) == 1 else None
+   if not isinstance(session_id, str) or not session_id.startswith("ses_"):
+       sys.exit("Could not determine the most recently updated OpenCode session.")
+
+   print(f"session_id: {session_id}")
+   print(f"created_at: {datetime.now(UTC):%Y-%m-%dT%H-%M-%SZ}")
+   PY
    ```
 
-    The OpenCode CLI has no explicit current-session command or environment variable. This records the most recently updated session for the project, which is the best supported lookup. If another session in the same directory is updated concurrently, stop and ask the user to confirm the session ID rather than recording an uncertain ID.
-2. Capture the UTC+0 creation timestamp immediately before writing with `created_at="$(date -u +'%Y-%m-%dT%H-%M-%SZ')"`.
-3. Create `handoff/` if it does not exist.
-4. Write the handoff to `handoff/handoff-${created_at}.md`.
-5. Report the resulting path.
+   The output labels provide the `session_id` and `created_at` values to use below. The OpenCode CLI has no explicit current-session command or environment variable. This records the most recently updated session for the project, which is the best supported lookup. If another session in the same directory is updated concurrently, stop and ask the user to confirm the session ID rather than recording an uncertain ID.
+2. Create `handoff/` if it does not exist.
+3. Write the handoff to `handoff/handoff-<created_at>.md`, replacing `<created_at>` with the script output.
+4. Report the resulting path.
 
 ## Content
 
