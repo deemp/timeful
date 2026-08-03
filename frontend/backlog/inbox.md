@@ -244,6 +244,24 @@ Semi-structured TODO list
 - [x] Schedule button on mobile should be filled blueish when clicked
 - [x] When there's a scheduled event and I edit availability, I shold draw only with green cells, not blue cells (scheduled)
 - [x] when editing availability, overlay availabilities should preserve the marked time slots and not shift
+- [ ] Move Show all hours to over Overlay availabilities on desktop and mobile
+- [ ] Given an event was scheduled and time zone switched so that event slots shifted to another date, mark them blue in relevant dates
+- [ ] <http://127.0.0.1:4173/e/aB3BE>
+  - ok in gmt+3
+  - padding gets added in +3:30 although not needed
+  - grid split in +12 although shouldn't
+- [ ] On mobile, the popover for time near cursor in the grid shouldn't move around and must stay near the cursor
+- [ ] Introduce a log of non-architectural decisions with SPEC-NNN identifiers
+- [ ] Introduce an index that tracks the status of SPECs
+- [ ] "select in Add/Edit availability" -> "change in ..."
+- [ ] On mobile, on the event page, when not interacting with the grid, make it scrollable with finger on the grid
+- [ ] set specific times - just select, don't draw scheduled event
+- [ ] on mobile, edit availability is permanently greenish although should be like that only after a click
+- [x] on mobile and desktop, there should be no delay between selecting the time slot and seeing the tooltip with time and date
+- [ ] on mobile, I shouldn't be able to click the grid through that Responses offcanvas
+- [ ] on mobile, when no slot is selected, the tooltip shouldn't be visible
+- [ ] on mobile, when scrolling, the tooltip with time should scroll together with selected cell, not scroll with the screen
+- [x] in commit skill, make the script for session identifier and time a single script
 
 ## MUST
 
