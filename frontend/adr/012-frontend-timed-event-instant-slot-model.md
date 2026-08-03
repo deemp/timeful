@@ -105,8 +105,8 @@ The specific-times toggle is an advanced editing affordance, not a different per
 
 ### Rendering and summary semantics
 
-- Timed grids outside specific-times editing must derive rendered date columns for timed specific-date events from picked dates.
-- Specific-times editing must derive rendered date columns from the ordered union of picked dates and enabled slots projected into the display timezone. A projected slot belongs to its display-local calendar-date column; an adjacent column must be created when that date is otherwise absent.
+- Timed grids must derive rendered date columns from enabled slots projected into the display timezone. A projected slot belongs to its display-local calendar-date column; an adjacent column must be created when that date is otherwise absent.
+- Specific-times grids additionally retain picked-date columns that have no projected enabled slots, so their full editable domain remains visible.
 - Timed grids must derive rendered slot existence from enabled slots after projection into the display timezone; they must not render synthetic out-of-domain slots.
 - Timed grids must derive participant-selectable cells from active slots.
 - Specific-times editing may render a full-height rectangular grid around projected slots. Cells without a mapped enabled slot are disabled padding cells: they are non-editable and use a visually distinct unavailable treatment. Enabled inactive cells remain editable and use a separate treatment.
@@ -134,7 +134,7 @@ The specific-times toggle is an advanced editing affordance, not a different per
 - Creating a normal timed event with selected days and a start/end window generates full-window enabled slots and matching active slots.
 - Entering specific-times during creation generates a full-day enabled domain for every picked date, then enables slot-level edits.
 - Disabling advanced slot editing restores `active slots = enabled slots` for the current enabled domain.
-- Changing only the display timezone can shift where active cells appear within a picked-date column without changing the picked date.
+- Changing only the display timezone can shift active cells into different projected date columns without changing canonical picked-date membership.
 - Adding a date in the picker adds that picked date's full enabled slot domain and matching active slots.
 - Removing a date removes its enabled slots and any active slots on that picked date.
 - Changing the event timezone preserves picked dates, regenerates the enabled slot domain for those dates, and filters active slots to the rebuilt enabled domain.

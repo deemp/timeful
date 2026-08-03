@@ -180,7 +180,7 @@ describe("specificTimesEditDraft", () => {
     })
   })
 
-  it("preserves the prior subset on unchanged dates and defaults added dates to fully active", () => {
+  it("preserves the prior subset on unchanged dates and activates a full day for added dates", () => {
     const schedule = buildEventEditorSchedule({
       daysOnly: false,
       daysOnlyType: "specific_dates",
@@ -198,22 +198,25 @@ describe("specificTimesEditDraft", () => {
       timeIncrementMinutes: 15,
     })
 
-    expect(
-      buildSpecificTimesEditDraft({
-        event: buildEvent(),
-        schedule,
-        timeIncrementMinutes: 15,
-        specificTimesEnabled: true,
-      }),
-    ).toMatchObject({
-      resetExistingTimes: false,
-      activeSlots: [
-        Temporal.Instant.from("2026-05-31T09:00:00Z").toZonedDateTimeISO(UTC),
-        Temporal.Instant.from("2026-05-31T09:15:00Z").toZonedDateTimeISO(UTC),
-        Temporal.Instant.from("2026-06-01T09:00:00Z").toZonedDateTimeISO(UTC),
-        Temporal.Instant.from("2026-06-01T09:15:00Z").toZonedDateTimeISO(UTC),
-      ],
+    const draft = buildSpecificTimesEditDraft({
+      event: buildEvent(),
+      schedule,
+      timeIncrementMinutes: 15,
+      specificTimesEnabled: true,
     })
+
+    expect(draft?.resetExistingTimes).toBe(false)
+    expect(draft?.enabledSlots).toHaveLength(3 * 96)
+    expect(draft?.activeSlots).toHaveLength(2 + 96)
+    expect(draft?.activeSlots?.slice(0, 2).map((slot) => slot.toString())).toEqual([
+      "2026-05-31T09:00:00+00:00[UTC]",
+      "2026-05-31T09:15:00+00:00[UTC]",
+    ])
+    expect(
+      draft?.activeSlots?.slice(2).every(
+        (slot) => slot.toPlainDate().toString() === "2026-06-01",
+      ),
+    ).toBe(true)
   })
 
   it("starts with an empty active subset when specific-times edit state resets", () => {
@@ -233,18 +236,18 @@ describe("specificTimesEditDraft", () => {
       timeIncrementMinutes: 30,
     })
 
-    expect(
-      buildSpecificTimesEditDraft({
-        event: buildEvent(),
-        schedule,
-        timeIncrementMinutes: 30,
-        specificTimesEnabled: true,
-      }),
-    ).toMatchObject({
-      resetExistingTimes: true,
-      enabledSlots: schedule.enabledSlots,
-      activeSlots: [],
+    const draft = buildSpecificTimesEditDraft({
+      event: buildEvent(),
+      schedule,
+      timeIncrementMinutes: 30,
+      specificTimesEnabled: true,
     })
+
+    expect(draft?.resetExistingTimes).toBe(true)
+    expect(draft?.enabledSlots).toHaveLength(2 * 48)
+    expect(draft?.enabledSlots?.[0]?.toString()).toBe("2026-05-30T00:00:00+00:00[UTC]")
+    expect(draft?.enabledSlots?.at(-1)?.toString()).toBe("2026-05-31T23:30:00+00:00[UTC]")
+    expect(draft?.activeSlots).toEqual([])
   })
 
   it("filters the active subset down to remaining picked dates when membership shrinks", () => {
@@ -398,23 +401,20 @@ describe("specificTimesEditDraft", () => {
       timeIncrementMinutes: 15,
     })
 
-    expect(
-      buildSpecificTimesEditDraft({
-        event: buildEvent(),
-        schedule,
-        timeIncrementMinutes: 15,
-        specificTimesEnabled: true,
-      }),
-    ).toMatchObject({
-      resetExistingTimes: false,
-      enabledSlots: [
-        Temporal.Instant.from("2026-05-30T09:00:00Z").toZonedDateTimeISO(UTC),
-        Temporal.Instant.from("2026-05-30T09:15:00Z").toZonedDateTimeISO(UTC),
-        Temporal.Instant.from("2026-05-31T09:00:00Z").toZonedDateTimeISO(UTC),
-        Temporal.Instant.from("2026-05-31T09:15:00Z").toZonedDateTimeISO(UTC),
-      ],
-      activeSlots: [],
+    const draft = buildSpecificTimesEditDraft({
+      event: buildEvent(),
+      schedule,
+      timeIncrementMinutes: 15,
+      specificTimesEnabled: true,
     })
+
+    expect(draft?.resetExistingTimes).toBe(false)
+    expect(draft?.enabledSlots).toHaveLength(2 * 96)
+    expect(draft?.enabledSlots?.[0]?.toInstant().toString()).toBe("2026-05-30T07:00:00Z")
+    expect(draft?.activeSlots?.map((slot) => slot.toString())).toEqual([
+      "2026-05-31T09:00:00+00:00[UTC]",
+      "2026-05-31T09:15:00+00:00[UTC]",
+    ])
   })
 
   it("collapses active slots back to the enabled domain when specific-times editing is disabled", () => {
@@ -681,12 +681,9 @@ describe("specificTimesEditDraft", () => {
       specificTimesEnabled: true,
     })
 
-    expect(draft?.enabledSlots?.map((slot) => slot.toString())).toEqual([
-      "2026-05-30T09:00:00+00:00[UTC]",
-      "2026-05-30T09:15:00+00:00[UTC]",
-      "2026-05-31T09:00:00+00:00[UTC]",
-      "2026-05-31T09:15:00+00:00[UTC]",
-    ])
+    expect(draft?.enabledSlots).toHaveLength(2 * 96)
+    expect(draft?.enabledSlots?.[0]?.toString()).toBe("2026-05-30T00:00:00+00:00[UTC]")
+    expect(draft?.enabledSlots?.at(-1)?.toString()).toBe("2026-05-31T23:45:00+00:00[UTC]")
     expect(draft?.activeSlots?.map((slot) => slot.toString())).toEqual([
       "2026-05-31T09:00:00+00:00[UTC]",
       "2026-05-31T09:15:00+00:00[UTC]",
@@ -760,13 +757,12 @@ describe("specificTimesEditDraft", () => {
         Temporal.PlainDate.from("2026-05-31"),
       ],
     })
-    // enabledSlots must NOT contain June 1 slots
-    expect(draft?.enabledSlots?.map((slot) => slot.toString())).toEqual([
-      "2026-05-30T09:00:00+00:00[UTC]",
-      "2026-05-30T09:15:00+00:00[UTC]",
-      "2026-05-31T09:00:00+00:00[UTC]",
-      "2026-05-31T09:15:00+00:00[UTC]",
-    ])
+    expect(draft?.enabledSlots).toHaveLength(2 * 96)
+    expect(
+      draft?.enabledSlots?.every(
+        (slot) => slot.toPlainDate().toString() !== "2026-06-01",
+      ),
+    ).toBe(true)
     // activeSlots keep the prior subset after removed-date filtering
     expect(draft?.activeSlots?.map((slot) => slot.toString())).toEqual([
       "2026-05-31T09:00:00+00:00[UTC]",

@@ -1,11 +1,12 @@
 import { ref } from "vue"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { Temporal } from "temporal-polyfill"
-import { durations, eventTypes, UTC } from "@/constants"
+import { durations, eventTypes, timeTypes, UTC } from "@/constants"
 import { createLocalStorageMock } from "@/test/localStorage"
 import { buildSpecificTimesCreateDraft } from "@/composables/event/specificTimesEditDraft"
 import { buildEventEditorSchedule } from "@/composables/event/eventEditorSchedule"
 import { normalizeActiveSlots } from "@/utils/timedEventSlots"
+import { formatTooltipContent } from "@/components/schedule_overlap/scheduleOverlapRendering"
 import { states, type ScheduleOverlapEvent } from "./types"
 import { useCalendarGrid } from "./useCalendarGrid"
 
@@ -1603,5 +1604,93 @@ describe("useCalendarGrid", () => {
       "2026-08-12T18:45:00Z",
     )
     expect(grid.getDateFromRowCol(1, 1)).toBeNull()
+  })
+
+  it("projects wrapped Vladivostok ranges into Auckland's adjacent display-date column", () => {
+    const eventTimezone = "Asia/Vladivostok"
+    const firstSlot = Temporal.ZonedDateTime.from(
+      "2026-08-06T18:00:00+10:00[Asia/Vladivostok]",
+    )
+    const enabledSlots = Array.from({ length: 8 }, (_, index) =>
+      firstSlot.add({ hours: index }),
+    )
+    const event = ref<ScheduleOverlapEvent>({
+      _id: "evt-vladivostok-auckland",
+      shortId: "vladivostok-auckland",
+      name: "Wrapped display-date projection",
+      type: eventTypes.SPECIFIC_DATES,
+      dates: [Temporal.PlainDate.from("2026-08-06")],
+      timeSeed: firstSlot,
+      startTime: Temporal.PlainTime.from("18:00"),
+      duration: Temporal.Duration.from({ hours: 8 }),
+      hasSpecificTimes: false,
+      enabledSlots,
+      activeSlots: enabledSlots,
+      eventTimezone,
+      slotGeneration: {
+        startTimeLocal: Temporal.PlainTime.from("18:00"),
+        endTimeLocal: Temporal.PlainTime.from("02:00"),
+        timeIncrement: durations.ONE_HOUR,
+      },
+      timedRecurrence: {
+        kind: "specific_dates",
+        selectedDays: [Temporal.PlainDate.from("2026-08-06")],
+        selectedDaysOfWeek: [],
+        startOnMonday: true,
+      },
+      notificationsEnabled: false,
+      blindAvailabilityEnabled: false,
+      daysOnly: false,
+      sendEmailAfterXResponses: -1,
+      collectEmails: false,
+      startOnMonday: true,
+      timeIncrement: durations.ONE_HOUR,
+      creatorPosthogId: "creator-vladivostok-auckland",
+      remindees: [],
+    })
+    const curTimezone = {
+      value: "Pacific/Auckland",
+      offset: Temporal.Duration.from({ hours: -12 }),
+      label: "Pacific/Auckland",
+      gmtString: "GMT+12",
+    }
+    const grid = useCalendarGrid({
+      event,
+      weekOffset: ref(0),
+      curTimezone: ref(curTimezone),
+      state: ref(states.HEATMAP),
+      isPhone: ref(false),
+    })
+
+    expect(
+      grid.days.value.map((day) => day.dateObject.toPlainDate().toString()),
+    ).toEqual(["2026-08-06", "2026-08-07"])
+    expect(grid.splitTimes.value.flat().map((time) => time.text)).not.toContain("+1 00:00")
+
+    const midnightRow = grid.splitTimes.value.flat().findIndex(
+      (time) => time.absoluteMinutes === 0,
+    )
+    expect(midnightRow).toBeGreaterThanOrEqual(0)
+
+    const adjacentSlot = grid.getDateFromRowCol(midnightRow, 1)
+    expect(adjacentSlot?.toInstant().toString()).toBe("2026-08-06T12:00:00Z")
+    expect(grid.getEnabledDateFromRowCol(midnightRow, 1)?.toInstant().toString()).toBe(
+      "2026-08-06T12:00:00Z",
+    )
+    expect(grid.getTimedCellState(midnightRow, 1)).toBe("active")
+    expect(grid.getDateFromRowCol(midnightRow, 0)).toBeNull()
+
+    const tooltipSlot = grid.getDisplayDateFromRowCol(midnightRow, 1)
+    expect(tooltipSlot?.toInstant().toString()).toBe("2026-08-06T12:00:00Z")
+    expect(
+      tooltipSlot &&
+        formatTooltipContent({
+          date: tooltipSlot,
+          curTimezone,
+          timeslotDuration: durations.ONE_HOUR,
+          timeType: timeTypes.HOUR24,
+          isSpecificDates: true,
+        }),
+    ).toBe("Fri, Aug 7, 2026 00:00 to 01:00")
   })
 })

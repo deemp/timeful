@@ -17,10 +17,7 @@
       </div>
       <span class="tw-text-sm">If needed</span>
     </div>
-    <div
-      v-if="isSpecificTimes"
-      class="tw-flex tw-items-start"
-    >
+    <div v-if="activeSlotsCount > 0" class="tw-flex tw-items-start">
       <div class="color-legend__indicator-slot">
         <div
           class="tw-h-4 tw-w-4 tw-rounded tw-border tw-border-gray tw-bg-[#F9CCCC]"
@@ -30,7 +27,7 @@
         >Unavailable, select in <br class="tw-hidden md:tw-block" />Add/Edit availability</span
       >
     </div>
-    <div class="tw-flex tw-items-start">
+    <div v-if="isSpecificTimes" class="tw-flex tw-items-start">
       <div class="color-legend__indicator-slot">
         <div
           class="tw-h-4 tw-w-4 tw-rounded tw-border tw-border-gray tw-bg-light-gray-stroke"

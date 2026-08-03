@@ -108,7 +108,7 @@ describe("ScheduleOverlapSidebar", () => {
     expect(vm.respondentsPanelEl?.className).toContain("respondents-panel-stub")
   })
 
-  it("shows active-slot legend items in normal display mode without responses", () => {
+  it("shows range-event active-slot legend items without specific-times editing guidance", () => {
     const wrapper = mount(ScheduleOverlapSidebar, {
       props: {
         sidebar: {
@@ -127,8 +127,33 @@ describe("ScheduleOverlapSidebar", () => {
     })
 
     expect(wrapper.text()).toContain("Unavailable, select in Add/Edit availability")
-    expect(wrapper.text()).toContain("Unavailable, select in Edit event")
+    expect(wrapper.text()).not.toContain("Unavailable, select in Edit event")
     expect(wrapper.text()).toContain("Unavailable, padding")
+  })
+
+  it("shows edit-event guidance for saved specific-times events", () => {
+    const wrapper = mount(ScheduleOverlapSidebar, {
+      props: {
+        sidebar: {
+          ...buildScheduleOverlapSidebarViewModel(),
+          state: states.BEST_TIMES,
+          activeSlotsCount: 1,
+          event: {
+            ...buildScheduleOverlapSidebarViewModel().event,
+            hasSpecificTimes: true,
+          },
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+          ColorLegend,
+        },
+      },
+    })
+
+    expect(wrapper.text()).toContain("Unavailable, select in Add/Edit availability")
+    expect(wrapper.text()).toContain("Unavailable, select in Edit event")
   })
 
   it("renders the overlay availability switch with the compact switch styling", () => {

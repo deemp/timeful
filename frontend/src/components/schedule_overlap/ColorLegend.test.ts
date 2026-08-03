@@ -52,8 +52,8 @@ describe("ColorLegend", () => {
     expect(wrapper.html()).toContain("tw-bg-[#F9CCCC]")
   })
 
-  it("shows the full palette after a response is received", () => {
-    const wrapper = mountLegend({ responseCount: 1 })
+  it("shows the response palette and active-slot guidance after a response is received", () => {
+    const wrapper = mountLegend({ activeSlotsCount: 1, responseCount: 1 })
 
     expectStructuralColors(wrapper)
     expect(wrapper.text()).toContain("Available")
@@ -65,8 +65,8 @@ describe("ColorLegend", () => {
     expect(labels(wrapper)).toHaveLength(5)
   })
 
-  it("shows the full palette while adding availability", () => {
-    const wrapper = mountLegend({ isAddingAvailability: true })
+  it("shows the response palette and active-slot guidance while adding availability", () => {
+    const wrapper = mountLegend({ activeSlotsCount: 1, isAddingAvailability: true })
 
     expect(wrapper.text()).toContain("Available")
     expect(wrapper.text()).toContain("If needed")
@@ -75,7 +75,7 @@ describe("ColorLegend", () => {
   })
 
   it("uses the respondent checkbox control geometry for each indicator", () => {
-    const wrapper = mountLegend({ responseCount: 1 })
+    const wrapper = mountLegend({ activeSlotsCount: 1, responseCount: 1 })
 
     const indicatorSlots = wrapper.findAll(".color-legend__indicator-slot")
     expect(indicatorSlots).toHaveLength(5)
@@ -85,10 +85,18 @@ describe("ColorLegend", () => {
     }
   })
 
-  it("shows the edit-event item only for specific-times events", () => {
+  it("shows the edit-event item only for saved specific-times events", () => {
     const wrapper = mountLegend({ isSpecificTimes: true })
 
     expect(wrapper.text()).toContain("Unavailable, select in Edit event")
     expect(wrapper.html()).toContain("tw-bg-light-gray-stroke")
+  })
+
+  it("keeps range-event legends free of the edit-event item", () => {
+    const wrapper = mountLegend({ activeSlotsCount: 1 })
+
+    expect(wrapper.text()).toContain("Unavailable, select in Add/Edit availability")
+    expect(wrapper.text()).not.toContain("Unavailable, select in Edit event")
+    expect(wrapper.html()).not.toContain("tw-bg-light-gray-stroke")
   })
 })
