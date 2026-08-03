@@ -13,7 +13,7 @@ describe("Tooltip", () => {
   it("uses declarative pointer listeners instead of manual DOM wiring", () => {
     expect(tooltipSource).toContain('@mouseenter="handleMouseEnter"')
     expect(tooltipSource).toContain('@mouseleave="handleMouseLeave"')
-    expect(tooltipSource).toContain('@mousemove="handleMouseMove"')
+    expect(tooltipSource).toContain('@mousemove="handleMouseMoveWithOverride"')
     expect(tooltipSource).not.toContain("addEventListener")
     expect(tooltipSource).not.toContain("removeEventListener")
   })
@@ -52,5 +52,25 @@ describe("Tooltip", () => {
 
     await trigger.trigger("mouseleave")
     expect(wrapper.find(".tw-fixed").exists()).toBe(false)
+  })
+
+  it("keeps an overridden position when the pointer moves", async () => {
+    const wrapper = mount(Tooltip, {
+      props: {
+        content: "Hello",
+      },
+      slots: {
+        default: "<button>Trigger</button>",
+      },
+    })
+    const trigger = wrapper.get("div.tw-relative")
+
+    await trigger.trigger("mouseenter")
+    await wrapper.setProps({ positionOverride: { x: 40, y: 200 } })
+    await trigger.trigger("mousemove", { clientX: 900, clientY: 700 })
+
+    const tooltip = wrapper.get(".tw-fixed")
+    expect(tooltip.attributes("style")).toContain("left: 40px;")
+    expect(tooltip.attributes("style")).toContain("top: 172px;")
   })
 })

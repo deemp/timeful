@@ -1949,7 +1949,7 @@ describe("ScheduleOverlap", () => {
     ).toBe(vm.splitTimes[0].length)
   })
 
-  it("tracks cursor position during drag move and clears on timeslot mouseleave", () => {
+  it("tracks cursor position during desktop drag move and clears on timeslot mouseleave", () => {
     const wrapper = mountScheduleOverlap()
     const vm = wrapper.vm as unknown as {
       tooltipPosition: { x: number; y: number } | null
@@ -1970,5 +1970,67 @@ describe("ScheduleOverlap", () => {
     vm.getTimeslotVon(1, 0).mouseleave()
 
     expect(vm.tooltipPosition).toBeNull()
+  })
+
+  it("keeps the mobile tooltip anchored to the last selected timeslot after drag completion", () => {
+    viewportWidth.value = 375
+    const firstCell = document.createElement("div")
+    firstCell.className = "timeslot"
+    firstCell.dataset.row = "1"
+    firstCell.dataset.col = "0"
+    firstCell.getBoundingClientRect = () =>
+      ({ left: 40, top: 80, width: 120, height: 20 }) as DOMRect
+
+    const secondCell = document.createElement("div")
+    secondCell.className = "timeslot"
+    secondCell.dataset.row = "2"
+    secondCell.dataset.col = "0"
+    secondCell.getBoundingClientRect = () =>
+      ({ left: 40, top: 100, width: 120, height: 20 }) as DOMRect
+
+    const dragSection = document.createElement("div")
+    dragSection.id = "drag-section"
+    dragSection.append(firstCell, secondCell)
+    document.body.append(dragSection)
+
+    const wrapper = mountScheduleOverlap()
+    const vm = wrapper.vm as unknown as {
+      selectedTooltipSlot: { row: number; col: number } | null
+      tooltipPosition: { x: number; y: number } | null
+      timedGridViewModel: {
+        actions: {
+          startDrag: (e: MouseEvent) => void
+          moveDrag: (e: MouseEvent) => void
+          endDrag: (e: MouseEvent) => void
+        }
+      }
+    }
+    const outsideGrid = document.createElement("div")
+    const eventFor = (target: Element, clientX: number, clientY: number) =>
+      ({
+        target,
+        currentTarget: dragSection,
+        clientX,
+        clientY,
+        preventDefault: vi.fn(),
+      }) as unknown as MouseEvent
+
+    vm.selectedTooltipSlot = { row: 1, col: 0 }
+    vm.timedGridViewModel.actions.moveDrag(eventFor(outsideGrid, 900, 700))
+
+    expect(vm.tooltipPosition).toEqual({ x: 100, y: 90 })
+
+    vm.selectedTooltipSlot = { row: 2, col: 0 }
+    vm.timedGridViewModel.actions.endDrag(eventFor(outsideGrid, 900, 700))
+
+    expect(vm.tooltipPosition).toEqual({ x: 100, y: 110 })
+
+    vm.timedGridViewModel.actions.moveDrag(eventFor(outsideGrid, 20, 20))
+
+    expect(vm.selectedTooltipSlot).toEqual({ row: 2, col: 0 })
+    expect(vm.tooltipPosition).toEqual({ x: 100, y: 110 })
+
+    wrapper.unmount()
+    dragSection.remove()
   })
 })

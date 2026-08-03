@@ -7,6 +7,7 @@ import {
   clickDateCell,
   collectDatePickerState,
   countGridCellsByClass,
+  createSpecificTimesEventFromDialog,
   dismissConsent,
   fetchEventByShortId,
   openEditDialog,
@@ -21,6 +22,65 @@ import {
 } from "./helpers/timed-event-helpers"
 
 test.describe.configure({ mode: "serial" })
+
+test("mobile grid tooltip stays beside the selected slot while a press moves outside it", async ({
+  page,
+}) => {
+  await createSpecificTimesEventFromDialog(
+    page,
+    "Mobile selected-slot tooltip regression"
+  )
+  await page.setViewportSize({ width: 375, height: 900 })
+
+  const selectedSlot = page.locator(
+    '#drag-section .timeslot[data-row="1"][data-col="0"]'
+  )
+  await selectedSlot.scrollIntoViewIfNeeded()
+  const selectedSlotBox = await selectedSlot.boundingBox()
+  expect(selectedSlotBox).not.toBeNull()
+  if (!selectedSlotBox) {
+    throw new Error("Expected selected grid slot to be visible")
+  }
+
+  const selectedX = selectedSlotBox.x + selectedSlotBox.width / 2
+  const selectedY = selectedSlotBox.y + selectedSlotBox.height / 2
+
+  await page.mouse.move(selectedX, selectedY)
+  await page.mouse.down()
+
+  const tooltip = page.locator(".tw-fixed.tw-z-50")
+  await expect(tooltip).toBeVisible()
+  const tooltipText = await tooltip.textContent()
+  expect(tooltipText).not.toBe("")
+
+  const outsideGridPoint = await page.evaluate(() => {
+    const candidates = [
+      { x: 8, y: 8 },
+      { x: window.innerWidth - 8, y: 8 },
+      { x: 8, y: window.innerHeight - 8 },
+      { x: window.innerWidth - 8, y: window.innerHeight - 8 },
+    ]
+    const point = candidates.find(({ x, y }) =>
+      !document.elementFromPoint(x, y)?.closest("#drag-section")
+    )
+    if (!point) {
+      throw new Error("Expected a viewport point outside the time grid")
+    }
+    return point
+  })
+  await page.mouse.move(outsideGridPoint.x, outsideGridPoint.y, { steps: 10 })
+  const selectedSlotAfterMove = await selectedSlot.boundingBox()
+  expect(selectedSlotAfterMove).not.toBeNull()
+  if (!selectedSlotAfterMove) {
+    throw new Error("Expected selected grid slot to remain visible")
+  }
+  await expect.poll(async () => tooltip.evaluate((element) =>
+    Number.parseFloat((element as HTMLElement).style.left)
+  )).toBe(selectedSlotAfterMove.x + selectedSlotAfterMove.width / 2)
+  await expect(tooltip).toHaveText(tooltipText ?? "")
+
+  await page.mouse.up()
+})
 
 test("enabling specific-times and saving without grid edits preserves canonical timed fields", async ({
   page,

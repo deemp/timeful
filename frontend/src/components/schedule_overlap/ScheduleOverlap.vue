@@ -324,6 +324,7 @@ const allowDrag = computed(
 const dragging = ref(false)
 const dragStart = ref<RowCol | null>(null)
 const dragCur = ref<RowCol | null>(null)
+const selectedTooltipSlot = ref<RowCol | null>(null)
 const tooltipPosition = ref<{ x: number; y: number } | null>(null)
 const fetchedResponses = ref<Record<string, FetchedResponse | undefined>>({})
 const loadingResponses = ref({
@@ -1363,24 +1364,107 @@ function setTooltipForRowCol(row: number, col: number) {
   }
 }
 
+function getTimedGridSlotFromEvent(e: PointerEvent | MouseEvent): RowCol | null {
+  const getSlotFromElement = (element: Element | null): RowCol | null => {
+    const cell = element?.closest<HTMLElement>(
+      "#drag-section .timeslot[data-row][data-col]"
+    )
+    if (!cell) {
+      return null
+    }
+
+    const { left, right, top, bottom } = cell.getBoundingClientRect()
+    if (
+      e.clientX < left ||
+      e.clientX > right ||
+      e.clientY < top ||
+      e.clientY > bottom
+    ) {
+      return null
+    }
+
+    const row = Number.parseInt(cell.dataset.row ?? "", 10)
+    const col = Number.parseInt(cell.dataset.col ?? "", 10)
+    return Number.isFinite(row) && Number.isFinite(col) ? { row, col } : null
+  }
+
+  return getSlotFromElement(document.elementFromPoint(e.clientX, e.clientY))
+}
+
+function updateSelectedTooltipSlot(e: PointerEvent | MouseEvent) {
+  if (
+    !isPhone.value ||
+    !("pointerId" in e) ||
+    !dragging.value ||
+    !dragCur.value
+  ) {
+    return
+  }
+
+  const slot = getTimedGridSlotFromEvent(e)
+  if (slot == null) {
+    return
+  }
+
+  if (slot.row === dragCur.value.row && slot.col === dragCur.value.col) {
+    selectedTooltipSlot.value = slot
+  }
+}
+
+function setTooltipPositionForDrag(e: PointerEvent | MouseEvent) {
+  if (isPhone.value) {
+    const selectedSlot = selectedTooltipSlot.value
+    if (!selectedSlot) {
+      return
+    }
+
+    const { row, col } = selectedSlot
+    const cell = document.querySelector<HTMLElement>(
+      `#drag-section .timeslot[data-row="${String(row)}"][data-col="${String(col)}"]`
+    )
+    if (cell) {
+      const { left, top, width, height } = cell.getBoundingClientRect()
+      tooltipPosition.value = {
+        x: left + width / 2,
+        y: top + height / 2,
+      }
+    }
+    return
+  }
+
+  tooltipPosition.value = { x: e.clientX, y: e.clientY }
+}
+
 const timedGridActions = computed<ScheduleOverlapTimeGridActions>(() => ({
   prevPage,
   nextPage,
   calendarScroll: onCalendarScroll,
-  startDrag,
+  startDrag: (e) => {
+    drag.startDrag(e)
+    updateSelectedTooltipSlot(e)
+    setTooltipPositionForDrag(e)
+    if (!props.event.daysOnly && selectedTooltipSlot.value) {
+      setTooltipForRowCol(
+        selectedTooltipSlot.value.row,
+        selectedTooltipSlot.value.col
+      )
+    }
+  },
   moveDrag: (e) => {
     drag.moveDrag(e)
-    tooltipPosition.value = { x: e.clientX, y: e.clientY }
-    if (dragging.value && !props.event.daysOnly && dragCur.value) {
-      setTooltipForRowCol(dragCur.value.row, dragCur.value.col)
+    setTooltipPositionForDrag(e)
+    const tooltipSlot = isPhone.value ? selectedTooltipSlot.value : dragCur.value
+    if (dragging.value && !props.event.daysOnly && tooltipSlot) {
+      setTooltipForRowCol(tooltipSlot.row, tooltipSlot.col)
     }
   },
   endDrag: (e) => {
-    if (!props.event.daysOnly && dragCur.value) {
-      setTooltipForRowCol(dragCur.value.row, dragCur.value.col)
+    const tooltipSlot = isPhone.value ? selectedTooltipSlot.value : dragCur.value
+    if (!props.event.daysOnly && tooltipSlot) {
+      setTooltipForRowCol(tooltipSlot.row, tooltipSlot.col)
     }
     if (e) {
-      tooltipPosition.value = { x: e.clientX, y: e.clientY }
+      setTooltipPositionForDrag(e)
     }
     drag.endDrag(e)
   },
@@ -1542,6 +1626,7 @@ function getTimeslotVon(row: number, col: number): Record<string, () => void> {
       }
     },
     mouseleave: () => {
+      if (isPhone.value && selectedTooltipSlot.value) return
       tooltipPosition.value = null
       tooltipContent.value = ""
     },

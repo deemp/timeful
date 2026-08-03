@@ -3,7 +3,7 @@
     class="tw-relative"
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
-    @mousemove="handleMouseMove"
+    @mousemove="handleMouseMoveWithOverride"
   >
     <slot></slot>
     <div
@@ -32,6 +32,12 @@ const props = withDefaults(
 
 const { handleMouseEnter, handleMouseLeave, handleMouseMove, isVisible, style, position } =
   useTooltipState(toRef(props, "content"))
+
+const handleMouseMoveWithOverride = (event: MouseEvent) => {
+  if (!props.positionOverride) {
+    handleMouseMove(event)
+  }
+}
 
 watch(
   () => props.positionOverride,
