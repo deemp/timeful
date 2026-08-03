@@ -65,6 +65,30 @@ describe("Tooltip", () => {
     expect(tooltip.attributes("style")).toContain("top: 172px;")
   })
 
+  it("places edge-anchored overrides outside their anchor with a gap", async () => {
+    const wrapper = mount(Tooltip, {
+      props: {
+        content: "Hello",
+        positionOverride: { x: 40, y: 200, placement: "above" },
+      },
+      slots: {
+        default: "<button>Trigger</button>",
+      },
+    })
+
+    await wrapper.vm.$nextTick()
+
+    const tooltip = wrapper.get(".tw-fixed")
+    expect(tooltip.attributes("style")).toContain("left: 40px;")
+    expect(tooltip.attributes("style")).toContain("top: 200px;")
+    expect(tooltip.attributes("style")).toContain("translate(-50%, calc(-100% - 8px))")
+
+    await wrapper.setProps({ positionOverride: { x: 40, y: 20, placement: "below" } })
+
+    expect(tooltip.attributes("style")).toContain("top: 20px;")
+    expect(tooltip.attributes("style")).toContain("translate(-50%, 8px)")
+  })
+
   it("renders immediately when visibility is explicitly forced", async () => {
     const wrapper = mount(Tooltip, {
       props: {

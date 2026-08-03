@@ -329,7 +329,11 @@ const dragging = ref(false)
 const dragStart = ref<RowCol | null>(null)
 const dragCur = ref<RowCol | null>(null)
 const selectedTooltipSlot = ref<RowCol | null>(null)
-const tooltipPosition = ref<{ x: number; y: number } | null>(null)
+const tooltipPosition = ref<{
+  x: number
+  y: number
+  placement?: "above" | "below"
+} | null>(null)
 const fetchedResponses = ref<Record<string, FetchedResponse | undefined>>({})
 const loadingResponses = ref({
   loading: false,
@@ -1426,9 +1430,11 @@ function setTooltipPositionForSelectedSlot() {
   }
 
   const { left, top, width, height } = cell.getBoundingClientRect()
+  const placement = top < 100 ? "below" : "above"
   tooltipPosition.value = {
     x: left + width / 2,
-    y: top + height / 2,
+    y: placement === "above" ? top : top + height,
+    placement,
   }
 }
 

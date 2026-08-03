@@ -2062,7 +2062,7 @@ describe("ScheduleOverlap", () => {
     dragSection.remove()
   })
 
-  it("keeps the mobile tooltip anchored to the last selected timeslot after drag completion", () => {
+  it("keeps the mobile tooltip separated from the last selected timeslot after drag completion", () => {
     viewportWidth.value = 375
     const firstCell = document.createElement("div")
     firstCell.className = "timeslot"
@@ -2086,7 +2086,11 @@ describe("ScheduleOverlap", () => {
     const wrapper = mountScheduleOverlap()
     const vm = wrapper.vm as unknown as {
       selectedTooltipSlot: { row: number; col: number } | null
-      tooltipPosition: { x: number; y: number } | null
+      tooltipPosition: {
+        x: number
+        y: number
+        placement?: "above" | "below"
+      } | null
       timedGridViewModel: {
         actions: {
           startDrag: (e: MouseEvent) => void
@@ -2108,17 +2112,17 @@ describe("ScheduleOverlap", () => {
     vm.selectedTooltipSlot = { row: 1, col: 0 }
     vm.timedGridViewModel.actions.moveDrag(eventFor(outsideGrid, 900, 700))
 
-    expect(vm.tooltipPosition).toEqual({ x: 100, y: 90 })
+    expect(vm.tooltipPosition).toEqual({ x: 100, y: 100, placement: "below" })
 
     vm.selectedTooltipSlot = { row: 2, col: 0 }
     vm.timedGridViewModel.actions.endDrag(eventFor(outsideGrid, 900, 700))
 
-    expect(vm.tooltipPosition).toEqual({ x: 100, y: 110 })
+    expect(vm.tooltipPosition).toEqual({ x: 100, y: 100, placement: "above" })
 
     vm.timedGridViewModel.actions.moveDrag(eventFor(outsideGrid, 20, 20))
 
     expect(vm.selectedTooltipSlot).toEqual({ row: 2, col: 0 })
-    expect(vm.tooltipPosition).toEqual({ x: 100, y: 110 })
+    expect(vm.tooltipPosition).toEqual({ x: 100, y: 100, placement: "above" })
 
     wrapper.unmount()
     dragSection.remove()

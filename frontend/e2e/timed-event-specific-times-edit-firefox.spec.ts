@@ -99,6 +99,21 @@ test("mobile timeslot click shows the selected-slot tooltip", async ({ page }) =
   const tooltip = page.locator(".tw-fixed.tw-z-50")
   await expect(tooltip).toBeVisible()
   expect(await tooltip.textContent()).not.toBe("")
+
+  const [selectedSlotBox, tooltipBox] = await Promise.all([
+    selectedSlot.boundingBox(),
+    tooltip.boundingBox(),
+  ])
+  expect(selectedSlotBox).not.toBeNull()
+  expect(tooltipBox).not.toBeNull()
+  if (!selectedSlotBox || !tooltipBox) {
+    throw new Error("Expected visible selected slot and tooltip")
+  }
+
+  const verticalGap = tooltipBox.y + tooltipBox.height <= selectedSlotBox.y
+    ? selectedSlotBox.y - (tooltipBox.y + tooltipBox.height)
+    : tooltipBox.y - (selectedSlotBox.y + selectedSlotBox.height)
+  expect(verticalGap).toBeGreaterThan(0)
 })
 
 test("mobile grid tooltip stays beside the selected slot while a press moves outside it", async ({
