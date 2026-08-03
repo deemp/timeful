@@ -183,7 +183,12 @@
                         </template>
                       </template>
 
-                      <div v-if="timedGrid.state !== timedGrid.states.EDIT_AVAILABILITY">
+                      <div
+                        v-if="
+                          timedGrid.state !== timedGrid.states.EDIT_AVAILABILITY &&
+                          timedGrid.state !== timedGrid.states.SET_SPECIFIC_TIMES
+                        "
+                      >
                         <template
                           v-if="
                             (timedGrid.dragStart && timedGrid.dragStart.col === d) ||

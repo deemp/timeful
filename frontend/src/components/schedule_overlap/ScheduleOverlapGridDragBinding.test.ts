@@ -444,6 +444,20 @@ describe("ScheduleOverlap grid drag bindings", () => {
     expect(wrapper.findAll(".scheduled-event-block")).toHaveLength(0)
   })
 
+  it("hides scheduled events while setting specific times", () => {
+    const { timedGrid } = createTimeGridViewModel()
+    timedGrid.state = states.SET_SPECIFIC_TIMES
+    timedGrid.savedScheduledEvent = { row: 0, col: 0, numRows: 1 }
+    timedGrid.scheduledEventStyles = [{ top: "0px", height: "60px" }]
+
+    const wrapper = mount(ScheduleOverlapTimeGrid, {
+      props: { timedGrid },
+      global,
+    })
+
+    expect(wrapper.findAll(".scheduled-event-block")).toHaveLength(0)
+  })
+
   it("renders one structural interior collapsed-hours row and forwards expansion clicks", async () => {
     const { timedGrid, actions } = createNonConsecutiveTimeGridViewModel()
     timedGrid.state = states.HEATMAP
