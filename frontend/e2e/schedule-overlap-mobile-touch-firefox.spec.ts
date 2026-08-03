@@ -106,3 +106,74 @@ test("touching a timeslot keeps its mobile tooltip anchored while scrolling", as
     })
   }).toBe(true)
 })
+
+test("mobile grid tooltip stays below the top navbar when scrolled underneath it", async ({
+  page,
+}) => {
+  await createSpecificTimesEventFromDialog(
+    page,
+    "Mobile tooltip navbar layering regression"
+  )
+
+  const selectedSlot = page.locator(
+    '#drag-section .timeslot[data-row="1"][data-col="0"]'
+  )
+  await selectedSlot.scrollIntoViewIfNeeded()
+  const selectedSlotBox = await selectedSlot.boundingBox()
+  expect(selectedSlotBox).not.toBeNull()
+  if (!selectedSlotBox) {
+    throw new Error("Expected selected grid slot to be visible")
+  }
+
+  await page.touchscreen.tap(
+    selectedSlotBox.x + selectedSlotBox.width / 2,
+    selectedSlotBox.y + selectedSlotBox.height / 2
+  )
+
+  const tooltip = page.locator(".tw-fixed.tw-z-50")
+  await expect(tooltip).toBeVisible()
+
+  await page.evaluate(() => {
+    const header = document.querySelector<HTMLElement>(
+      ".tw-fixed.tw-h-14.tw-w-screen"
+    )
+    const slot = document.querySelector<HTMLElement>(
+      '#drag-section .timeslot[data-row="1"][data-col="0"]'
+    )
+    const scrollContainer = document.scrollingElement as HTMLElement | null
+    if (!header || !slot || !scrollContainer) {
+      throw new Error("Expected top navbar, selected grid slot, and scroll container")
+    }
+
+    const headerRect = header.getBoundingClientRect()
+    const slotRect = slot.getBoundingClientRect()
+    scrollContainer.style.scrollBehavior = "auto"
+    scrollContainer.scrollTop +=
+      slotRect.top - (headerRect.height - slotRect.height - 16)
+    window.dispatchEvent(new Event("scroll"))
+  })
+
+  await expect.poll(() => page.evaluate(() => {
+    const header = document.querySelector<HTMLElement>(
+      ".tw-fixed.tw-h-14.tw-w-screen"
+    )
+    const tooltipElement = document.querySelector<HTMLElement>(".tw-fixed.tw-z-50")
+    if (!header || !tooltipElement) return false
+
+    // Allow hit testing without changing the tooltip's stacking context.
+    tooltipElement.style.pointerEvents = "auto"
+
+    const headerRect = header.getBoundingClientRect()
+    const tooltipRect = tooltipElement.getBoundingClientRect()
+    const left = Math.max(headerRect.left, tooltipRect.left)
+    const right = Math.min(headerRect.right, tooltipRect.right)
+    const top = Math.max(headerRect.top, tooltipRect.top)
+    const bottom = Math.min(headerRect.bottom, tooltipRect.bottom)
+    if (left >= right || top >= bottom) return false
+
+    return header.contains(document.elementFromPoint(
+      (left + right) / 2,
+      (top + bottom) / 2
+    ))
+  })).toBe(true)
+})
