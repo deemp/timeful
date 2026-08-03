@@ -55,6 +55,8 @@ import {
   shallowRef,
   computed,
   nextTick,
+  onBeforeUnmount,
+  onMounted,
   watch,
   watchEffect,
   type ComputedRef,
@@ -555,7 +557,7 @@ const {
   splitTimes, times, allDays, days, monthDays, monthDayIncluded,
   curMonthText, columnOffsets: _columnOffsets, showLeftZigZag: _showLeftZigZag, showRightZigZag: _showRightZigZag, hasNextPage, hasPrevPage, hasPages: _hasPages,
   maxDaysPerPage, isColConsecutive, getDateFromDayHoursOffset: _getDateFromDayHoursOffset, getDateFromDayTimeIndex: _getDateFromDayTimeIndex,
-   getDisplayDateFromRowCol, getEnabledDateFromRowCol, getTimedCellState, getDateFromRowCol, setTimeslotSize, onResize, onCalendarScroll, getLocalTimezone: _getLocalTimezone,
+    getDisplayDateFromRowCol, getEnabledDateFromRowCol, getDateFromRowCol, setTimeslotSize, onResize, onCalendarScroll, getLocalTimezone: _getLocalTimezone,
   getMinMaxHoursFromTimes: _getMinMaxHoursFromTimes,
 } = grid
 
@@ -625,6 +627,29 @@ const {
 const visibleTooltipContent = computed(() =>
   !isPhone.value || selectedTooltipSlot.value ? tooltipContent.value : ""
 )
+
+function dismissMobileTooltipOnOutsideGridClick(event: MouseEvent) {
+  if (
+    !isPhone.value ||
+    !selectedTooltipSlot.value ||
+    (event.target instanceof Element && event.target.closest("#drag-section"))
+  ) {
+    return
+  }
+
+  selectedTooltipSlot.value = null
+  tooltipPosition.value = null
+  tooltipContent.value = ""
+}
+
+onMounted(() => {
+  // Capture clicks from the mobile overlay, which stops bubbling interactions.
+  document.addEventListener("click", dismissMobileTooltipOnOutsideGridClick, true)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", dismissMobileTooltipOnOutsideGridClick, true)
+})
 
 useScheduleOverlapController({
   event: eventReadonly,
@@ -919,7 +944,7 @@ const baseTimeslotClassStyle = computed(() => {
     getDateFromRowCol,
     getEnabledDateFromRowCol,
     getTimedCellState: (row, col) =>
-      getTimedCellState(row, maxDaysPerPage.value * page.value + col),
+      grid.getTimedCellState(row, maxDaysPerPage.value * page.value + col),
     state: state.value,
     overlayAvailability: overlayAvailability.value,
     dragType: dragType.value,

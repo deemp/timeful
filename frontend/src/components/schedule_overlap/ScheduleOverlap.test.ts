@@ -2028,6 +2028,45 @@ describe("ScheduleOverlap", () => {
     dragSection.remove()
   })
 
+  it("dismisses the mobile tooltip when clicking outside the grid", async () => {
+    viewportWidth.value = 375
+    const cell = document.createElement("div")
+    cell.className = "timeslot"
+    cell.dataset.row = "1"
+    cell.dataset.col = "0"
+    cell.getBoundingClientRect = () =>
+      ({ left: 40, top: 80, width: 120, height: 20 }) as DOMRect
+    const dragSection = document.createElement("div")
+    dragSection.id = "drag-section"
+    dragSection.append(cell)
+    document.body.append(dragSection)
+
+    const wrapper = mountScheduleOverlap({
+      global: {
+        stubs: {
+          Tooltip,
+        },
+      },
+    })
+    const vm = wrapper.vm as unknown as {
+      getTimeslotVon: (row: number, col: number) => Record<string, () => void>
+      selectedTooltipSlot: { row: number; col: number } | null
+    }
+
+    vm.getTimeslotVon(1, 0).click()
+    await nextTick()
+    expect(wrapper.find(".tw-fixed.tw-z-50").exists()).toBe(true)
+
+    document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    await nextTick()
+
+    expect(vm.selectedTooltipSlot).toBeNull()
+    expect(wrapper.find(".tw-fixed.tw-z-50").exists()).toBe(false)
+
+    wrapper.unmount()
+    dragSection.remove()
+  })
+
   it("records the mobile tooltip anchor from a compatibility mouse press", () => {
     viewportWidth.value = 375
     const cell = document.createElement("div")

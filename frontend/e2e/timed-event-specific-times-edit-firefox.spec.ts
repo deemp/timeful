@@ -164,6 +164,7 @@ test("mobile Responses heading does not dispatch a gesture to the grid", async (
     pointerDowns: Number((element as HTMLElement).dataset.pointerDowns),
     clicks: Number((element as HTMLElement).dataset.clicks),
   }))).toEqual({ pointerDowns: 0, clicks: 0 })
+  await expect(page.locator(".tw-fixed.tw-z-50")).toHaveCount(0)
 })
 
 test("mobile grid tooltip stays beside the selected slot while a press moves outside it", async ({
