@@ -84,7 +84,7 @@
                 id="drag-section"
                 data-long-press-delay="500"
                 class="tw-relative"
-              style="touch-action: none"
+                :style="{ touchAction: timedGrid.allowDrag ? 'none' : 'pan-y' }"
               @pointerdown="timedGrid.actions.startDrag"
               @pointermove="timedGrid.actions.moveDrag"
               @pointerup="timedGrid.actions.endDrag"

@@ -107,6 +107,7 @@ interface UseScheduleOverlapViewModelsFlatOptions {
   toolRowActions: ComputedRef<ScheduleOverlapToolRowActions>
   timezoneModified: Ref<boolean>
   startCalendarOnMonday: Ref<boolean>
+  allowDrag: ComputedRef<boolean>
   timezoneReferenceDate: Ref<Temporal.ZonedDateTime>
   mobileNumDays: Ref<number>
   allowScheduleEvent: Ref<boolean>
@@ -374,6 +375,7 @@ export function useScheduleOverlapViewModels(
       monthDays: opts.monthDays.value,
       dayTimeslotClassStyle: opts.dayTimeslotClassStyle.value,
       dayTimeslotVon: opts.dayTimeslotVon.value,
+      allowDrag: opts.allowDrag.value,
       isPhone: opts.isPhone.value,
       hintTextShown: opts.hintTextShown.value,
       hintText: opts.hintText.value,
@@ -428,6 +430,7 @@ export function useScheduleOverlapViewModels(
     respondentsLength: opts.respondents.value.length,
     fetchedResponses: opts.fetchedResponses.value,
     loadingResponsesLoading: opts.loadingResponsesLoading.value,
+    allowDrag: opts.allowDrag.value,
     toolRow: toolRowViewModel.value,
     getRenderedTimeBlockStyles: opts.getRenderedTimeBlockStyles,
     getRenderedTimeBlockStyle: opts.getRenderedTimeBlockStyle,

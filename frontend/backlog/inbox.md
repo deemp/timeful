@@ -301,3 +301,4 @@ Semi-structured TODO list
 
 - [x] "Best times" toggle should appear when there is at least one response, not more than one
 - [x] When Best times and More options are both visible, they should be side by side
+- [x] On mobile, on the event page, when swiping inside the grid, the grid should scroll just like when swiping outside

@@ -87,6 +87,7 @@ function createTimeGridViewModel() {
     overlaidAvailability: [[]],
     timeslotClassStyle: [{ class: "", style: {} }],
     timeslotVon: [{}],
+    allowDrag: true,
     noEventNames: false,
     hintTextShown: false,
     hintText: "",
@@ -200,6 +201,7 @@ function createDaysOnlyGridViewModel() {
     }],
     dayTimeslotClassStyle: [{ class: "", style: {} }],
     dayTimeslotVon: [{}],
+    allowDrag: true,
     isPhone: false,
     hintTextShown: false,
     hintText: "",
@@ -302,6 +304,50 @@ describe("ScheduleOverlap grid drag bindings", () => {
     expect(actions.startDrag).toHaveBeenCalledTimes(1)
     expect(actions.moveDrag).toHaveBeenCalledTimes(1)
     expect(actions.endDrag).toHaveBeenCalledTimes(1)
+  })
+
+  it("allows vertical touch panning through read-only grid surfaces", () => {
+    const { timedGrid } = createTimeGridViewModel()
+    timedGrid.allowDrag = false
+    const { daysOnlyGrid } = createDaysOnlyGridViewModel()
+    daysOnlyGrid.allowDrag = false
+
+    const timedWrapper = mount(ScheduleOverlapTimeGrid, {
+      props: { timedGrid },
+      global,
+    })
+    const daysOnlyWrapper = mount(ScheduleOverlapDaysOnlyGrid, {
+      props: { daysOnlyGrid },
+      global,
+    })
+
+    expect(timedWrapper.get("#drag-section").attributes("style")).toContain(
+      "touch-action: pan-y;"
+    )
+    expect(daysOnlyWrapper.get("#drag-section").attributes("style")).toContain(
+      "touch-action: pan-y;"
+    )
+  })
+
+  it("keeps touch drag selection enabled on editable grid surfaces", () => {
+    const { timedGrid } = createTimeGridViewModel()
+    const { daysOnlyGrid } = createDaysOnlyGridViewModel()
+
+    const timedWrapper = mount(ScheduleOverlapTimeGrid, {
+      props: { timedGrid },
+      global,
+    })
+    const daysOnlyWrapper = mount(ScheduleOverlapDaysOnlyGrid, {
+      props: { daysOnlyGrid },
+      global,
+    })
+
+    expect(timedWrapper.get("#drag-section").attributes("style")).toContain(
+      "touch-action: none;"
+    )
+    expect(daysOnlyWrapper.get("#drag-section").attributes("style")).toContain(
+      "touch-action: none;"
+    )
   })
 
   it("renders non-consecutive day gaps as wide blank spacing", () => {

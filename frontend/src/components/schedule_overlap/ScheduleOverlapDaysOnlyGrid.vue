@@ -34,7 +34,7 @@
       <div
         id="drag-section"
         class="schedule-overlap-days-only-grid__month tw-grid tw-grid-cols-7"
-        style="touch-action: none"
+        :style="{ touchAction: daysOnlyGrid.allowDrag ? 'none' : 'pan-y' }"
         @pointerdown="daysOnlyGrid.actions.startDrag"
         @pointermove="daysOnlyGrid.actions.moveDrag"
         @pointerup="daysOnlyGrid.actions.endDrag"

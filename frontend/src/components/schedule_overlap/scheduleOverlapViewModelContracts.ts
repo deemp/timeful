@@ -183,6 +183,7 @@ export interface ScheduleOverlapDaysOnlyGridViewModel {
   monthDays: MonthDayItem[]
   dayTimeslotClassStyle: ClassStyle[]
   dayTimeslotVon: Record<string, () => void>[]
+  allowDrag: boolean
   isPhone: boolean
   hintTextShown: boolean
   hintText: string
@@ -237,6 +238,7 @@ export interface ScheduleOverlapTimeGridViewModel {
   respondentsLength: number
   fetchedResponses: Record<string, FetchedResponse | undefined>
   loadingResponsesLoading: boolean
+  allowDrag: boolean
   toolRow: ScheduleOverlapToolRowViewModel
   getRenderedTimeBlockStyles: (
     block: NormalizedCalendarEvent | OverlaidAvailabilityBlock
