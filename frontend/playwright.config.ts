@@ -52,5 +52,16 @@ export default defineConfig({
         viewport: { width: 1440, height: 1600 },
       },
     },
+    {
+      name: "firefox-touch",
+      testMatch: /schedule-overlap-mobile-touch-firefox\.spec\.ts/,
+      workers: 1,
+      use: {
+        browserName: "firefox",
+        hasTouch: true,
+        timezoneId: "UTC",
+        viewport: { width: 375, height: 900 },
+      },
+    },
   ],
 })

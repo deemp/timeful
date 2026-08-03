@@ -82,6 +82,55 @@ describe("useScheduleOverlapUI deselectRespondents", () => {
     dragSection.remove()
   })
 
+  it("keeps the current timeslot when a click lands inside the mobile overlay", () => {
+    const { ui, curTimeslot, endDrag } = createUi()
+    const mobileOverlay = document.createElement("div")
+    mobileOverlay.className = "schedule-overlap-mobile-overlay"
+    const inner = document.createElement("div")
+    mobileOverlay.appendChild(inner)
+    document.body.appendChild(mobileOverlay)
+
+    const event = new MouseEvent("click", { bubbles: true })
+    Object.defineProperty(event, "target", {
+      configurable: true,
+      value: inner,
+    })
+    ui.deselectRespondents(event)
+
+    expect(curTimeslot.value).toEqual({ row: 2, col: 3 })
+    expect(endDrag).not.toHaveBeenCalled()
+
+    mobileOverlay.remove()
+  })
+
+  it("clears the current timeslot when a click lands outside the grid and overlay", () => {
+    const { ui, curTimeslot, endDrag } = createUi()
+    const outside = document.createElement("button")
+    document.body.appendChild(outside)
+
+    const event = new MouseEvent("click", { bubbles: true })
+    Object.defineProperty(event, "target", {
+      configurable: true,
+      value: outside,
+    })
+    ui.deselectRespondents(event)
+
+    expect(curTimeslot.value).toEqual({ row: -1, col: -1 })
+    expect(endDrag).toHaveBeenCalledTimes(1)
+
+    outside.remove()
+  })
+
+  it("keeps a mobile timeslot selected when the grid receives mouseleave", () => {
+    const { ui, isPhone, curTimeslot, endDrag } = createUi()
+    isPhone.value = true
+
+    ui.resetCurTimeslot()
+
+    expect(curTimeslot.value).toEqual({ row: 2, col: 3 })
+    expect(endDrag).not.toHaveBeenCalled()
+  })
+
   it("uses a responsive respondents panel width on compact desktop", () => {
     const { ui } = createUi()
 

@@ -39,6 +39,7 @@ interface ControllerHarnessOptions {
   fromCreateSpecificTimesDraft?: boolean
   specificTimesEntryDraft?: SpecificTimesEditDraft
   showBestTimes?: boolean
+  showStickyRespondents?: boolean
   respondents?: { _id?: string }[]
 }
 
@@ -68,7 +69,7 @@ const mountControllerHarness = (options: ControllerHarnessOptions = {}) => {
   const delayedShowStickyRespondents = ref(false)
   const delayedShowStickyRespondentsTimeout =
     ref<ReturnType<typeof setTimeout> | null>(null)
-  const showStickyRespondents = computed(() => false)
+  const showStickyRespondents = ref(options.showStickyRespondents ?? false)
   const authUser = ref<{
     _id?: string
     calendarOptions?: { bufferTime?: { enabled?: boolean; time?: number } }
@@ -121,7 +122,7 @@ const mountControllerHarness = (options: ControllerHarnessOptions = {}) => {
         curScheduledEvent,
         delayedShowStickyRespondents,
         delayedShowStickyRespondentsTimeout,
-        showStickyRespondents,
+        showStickyRespondents: computed(() => showStickyRespondents.value),
         authUser: computed(() => authUser.value),
         setTimeslotSize: spies.setTimeslotSize,
         onResize: spies.onResize,
@@ -169,6 +170,8 @@ const mountControllerHarness = (options: ControllerHarnessOptions = {}) => {
     curScheduledEvent,
     curTimeslotAvailability,
     respondents,
+    showStickyRespondents,
+    delayedShowStickyRespondents,
     spies,
   }
 }
@@ -227,6 +230,32 @@ describe("useScheduleOverlapController", () => {
     })
 
     wrapper.unmount()
+  })
+
+  it("delays respondents visibility changes", async () => {
+    vi.useFakeTimers()
+    const {
+      wrapper,
+      showStickyRespondents,
+      delayedShowStickyRespondents,
+    } = mountControllerHarness()
+
+    showStickyRespondents.value = true
+    await nextTick()
+    expect(delayedShowStickyRespondents.value).toBe(false)
+
+    await vi.advanceTimersByTimeAsync(100)
+    expect(delayedShowStickyRespondents.value).toBe(true)
+
+    showStickyRespondents.value = false
+    await nextTick()
+    expect(delayedShowStickyRespondents.value).toBe(true)
+
+    await vi.advanceTimersByTimeAsync(100)
+    expect(delayedShowStickyRespondents.value).toBe(false)
+
+    wrapper.unmount()
+    vi.useRealTimers()
   })
 
   it("moves fromEditEvent-specific-times sync into the controller watcher", async () => {

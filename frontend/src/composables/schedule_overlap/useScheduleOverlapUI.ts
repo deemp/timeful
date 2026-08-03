@@ -207,8 +207,8 @@ export function useScheduleOverlapUI(opts: UseScheduleOverlapUIOptions) {
     e.stopPropagation()
   }
 
-  const resetCurTimeslot = () => {
-    if (opts.timeslotSelected.value) return
+  const resetCurTimeslot = (force = false) => {
+    if (!force && (opts.timeslotSelected.value || opts.isPhone.value)) return
     opts.curTimeslotAvailability.value = {}
     for (const respondent of opts.respondents.value) {
       if (respondent._id)
@@ -223,9 +223,13 @@ export function useScheduleOverlapUI(opts: UseScheduleOverlapUIOptions) {
     const clickedInsideOptions = Boolean(
       opts.optionsSectionRef?.value?.contains(target ?? null)
     )
+    const clickedInsideMobileOverlay = Boolean(
+      target?.closest(".schedule-overlap-mobile-overlay")
+    )
     const clickedInsideDragSection = Boolean(target?.closest("#drag-section"))
     if (
       clickedInsideOptions ||
+      clickedInsideMobileOverlay ||
       clickedInsideDragSection ||
       target?.classList.contains("timeslot")
     ) {
@@ -237,7 +241,7 @@ export function useScheduleOverlapUI(opts: UseScheduleOverlapUIOptions) {
     }
     curRespondents.value = []
     opts.timeslotSelected.value = false
-    resetCurTimeslot()
+    resetCurTimeslot(true)
   }
 
   const isGuest = (user: { _id?: string; firstName?: string }): boolean =>

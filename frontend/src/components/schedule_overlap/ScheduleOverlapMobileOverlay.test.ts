@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import { mount, shallowMount } from "@vue/test-utils"
 import { availabilityTypes } from "@/constants"
 import { states } from "@/composables/schedule_overlap/types"
@@ -41,6 +41,7 @@ describe("ScheduleOverlapMobileOverlay", () => {
     expect(wrapper.findComponent({ name: "GCalWeekSelector" }).exists()).toBe(true)
     expect(wrapper.findComponent({ name: "ScheduleOverlapRespondentsPanel" }).exists()).toBe(true)
     expect(wrapper.findComponent({ name: "SpecificTimesInstructions" }).exists()).toBe(true)
+    expect(wrapper.find(".schedule-overlap-mobile-overlay").classes()).toContain("tw-inset-x-0")
   })
 
   it("re-emits respondents-panel events through the grouped overlay listener bridge", async () => {
@@ -79,5 +80,28 @@ describe("ScheduleOverlapMobileOverlay", () => {
     expect(wrapper.emitted("update:showCalendarEvents")?.[0]).toEqual([false])
     expect(wrapper.emitted("mouseOverRespondent")?.[0]?.[1]).toBe("user-1")
     expect(wrapper.emitted("refreshEvent")).toHaveLength(1)
+  })
+
+  it("keeps panel clicks inside the mobile overlay", async () => {
+    const outsideClick = vi.fn()
+    document.addEventListener("click", outsideClick)
+    const wrapper = mount(ScheduleOverlapMobileOverlay, {
+      props: {
+        overlay: buildScheduleOverlapMobileOverlayViewModel(),
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+          "v-expand-transition": {
+            template: "<div><slot /></div>",
+          },
+        },
+      },
+    })
+
+    await wrapper.find(".schedule-overlap-mobile-overlay").trigger("click")
+
+    expect(outsideClick).not.toHaveBeenCalled()
+    document.removeEventListener("click", outsideClick)
   })
 })

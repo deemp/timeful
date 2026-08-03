@@ -116,6 +116,56 @@ test("mobile timeslot click shows the selected-slot tooltip", async ({ page }) =
   expect(verticalGap).toBeGreaterThan(0)
 })
 
+test("mobile Responses heading does not dispatch a gesture to the grid", async ({ page }) => {
+  await createSpecificTimesEventFromDialog(
+    page,
+    "Mobile Responses interaction boundary regression"
+  )
+  await page.setViewportSize({ width: 375, height: 900 })
+
+  const selectedSlot = page.locator(
+    '#drag-section .timeslot[data-row="1"][data-col="0"]'
+  )
+  await selectedSlot.scrollIntoViewIfNeeded()
+  await selectedSlot.dispatchEvent("click")
+
+  const overlay = page.locator(".schedule-overlap-mobile-overlay")
+  const responsesHeading = overlay.getByText("Responses", { exact: true })
+  await expect(responsesHeading).toBeVisible()
+
+  await page.evaluate(() => {
+    const dragSection = document.querySelector("#drag-section")
+    if (!(dragSection instanceof HTMLElement)) {
+      throw new Error("Expected drag section")
+    }
+    dragSection.dataset.pointerDowns = "0"
+    dragSection.dataset.clicks = "0"
+    dragSection.addEventListener("pointerdown", () => {
+      dragSection.dataset.pointerDowns = String(
+        Number(dragSection.dataset.pointerDowns) + 1
+      )
+    })
+    dragSection.addEventListener("click", () => {
+      dragSection.dataset.clicks = String(Number(dragSection.dataset.clicks) + 1)
+    })
+  })
+
+  const headingBox = await responsesHeading.boundingBox()
+  expect(headingBox).not.toBeNull()
+  if (!headingBox) {
+    throw new Error("Expected the Responses heading to be visible")
+  }
+  await page.mouse.click(
+    headingBox.x + headingBox.width / 2,
+    headingBox.y + headingBox.height / 2
+  )
+
+  await expect.poll(() => page.locator("#drag-section").evaluate((element) => ({
+    pointerDowns: Number((element as HTMLElement).dataset.pointerDowns),
+    clicks: Number((element as HTMLElement).dataset.clicks),
+  }))).toEqual({ pointerDowns: 0, clicks: 0 })
+})
+
 test("mobile grid tooltip stays beside the selected slot while a press moves outside it", async ({
   page,
 }) => {

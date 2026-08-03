@@ -1,5 +1,15 @@
 <template>
-  <div class="tw-fixed tw-z-20 tw-w-full" :style="{ bottom: overlay.bottomOffset }">
+  <div
+    class="schedule-overlap-mobile-overlay tw-fixed tw-inset-x-0 tw-z-30 tw-isolate tw-pointer-events-auto"
+    :style="{ bottom: overlay.bottomOffset }"
+    @pointerdown.stop
+    @pointerup.stop
+    @mousedown.stop
+    @mouseup.stop
+    @touchstart.stop
+    @touchend.stop
+    @click.stop
+  >
     <v-expand-transition>
       <template v-if="overlay.hintTextShown">
         <div :key="overlay.hintText">
