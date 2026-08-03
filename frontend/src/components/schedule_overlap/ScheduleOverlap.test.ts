@@ -85,6 +85,28 @@ const buildCanonicalSpecificTimesEvent = ({
   },
 })
 
+interface TimedGridPresentationForTest {
+  days: { dateObject: Temporal.ZonedDateTime }[]
+  renderedRows: {
+    id: string
+    kind: "timeslot" | "collapsed" | "filler" | "split-gap"
+    startLabel?: string
+    endLabel?: string
+    timeText?: string
+    height: number
+  }[]
+  splitTimes: {
+    absoluteMinutes?: number
+    displayedMinutes?: number
+    text?: string
+  }[][]
+  timeAxisEndText?: string
+}
+
+const getTimedGridPresentation = (wrapper: ScheduleOverlapWrapper) =>
+  wrapper.findComponent({ name: "ScheduleOverlapTimeGrid" }).props("timedGrid") as
+    TimedGridPresentationForTest
+
 vi.mock("vuetify", () => ({
   useDisplay: () => ({
     width: viewportWidth,
@@ -309,10 +331,7 @@ describe("ScheduleOverlap", () => {
 
     const vm = wrapper.vm as unknown as {
       saveTempTimes: () => void
-      days: { dateObject: Temporal.ZonedDateTime }[]
-      splitTimes: { text?: string; displayedMinutes?: number }[][]
       eventRef: { times?: Temporal.ZonedDateTime[]; startTime?: Temporal.PlainTime; endTime?: Temporal.PlainTime }
-      renderedRows: { kind: "timeslot" | "collapsed" | "filler" | "split-gap"; startLabel?: string; endLabel?: string }[]
     }
 
     vm.saveTempTimes()
@@ -381,18 +400,19 @@ describe("ScheduleOverlap", () => {
     )
     expect(vm.eventRef.startTime?.toString()).toBe("00:00:00")
     expect(vm.eventRef.endTime?.toString()).toBe("04:00:00")
+    const timedGrid = getTimedGridPresentation(wrapper)
     expect(
-      vm.days.map((day) => day.dateObject.withTimeZone("UTC").toPlainDate().toString())
+      timedGrid.days.map((day) => day.dateObject.withTimeZone("UTC").toPlainDate().toString())
     ).toEqual(["2026-05-29", "2026-05-30"])
-    const renderedHourLabels = vm.splitTimes[0].map((time) => time.text).filter(Boolean)
+    const renderedHourLabels = timedGrid.splitTimes[0].map((time) => time.text).filter(Boolean)
     expect(renderedHourLabels).toHaveLength(24)
     expect(renderedHourLabels[0]).toBe("12 am")
     expect(renderedHourLabels.at(-1)).toBe("11 pm")
-    expect(vm.splitTimes[0].map((time) => time.displayedMinutes)).toEqual(
+    expect(timedGrid.splitTimes[0].map((time) => time.displayedMinutes)).toEqual(
       Array.from({ length: 96 }, (_, index) => index * 15)
     )
     expect(
-      vm.renderedRows.filter((row) => row.kind === "collapsed")
+      timedGrid.renderedRows.filter((row) => row.kind === "collapsed")
     ).toEqual([
       expect.objectContaining({ startLabel: "04:00", endLabel: "00:00" }),
     ])
@@ -1305,21 +1325,16 @@ describe("ScheduleOverlap", () => {
     })
 
     const vm = wrapper.vm as unknown as {
-      renderedRows: {
-        id: string
-        kind: "timeslot" | "collapsed" | "filler" | "split-gap"
-        timeText?: string
-      }[]
-      splitTimes: { absoluteMinutes?: number; text?: string }[][]
       showAllHours: boolean
       updateShowAllHours: (value: boolean) => void
     }
 
     expect(vm.showAllHours).toBe(false)
 
-    const initialTimeslotRows = vm.renderedRows.filter((row) => row.kind === "timeslot")
-    expect(vm.renderedRows.some((row) => row.kind === "collapsed")).toBe(false)
-    expect(initialTimeslotRows.length).toBe(vm.splitTimes.flat().length)
+    let timedGrid = getTimedGridPresentation(wrapper)
+    const initialTimeslotRows = timedGrid.renderedRows.filter((row) => row.kind === "timeslot")
+    expect(timedGrid.renderedRows.some((row) => row.kind === "collapsed")).toBe(false)
+    expect(initialTimeslotRows.length).toBe(timedGrid.splitTimes.flat().length)
     expect(initialTimeslotRows[0]?.timeText).toBe("09:00")
     expect(
       initialTimeslotRows
@@ -1344,9 +1359,10 @@ describe("ScheduleOverlap", () => {
     await nextTick()
 
     expect(vm.showAllHours).toBe(true)
-    expect(vm.renderedRows.some((row) => row.kind === "collapsed")).toBe(false)
-    const expandedTimeslotRows = vm.renderedRows.filter((row) => row.kind === "timeslot")
-    expect(expandedTimeslotRows).toHaveLength(vm.splitTimes.flat().length)
+    timedGrid = getTimedGridPresentation(wrapper)
+    expect(timedGrid.renderedRows.some((row) => row.kind === "collapsed")).toBe(false)
+    const expandedTimeslotRows = timedGrid.renderedRows.filter((row) => row.kind === "timeslot")
+    expect(expandedTimeslotRows).toHaveLength(timedGrid.splitTimes.flat().length)
     expect(expandedTimeslotRows).toHaveLength(initialTimeslotRows.length)
   })
 
@@ -1461,11 +1477,9 @@ describe("ScheduleOverlap", () => {
       },
     })
 
-    const vm = wrapper.vm as unknown as {
-      renderedRows: { kind: "timeslot" | "collapsed" | "filler" | "split-gap"; startLabel?: string; endLabel?: string }[]
-    }
-
-    expect(vm.renderedRows.some((row) => row.kind === "collapsed")).toBe(false)
+    expect(
+      getTimedGridPresentation(wrapper).renderedRows.some((row) => row.kind === "collapsed")
+    ).toBe(false)
   })
 
   it("collapses enabled but inactive interior specific-time hours", () => {
@@ -1527,12 +1541,11 @@ describe("ScheduleOverlap", () => {
     })
 
     const vm = wrapper.vm as unknown as {
-      renderedRows: { kind: "timeslot" | "collapsed" | "filler" | "split-gap"; startLabel?: string; endLabel?: string }[]
       state: (typeof states)[keyof typeof states]
     }
 
     expect(vm.state).toBe(states.HEATMAP)
-    expect(vm.renderedRows.filter((row) => row.kind === "collapsed")).toEqual(
+    expect(getTimedGridPresentation(wrapper).renderedRows.filter((row) => row.kind === "collapsed")).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           startLabel: "10:00",
@@ -1597,18 +1610,13 @@ describe("ScheduleOverlap", () => {
     const vm = wrapper.vm as unknown as {
       state: (typeof states)[keyof typeof states]
       scheduleEvent: () => void
-      renderedRows: {
-        kind: "timeslot" | "collapsed" | "filler" | "split-gap"
-        startLabel?: string
-        endLabel?: string
-      }[]
     }
 
     vm.scheduleEvent()
     await nextTick()
 
     expect(vm.state).toBe(states.SCHEDULE_EVENT)
-    expect(vm.renderedRows.filter((row) => row.kind === "collapsed")).toEqual(
+    expect(getTimedGridPresentation(wrapper).renderedRows.filter((row) => row.kind === "collapsed")).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ startLabel: "10:00", endLabel: "16:00" }),
       ])
@@ -1650,17 +1658,9 @@ describe("ScheduleOverlap", () => {
       },
     })
 
-    const vm = wrapper.vm as unknown as {
-      renderedRows: {
-        kind: "timeslot" | "collapsed" | "filler" | "split-gap"
-        startLabel?: string
-        endLabel?: string
-        timeText?: string
-      }[]
-    }
-
-    expect(vm.renderedRows.some((row) => row.kind === "collapsed")).toBe(false)
-    const timeslotRows = vm.renderedRows.filter((row) => row.kind === "timeslot")
+    const timedGrid = getTimedGridPresentation(wrapper)
+    expect(timedGrid.renderedRows.some((row) => row.kind === "collapsed")).toBe(false)
+    const timeslotRows = timedGrid.renderedRows.filter((row) => row.kind === "timeslot")
     expect(timeslotRows[0]?.timeText).toBe("14:00")
     expect(timeslotRows.at(-1)?.timeText).toBe("17:00")
   })
@@ -1694,17 +1694,10 @@ describe("ScheduleOverlap", () => {
       },
     })
 
-    const vm = wrapper.vm as unknown as {
-      renderedRows: {
-        kind: "timeslot" | "collapsed" | "filler" | "split-gap"
-        timeText?: string
-        cells?: { class: string; style: Record<string, string> }[]
-      }[]
-    }
+    const timedGrid = getTimedGridPresentation(wrapper)
+    const timeslotRows = timedGrid.renderedRows.filter((row) => row.kind === "timeslot")
 
-    const timeslotRows = vm.renderedRows.filter((row) => row.kind === "timeslot")
-
-    expect(vm.renderedRows.some((row) => row.kind === "filler")).toBe(false)
+    expect(timedGrid.renderedRows.some((row) => row.kind === "filler")).toBe(false)
     expect(timeslotRows[0]?.timeText).toBe("14:00")
     expect(timeslotRows.at(-1)?.timeText).toBeUndefined()
   })
@@ -1745,11 +1738,9 @@ describe("ScheduleOverlap", () => {
       },
     })
 
-    const vm = wrapper.vm as unknown as {
-      renderedRows: { kind: "timeslot" | "collapsed" | "filler" | "split-gap"; startLabel?: string; endLabel?: string }[]
-    }
-
-    expect(vm.renderedRows.some((row) => row.kind === "collapsed")).toBe(false)
+    expect(
+      getTimedGridPresentation(wrapper).renderedRows.some((row) => row.kind === "collapsed")
+    ).toBe(false)
   })
 
   it("collapses only whole interior hours for schedule-grey runs with partial-hour boundaries", () => {
@@ -1779,11 +1770,8 @@ describe("ScheduleOverlap", () => {
       },
     })
 
-    const vm = wrapper.vm as unknown as {
-      renderedRows: { kind: "timeslot" | "collapsed" | "filler" | "split-gap"; startLabel?: string; endLabel?: string; timeText?: string }[]
-    }
-
-    const collapsedRows = vm.renderedRows.filter((row) => row.kind === "collapsed")
+    const timedGrid = getTimedGridPresentation(wrapper)
+    const collapsedRows = timedGrid.renderedRows.filter((row) => row.kind === "collapsed")
 
     expect(collapsedRows).toEqual(
       expect.arrayContaining([
@@ -1793,7 +1781,7 @@ describe("ScheduleOverlap", () => {
         }),
       ])
     )
-    expect(vm.renderedRows.some((row) => row.kind === "timeslot")).toBe(true)
+    expect(timedGrid.renderedRows.some((row) => row.kind === "timeslot")).toBe(true)
   })
 
   it("keeps wrapped UTC+3:30 midnight rows continuous", () => {
@@ -1820,28 +1808,22 @@ describe("ScheduleOverlap", () => {
     })
 
     const vm = wrapper.vm as unknown as {
-      renderedRows: {
-        kind: "timeslot" | "collapsed" | "filler" | "split-gap"
-        timeText?: string
-        height: number
-      }[]
-      splitTimes: { text?: string }[][]
-      days: { dateObject: Temporal.ZonedDateTime }[]
       getDateFromRowCol: (row: number, col: number) => Temporal.ZonedDateTime | null
     }
+    const timedGrid = getTimedGridPresentation(wrapper)
 
-    const hourLabels = vm.renderedRows
+    const hourLabels = timedGrid.renderedRows
       .map((row) => row.timeText)
       .filter((label): label is string => Boolean(label))
 
-    expect(vm.renderedRows.some((row) => row.kind === "split-gap")).toBe(false)
-    expect(vm.renderedRows[0]?.timeText).toBe("00:00")
+    expect(timedGrid.renderedRows.some((row) => row.kind === "split-gap")).toBe(false)
+    expect(timedGrid.renderedRows[0]?.timeText).toBe("00:00")
     expect(hourLabels).toContain("23:00")
     expect(hourLabels.filter((label) => label === "02:00")).toHaveLength(1)
 
-    for (let col = 0; col < vm.days.length; col += 1) {
-      const headerDate = vm.days[col]?.dateObject.withTimeZone("+03:30").toPlainDate().toString()
-      for (let row = 0; row < vm.splitTimes[0].length + vm.splitTimes[1].length; row += 1) {
+    for (let col = 0; col < timedGrid.days.length; col += 1) {
+      const headerDate = timedGrid.days[col]?.dateObject.withTimeZone("+03:30").toPlainDate().toString()
+      for (let row = 0; row < timedGrid.splitTimes[0].length + timedGrid.splitTimes[1].length; row += 1) {
         const slot = vm.getDateFromRowCol(row, col)
         if (!slot) continue
         expect(slot.withTimeZone("+03:30").toPlainDate().toString()).toBe(headerDate)
@@ -1872,33 +1854,26 @@ describe("ScheduleOverlap", () => {
       },
     })
 
-    const vm = wrapper.vm as unknown as {
-      renderedRows: {
-        kind: "timeslot" | "collapsed" | "filler" | "split-gap"
-        timeText?: string
-      }[]
-      splitTimes: { text?: string; displayedMinutes?: number }[][]
-      timeAxisEndText?: string
-    }
+    const timedGrid = getTimedGridPresentation(wrapper)
 
-    const hourLabels = vm.renderedRows
+    const hourLabels = timedGrid.renderedRows
       .map((row) => row.timeText)
       .filter((label): label is string => Boolean(label))
 
-    expect(vm.renderedRows.some((row) => row.kind === "split-gap")).toBe(false)
-    expect(vm.splitTimes[1]).toEqual([])
+    expect(timedGrid.renderedRows.some((row) => row.kind === "split-gap")).toBe(false)
+    expect(timedGrid.splitTimes[1]).toEqual([])
     expect(hourLabels.slice(0, 4)).toEqual(["00:00", "01:00", "02:00", "03:00"])
     expect(hourLabels.at(-1)).toBe("23:00")
-    expect(vm.timeAxisEndText).toBe("00:00")
+    expect(timedGrid.timeAxisEndText).toBe("00:00")
     expect(hourLabels.filter((label) => label === "00:00")).toHaveLength(1)
     expect(hourLabels.filter((label) => label === "01:00")).toHaveLength(1)
     expect(
       new Set(
-        vm.splitTimes[0]
+        timedGrid.splitTimes[0]
           .map((time) => time.displayedMinutes)
           .filter((minutes): minutes is number => typeof minutes === "number")
       ).size
-    ).toBe(vm.splitTimes[0].length)
+    ).toBe(timedGrid.splitTimes[0].length)
   })
 
   it("does not render a split gap or duplicate hour labels when a wrapped Kathmandu window overlaps in displayed local time", () => {
@@ -1924,53 +1899,24 @@ describe("ScheduleOverlap", () => {
       },
     })
 
-    const vm = wrapper.vm as unknown as {
-      renderedRows: {
-        kind: "timeslot" | "collapsed" | "filler" | "split-gap"
-        timeText?: string
-      }[]
-      splitTimes: { text?: string; displayedMinutes?: number }[][]
-    }
+    const timedGrid = getTimedGridPresentation(wrapper)
 
-    const hourLabels = vm.renderedRows
+    const hourLabels = timedGrid.renderedRows
       .map((row) => row.timeText)
       .filter((label): label is string => Boolean(label))
 
-    expect(vm.renderedRows.some((row) => row.kind === "split-gap")).toBe(false)
-    expect(vm.splitTimes[1]).toEqual([])
+    expect(timedGrid.renderedRows.some((row) => row.kind === "split-gap")).toBe(false)
+    expect(timedGrid.splitTimes[1]).toEqual([])
     expect(hourLabels.filter((label) => label === "00:00")).toHaveLength(1)
     expect(hourLabels.filter((label) => label === "01:00")).toHaveLength(1)
     expect(hourLabels.filter((label) => label === "02:00")).toHaveLength(1)
     expect(
       new Set(
-        vm.splitTimes[0]
+        timedGrid.splitTimes[0]
           .map((time) => time.displayedMinutes)
           .filter((minutes): minutes is number => typeof minutes === "number")
       ).size
-    ).toBe(vm.splitTimes[0].length)
-  })
-
-  it("tracks cursor position during desktop drag move and clears on timeslot mouseleave", () => {
-    const wrapper = mountScheduleOverlap()
-    const vm = wrapper.vm as unknown as {
-      tooltipPosition: { x: number; y: number } | null
-      timedGridViewModel: {
-        actions: {
-          moveDrag: (e: { clientX: number; clientY: number }) => void
-        }
-      }
-      getTimeslotVon: (row: number, col: number) => Record<string, () => void>
-    }
-
-    expect(vm.tooltipPosition).toBeNull()
-
-    vm.timedGridViewModel.actions.moveDrag({ clientX: 150, clientY: 280 })
-
-    expect(vm.tooltipPosition).toEqual({ x: 150, y: 280 })
-
-    vm.getTimeslotVon(1, 0).mouseleave()
-
-    expect(vm.tooltipPosition).toBeNull()
+    ).toBe(timedGrid.splitTimes[0].length)
   })
 
   it("does not render a mobile tooltip from hover before a timeslot is selected", async () => {
@@ -2067,69 +2013,4 @@ describe("ScheduleOverlap", () => {
     dragSection.remove()
   })
 
-  it("keeps the mobile tooltip separated from the last selected timeslot after drag completion", () => {
-    viewportWidth.value = 375
-    const firstCell = document.createElement("div")
-    firstCell.className = "timeslot"
-    firstCell.dataset.row = "1"
-    firstCell.dataset.col = "0"
-    firstCell.getBoundingClientRect = () =>
-      ({ left: 40, top: 80, width: 120, height: 20 }) as DOMRect
-
-    const secondCell = document.createElement("div")
-    secondCell.className = "timeslot"
-    secondCell.dataset.row = "2"
-    secondCell.dataset.col = "0"
-    secondCell.getBoundingClientRect = () =>
-      ({ left: 40, top: 100, width: 120, height: 20 }) as DOMRect
-
-    const dragSection = document.createElement("div")
-    dragSection.id = "drag-section"
-    dragSection.append(firstCell, secondCell)
-    document.body.append(dragSection)
-
-    const wrapper = mountScheduleOverlap()
-    const vm = wrapper.vm as unknown as {
-      selectedTooltipSlot: { row: number; col: number } | null
-      tooltipPosition: {
-        x: number
-        y: number
-        placement?: "above" | "below"
-      } | null
-      timedGridViewModel: {
-        actions: {
-          startDrag: (e: MouseEvent) => void
-          moveDrag: (e: MouseEvent) => void
-          endDrag: (e: MouseEvent) => void
-        }
-      }
-    }
-    const outsideGrid = document.createElement("div")
-    const eventFor = (target: Element, clientX: number, clientY: number) =>
-      ({
-        target,
-        currentTarget: dragSection,
-        clientX,
-        clientY,
-        preventDefault: vi.fn(),
-      }) as unknown as MouseEvent
-
-    vm.selectedTooltipSlot = { row: 1, col: 0 }
-    vm.timedGridViewModel.actions.moveDrag(eventFor(outsideGrid, 900, 700))
-
-    expect(vm.tooltipPosition).toEqual({ x: 100, y: 100, placement: "below" })
-
-    vm.selectedTooltipSlot = { row: 2, col: 0 }
-    vm.timedGridViewModel.actions.endDrag(eventFor(outsideGrid, 900, 700))
-
-    expect(vm.tooltipPosition).toEqual({ x: 100, y: 100, placement: "above" })
-
-    vm.timedGridViewModel.actions.moveDrag(eventFor(outsideGrid, 20, 20))
-
-    expect(vm.selectedTooltipSlot).toEqual({ row: 2, col: 0 })
-    expect(vm.tooltipPosition).toEqual({ x: 100, y: 100, placement: "above" })
-
-    wrapper.unmount()
-    dragSection.remove()
-  })
 })

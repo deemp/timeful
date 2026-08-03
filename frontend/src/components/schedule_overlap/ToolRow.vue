@@ -155,7 +155,7 @@ import TimezoneSelector from "./TimezoneSelector.vue"
 import GCalWeekSelector from "./GCalWeekSelector.vue"
 import EventOptions from "./EventOptions.vue"
 import { timeTypes } from "@/constants"
-import type { ScheduleOverlapToolRowViewModel } from "./scheduleOverlapViewModels"
+import type { ScheduleOverlapToolRowViewModel } from "./scheduleOverlapViewModelContracts"
 
 defineProps<{
   toolRow: ScheduleOverlapToolRowViewModel

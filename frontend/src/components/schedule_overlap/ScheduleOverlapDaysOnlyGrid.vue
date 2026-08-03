@@ -94,7 +94,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ScheduleOverlapDaysOnlyGridViewModel } from "./scheduleOverlapViewModels"
+import type { ScheduleOverlapDaysOnlyGridViewModel } from "./scheduleOverlapViewModelContracts"
 import ToolRow from "./ToolRow.vue"
 import ZigZag from "./ZigZag.vue"
 

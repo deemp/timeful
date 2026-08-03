@@ -10,7 +10,7 @@ import type {
   ScheduleOverlapMobileOverlayViewModel,
   ScheduleOverlapRespondentsPanelViewModel,
   ScheduleOverlapSidebarViewModel,
-} from "./scheduleOverlapViewModels"
+} from "./scheduleOverlapViewModelContracts"
 
 export type ScheduleOverlapWrapper = ReturnType<
   typeof shallowMount<typeof ScheduleOverlap>

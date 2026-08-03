@@ -28,7 +28,7 @@ import type {
   ScheduleOverlapTimeGridViewModel,
   ScheduleOverlapToolRowActions,
   ScheduleOverlapToolRowViewModel,
-} from "./scheduleOverlapViewModels"
+} from "./scheduleOverlapViewModelContracts"
 import type {
   ClassStyle,
   RenderedOverlayAvailabilityFragment,

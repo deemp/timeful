@@ -347,7 +347,7 @@
 import {
   SPLIT_GAP_WIDTH
 } from "@/composables/schedule_overlap/types"
-import type { ScheduleOverlapTimeGridViewModel } from "./scheduleOverlapViewModels"
+import type { ScheduleOverlapTimeGridViewModel } from "./scheduleOverlapViewModelContracts"
 import CalendarEventBlock from "./CalendarEventBlock.vue"
 import SignUpCalendarBlock from "@/components/sign_up_form/SignUpCalendarBlock.vue"
 import ToolRow from "./ToolRow.vue"

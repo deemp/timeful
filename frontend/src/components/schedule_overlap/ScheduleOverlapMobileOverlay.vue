@@ -92,7 +92,7 @@ import AvailabilityTypeToggle from "./AvailabilityTypeToggle.vue"
 import GCalWeekSelector from "./GCalWeekSelector.vue"
 import ScheduleOverlapRespondentsPanel from "./ScheduleOverlapRespondentsPanel.vue"
 import SpecificTimesInstructions from "./SpecificTimesInstructions.vue"
-import type { ScheduleOverlapMobileOverlayViewModel } from "./scheduleOverlapViewModels"
+import type { ScheduleOverlapMobileOverlayViewModel } from "./scheduleOverlapViewModelContracts"
 
 defineProps<{
   overlay: ScheduleOverlapMobileOverlayViewModel

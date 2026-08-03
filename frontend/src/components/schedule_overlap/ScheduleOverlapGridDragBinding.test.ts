@@ -10,7 +10,7 @@ import ScheduleOverlapTimeGrid from "./ScheduleOverlapTimeGrid.vue"
 import type {
   ScheduleOverlapDaysOnlyGridViewModel,
   ScheduleOverlapTimeGridViewModel,
-} from "./scheduleOverlapViewModels"
+} from "./scheduleOverlapViewModelContracts"
 
 const baseEvent = {
   _id: "evt-1",

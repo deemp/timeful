@@ -57,8 +57,6 @@ import {
   nextTick,
   watch,
   watchEffect,
-  type ComputedRef,
-  type Ref,
 } from "vue"
 import { useDisplay } from "vuetify"
 import { Temporal } from "temporal-polyfill"
@@ -70,10 +68,7 @@ import {
 import {
   availabilityTypes, eventTypes, UTC, type AvailabilityType
 } from "@/constants"
-import {
-  isAnonymousOwnerEvent,
-  isSignedInOwner,
-} from "@/composables/event/eventOwnership"
+import { isSignedInOwner } from "@/composables/event/eventOwnership"
 import { useMainStore } from "@/stores/main"
 import { freemiumEnabled } from "@/utils/freemium"
 import ScheduleOverlapDaysOnlyGrid from "./ScheduleOverlapDaysOnlyGrid.vue"
@@ -98,7 +93,10 @@ import {
 import { useOwnedTimezone } from "@/composables/timezone/useOwnedTimezone"
 import type { SpecificTimesEditDraft } from "@/composables/event/specificTimesEditDraft"
 import { useScheduleOverlapController } from "./useScheduleOverlapController"
-import { useScheduleOverlapPreferences } from "./useScheduleOverlapPreferences"
+import {
+  useScheduleOverlapPreferences,
+  type UseScheduleOverlapPreferencesReturn,
+} from "./useScheduleOverlapPreferences"
 import { useScheduleOverlapViewModels } from "./useScheduleOverlapViewModels"
 import { useTimedGridPresentation } from "./useTimedGridPresentation"
 import { useTimedGridInteractions } from "./useTimedGridInteractions"
@@ -114,7 +112,7 @@ import type {
   ScheduleOverlapDaysOnlyGridActions,
   ScheduleOverlapTimeGridActions,
   ScheduleOverlapToolRowActions,
-} from "./scheduleOverlapViewModels"
+} from "./scheduleOverlapViewModelContracts"
 import type { ScheduleOverlapSidebarExposed as ScheduleOverlapSidebarContract } from "./scheduleOverlapContracts"
 import {
   readShowAllHoursPreference,
@@ -196,7 +194,6 @@ const isPhone = computed(
 const isSignUp = computed(() => Boolean(props.event.isSignUpForm))
 const isGroup = computed(() => props.event.type === eventTypes.GROUP)
 const isOwner = computed(() => isSignedInOwner(props.event, mainStore.authUser))
-const _isGuestEvent = computed(() => isAnonymousOwnerEvent(props.event))
 const authUser = computed(() => mainStore.authUser)
 
 const cloneScheduleOverlapEvent = (
@@ -222,60 +219,9 @@ const scheduleTimezoneReferenceDate = computed(() =>
   getTimezoneReferenceDateForEvent(eventRef.value, props.weekOffset)
 )
 const shownInTimezoneStorageKey = computed(() => `shownInTimezone_${props.event._id ?? ""}`)
-const scheduleOverlapPreferences = useScheduleOverlapPreferences({
+const scheduleOverlapPreferences: UseScheduleOverlapPreferencesReturn = useScheduleOverlapPreferences({
   eventId: computed(() => props.event._id ?? ""),
-}) as {
-  guestNameKey: ComputedRef<string>
-  ownedGuestResponses: ComputedRef<
-    {
-      lookupKey: string
-      lastUsedAt: number
-      name?: string
-      guestId?: string
-      guestEditToken?: string
-      guestEditPolicy?: "protected" | "open"
-      guestOwnershipMode?: "legacy" | "token"
-    }[]
-  >
-  guestOwnership: ComputedRef<
-    | {
-        lookupKey: string
-        lastUsedAt: number
-        name?: string
-        guestId?: string
-        guestEditToken?: string
-        guestEditPolicy?: "protected" | "open"
-        guestOwnershipMode?: "legacy" | "token"
-      }
-    | undefined
-  >
-  guestName: ComputedRef<string | undefined>
-  guestResponseLookupKey: ComputedRef<string | undefined>
-  showBestTimes: Ref<boolean>
-  setGuestName: (name: string) => void
-  setGuestOwnership: (
-    value: {
-      name?: string
-      guestId?: string
-      guestEditToken?: string
-      guestEditPolicy?: "protected" | "open"
-      guestOwnershipMode?: "legacy" | "token"
-    },
-    options?: { select?: boolean }
-  ) => void
-  selectGuestOwnership: (lookupKey?: string) => void
-  removeGuestOwnership: (lookupKey: string) => void
-  clearSelectedGuestOwnership: () => void
-  getOwnedGuestOwnership: (lookupKey?: string) => {
-    lookupKey: string
-    lastUsedAt: number
-    name?: string
-    guestId?: string
-    guestEditToken?: string
-    guestEditPolicy?: "protected" | "open"
-    guestOwnershipMode?: "legacy" | "token"
-  } | undefined
-}
+})
 const guestNameKey = scheduleOverlapPreferences.guestNameKey
 const ownedGuestResponses = scheduleOverlapPreferences.ownedGuestResponses
 const guestOwnership = scheduleOverlapPreferences.guestOwnership
@@ -752,9 +698,7 @@ const {
   getRenderedTimeBlockStyle: _getRenderedTimeBlockStyleForTemplate,
   getRenderedTimeBlockStyles: _getRenderedTimeBlockStylesForTemplate,
   overlaidAvailability: _overlaidAvailability,
-  renderedRows: _renderedRows,
   scheduledEventStyles: _scheduledEventStyles,
-  timeAxisEndText: _timeAxisEndText,
   timeslotClassStyle: _timeslotClassStyle,
   timeslotVon: _timeslotVon,
   toggleCollapsedSpan,
@@ -1067,8 +1011,6 @@ defineExpose({
   canEditGuestName: _canEditGuestName,
   curTimeslot: _curTimeslot,
   timeslotSelected,
-  renderedRows: _renderedRows,
-  timeAxisEndText: _timeAxisEndText,
   editOwnedGuestAvailability,
   setAvailabilityAutomatically: _setAvailabilityAutomatically,
   populateUserAvailability,

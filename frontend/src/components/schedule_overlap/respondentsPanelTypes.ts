@@ -1,1 +1,1 @@
-export type { ScheduleOverlapRespondentsPanelViewModel } from "./scheduleOverlapViewModels"
+export type { ScheduleOverlapRespondentsPanelViewModel } from "./scheduleOverlapViewModelContracts"

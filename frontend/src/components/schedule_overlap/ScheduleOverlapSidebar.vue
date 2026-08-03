@@ -284,7 +284,7 @@ import ScheduleOverlapRespondentsPanel from "./ScheduleOverlapRespondentsPanel.v
 import type {
   ScheduleOverlapRespondentsPanelExposed,
 } from "./scheduleOverlapContracts"
-import type { ScheduleOverlapSidebarViewModel } from "./scheduleOverlapViewModels"
+import type { ScheduleOverlapSidebarViewModel } from "./scheduleOverlapViewModelContracts"
 const props = defineProps<{
   sidebar: ScheduleOverlapSidebarViewModel
 }>()
