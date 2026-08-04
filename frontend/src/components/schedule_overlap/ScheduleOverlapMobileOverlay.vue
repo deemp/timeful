@@ -1,6 +1,6 @@
 <template>
   <div
-    class="schedule-overlap-mobile-overlay tw-fixed tw-inset-x-0 tw-z-30 tw-isolate tw-pointer-events-auto"
+    class="schedule-overlap-mobile-overlay tw-fixed tw-inset-x-0 tw-z-[60] tw-isolate tw-pointer-events-auto"
     :style="{ bottom: overlay.bottomOffset }"
     @pointerdown.stop
     @pointerup.stop

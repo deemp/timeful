@@ -59,6 +59,45 @@ test("Responses panel prevents touch gestures from reaching the mobile grid", as
   }))).toEqual({ pointerDowns: 0, mouseDowns: 0, clicks: 0 })
 })
 
+test("Responses panel stacks above an overlapping mobile tooltip", async ({ page }) => {
+  await createSpecificTimesEventFromDialog(
+    page,
+    "Mobile Responses tooltip layering regression"
+  )
+
+  const selectedSlot = page.locator(
+    '#drag-section .timeslot[data-row="1"][data-col="0"]'
+  )
+  await selectedSlot.scrollIntoViewIfNeeded()
+  await selectedSlot.dispatchEvent("click")
+
+  const overlay = page.locator(".schedule-overlap-mobile-overlay")
+  const tooltip = page.locator(".tw-fixed.tw-z-50")
+  await expect(overlay.getByText("Responses", { exact: true })).toBeVisible()
+  await expect(tooltip).toBeVisible()
+
+  await expect.poll(() => page.evaluate(() => {
+    const overlayElement = document.querySelector<HTMLElement>(
+      ".schedule-overlap-mobile-overlay"
+    )
+    const tooltipElement = document.querySelector<HTMLElement>(
+      ".tw-fixed.tw-z-50"
+    )
+    if (!overlayElement || !tooltipElement) return false
+
+    const overlayRect = overlayElement.getBoundingClientRect()
+    tooltipElement.style.left = `${String(overlayRect.left + overlayRect.width / 2)}px`
+    tooltipElement.style.top = `${String(overlayRect.top + 16)}px`
+    tooltipElement.style.transform = "translate(-50%, 0)"
+    tooltipElement.style.pointerEvents = "auto"
+
+    return overlayElement.contains(document.elementFromPoint(
+      overlayRect.left + overlayRect.width / 2,
+      overlayRect.top + 16
+    ))
+  })).toBe(true)
+})
+
 test("touching a timeslot keeps its mobile tooltip anchored while scrolling", async ({ page }) => {
   await createSpecificTimesEventFromDialog(
     page,
