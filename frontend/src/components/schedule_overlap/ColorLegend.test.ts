@@ -18,7 +18,7 @@ describe("ColorLegend", () => {
     })
 
   const expectStructuralColors = (wrapper: ReturnType<typeof mountLegend>) => {
-    expect(wrapper.text()).toContain("Unavailable, padding")
+    expect(wrapper.text()).toContain("Disabled, outside the event dates in the event timezone")
     expect(wrapper.html()).toContain("tw-bg-gray")
     expect(wrapper.text()).toContain("Scheduled event")
     expect(wrapper.find(".scheduled-event-legend-indicator").classes()).toEqual(
@@ -34,7 +34,7 @@ describe("ColorLegend", () => {
 
     expectStructuralColors(wrapper)
     expect(labels(wrapper)).toEqual([
-      "Unavailable, padding",
+      "Disabled, outside the event dates in the event timezone",
       "Scheduled event",
     ])
     expect(wrapper.html()).not.toContain("tw-bg-[#F9CCCC]")
@@ -45,8 +45,8 @@ describe("ColorLegend", () => {
 
     expectStructuralColors(wrapper)
     expect(labels(wrapper)).toEqual([
-      "Unavailable, select in Add/Edit availability",
-      "Unavailable, padding",
+      "Unavailable, change in Add/Edit availability",
+      "Disabled, outside the event dates in the event timezone",
       "Scheduled event",
     ])
     expect(wrapper.html()).toContain("tw-bg-[#F9CCCC]")
@@ -60,7 +60,7 @@ describe("ColorLegend", () => {
     expect(wrapper.html()).toContain("tw-bg-[#00994C77]")
     expect(wrapper.text()).toContain("If needed")
     expect(wrapper.html()).toContain("tw-bg-yellow")
-    expect(wrapper.text()).toContain("Unavailable, select in Add/Edit availability")
+    expect(wrapper.text()).toContain("Unavailable, change in Add/Edit availability")
     expect(wrapper.html()).toContain("tw-bg-[#F9CCCC]")
     expect(labels(wrapper)).toHaveLength(5)
   })
@@ -70,7 +70,7 @@ describe("ColorLegend", () => {
 
     expect(wrapper.text()).toContain("Available")
     expect(wrapper.text()).toContain("If needed")
-    expect(wrapper.text()).toContain("Unavailable, select in Add/Edit availability")
+    expect(wrapper.text()).toContain("Unavailable, change in Add/Edit availability")
     expect(labels(wrapper)).toHaveLength(5)
   })
 
@@ -88,15 +88,15 @@ describe("ColorLegend", () => {
   it("shows the edit-event item only for saved specific-times events", () => {
     const wrapper = mountLegend({ isSpecificTimes: true })
 
-    expect(wrapper.text()).toContain("Unavailable, select in Edit event")
+    expect(wrapper.text()).toContain("Disabled, change in Edit event")
     expect(wrapper.html()).toContain("tw-bg-light-gray-stroke")
   })
 
   it("keeps range-event legends free of the edit-event item", () => {
     const wrapper = mountLegend({ activeSlotsCount: 1 })
 
-    expect(wrapper.text()).toContain("Unavailable, select in Add/Edit availability")
-    expect(wrapper.text()).not.toContain("Unavailable, select in Edit event")
+    expect(wrapper.text()).toContain("Unavailable, change in Add/Edit availability")
+    expect(wrapper.text()).not.toContain("Disabled, change in Edit event")
     expect(wrapper.html()).not.toContain("tw-bg-light-gray-stroke")
   })
 })

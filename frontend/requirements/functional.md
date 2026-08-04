@@ -76,10 +76,10 @@ Default hours for a new event should be 9-18.
 
 Grid colors shall use context-specific labels:
 
-- In the specific-times editor: white is `Selected for the event`, light grey is `Available to select`, and dark grey is `Unavailable, padding`.
-- In every event availability grid, pale red is `Unavailable, select in Add/Edit availability` for an active slot that is unavailable to the current respondent.
-- In a saved specific-times event grid, light grey is `Unavailable, select in Edit event` for an enabled but inactive slot. Range-event grids shall not show this legend item.
-- In every event availability grid, dark grey is `Unavailable, padding`. For range events it is the only grey legend item.
+- In the specific-times editor: white is `Selected for the event`, light grey is `Selectable for the event`, and dark grey is `Disabled, outside the event dates in the event timezone`.
+- In every event availability grid, pale red is `Unavailable, change in Add/Edit availability` for an active slot that is unavailable to the current respondent.
+- In a saved specific-times event grid, light grey is `Disabled, change in Edit event` for an enabled but inactive slot. Range-event grids shall not show this legend item.
+- In every event availability grid, dark grey is `Disabled, outside the event dates in the event timezone`. For range events it is the only grey legend item.
 - The event availability legend shall show only items that can occur in the current mode. It shall not expose internal terms such as enabled, inactive, or outside the selected range.
 - Specific-times enabled inactive cells shall remain editable, while dark-grey padding cells outside the enabled domain shall be non-editable.
 - Padding shall appear only in cells without an enabled slot for that display-date column. It shall not be created by page-wide filler rows; range grids may include only the non-enabled cells necessary to reach their hour-aligned axis boundaries.
@@ -151,7 +151,7 @@ Timed grids shall distinguish the enabled-slot domain from the active-slot selec
 - `Shown in` changes a slot's displayed date, clock time, tooltip date/time, and grid column. A slot projected across midnight shall render at its normal clock time in its adjacent projected-date column; the grid shall create that column when needed and shall not render a synthetic next-day axis row.
 - While setting specific times, every increment from `00:00` inclusive through the next `00:00` exclusive shall be an enabled slot for every picked date. The grid shall show that full-day domain. Selected slots are active; enabled inactive slots remain editable; cells outside the enabled domain are non-editable padding.
 - On the event page for a specific-times event, the grid shall show its complete enabled domain, with inactive spans eligible for the existing collapsed-hours behavior. Active slots are respondent-selectable. Enabled inactive slots are not respondent-selectable and shall not be presented as padding.
-- On the event page for a range event, only increments in the selected range are enabled and active. The grid shall render the selected range with hour-aligned axis boundaries; it need not render the rest of the day. Any non-enabled cell rendered by those boundaries is dark-grey `Unavailable, padding`.
+- On the event page for a range event, only increments in the selected range are enabled and active. The grid shall render the selected range with hour-aligned axis boundaries; it need not render the rest of the day. Any non-enabled cell rendered by those boundaries is dark-grey `Disabled, outside the event dates in the event timezone`.
 - The legend shall use the context-specific labels in FR-018. It shall not expose internal enabled/active-domain terminology.
 
 ## FR-027

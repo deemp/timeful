@@ -24,7 +24,7 @@
         ></div>
       </div>
       <span class="tw-text-sm"
-        >Unavailable, select in <br class="tw-hidden md:tw-block" />Add/Edit availability</span
+        >Unavailable, change in <br class="tw-hidden md:tw-block" />Add/Edit availability</span
       >
     </div>
     <div v-if="isSpecificTimes" class="tw-flex tw-items-start">
@@ -34,7 +34,7 @@
         ></div>
       </div>
       <span class="tw-text-sm"
-        >Unavailable, select in <br class="tw-hidden md:tw-block" />Edit event</span
+        >Disabled, change in <br class="tw-hidden md:tw-block" />Edit event</span
       >
     </div>
     <div class="tw-flex tw-items-start">
@@ -43,7 +43,7 @@
           class="tw-h-4 tw-w-4 tw-rounded tw-border tw-border-gray tw-bg-gray"
         ></div>
       </div>
-      <span class="tw-text-sm">Unavailable, padding</span>
+      <span class="tw-text-sm">Disabled, outside the event dates in the event timezone</span>
     </div>
     <div class="tw-flex tw-items-start">
       <div class="color-legend__indicator-slot">

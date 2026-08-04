@@ -10,7 +10,7 @@
         <div
           class="specific-times-instructions-swatch specific-times-instructions-swatch--enabled tw-bg-light-gray-stroke"
         ></div>
-        <span class="tw-text-sm">Available to select</span>
+        <span class="tw-text-sm">Selectable for the event</span>
       </div>
       <div class="tw-flex tw-items-center tw-gap-2">
         <div
@@ -22,7 +22,7 @@
         <div
           class="specific-times-instructions-swatch specific-times-instructions-swatch--disabled-padding tw-bg-gray"
         ></div>
-        <span class="tw-text-sm">Unavailable, padding</span>
+        <span class="tw-text-sm">Disabled, outside the event dates in the event timezone</span>
       </div>
     </div>
     <v-btn

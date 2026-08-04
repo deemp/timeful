@@ -126,9 +126,9 @@ describe("ScheduleOverlapSidebar", () => {
       },
     })
 
-    expect(wrapper.text()).toContain("Unavailable, select in Add/Edit availability")
-    expect(wrapper.text()).not.toContain("Unavailable, select in Edit event")
-    expect(wrapper.text()).toContain("Unavailable, padding")
+    expect(wrapper.text()).toContain("Unavailable, change in Add/Edit availability")
+    expect(wrapper.text()).not.toContain("Disabled, change in Edit event")
+    expect(wrapper.text()).toContain("Disabled, outside the event dates in the event timezone")
   })
 
   it("shows edit-event guidance for saved specific-times events", () => {
@@ -152,8 +152,8 @@ describe("ScheduleOverlapSidebar", () => {
       },
     })
 
-    expect(wrapper.text()).toContain("Unavailable, select in Add/Edit availability")
-    expect(wrapper.text()).toContain("Unavailable, select in Edit event")
+    expect(wrapper.text()).toContain("Unavailable, change in Add/Edit availability")
+    expect(wrapper.text()).toContain("Disabled, change in Edit event")
   })
 
   it("renders the overlay availability switch with the compact switch styling", () => {
