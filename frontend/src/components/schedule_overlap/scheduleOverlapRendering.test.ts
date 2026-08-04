@@ -940,12 +940,19 @@ describe("scheduleOverlapRendering", () => {
     )
   })
 
-  it("uses the lighter legacy heatmap tint for a single respondent when multiple guests never overlap", () => {
+  it("uses the legacy strong heatmap tint for a peak that excludes displayed respondents", () => {
     const slot = zdt("2026-01-01T09:00:00Z")
-    const responsesFormatted = new ZdtMap<Set<string>>()
-    responsesFormatted.set(slot, new Set(["guest-1"]))
+    const getHeatmapClassStyle = ({
+      slotRespondents,
+      max,
+    }: {
+      slotRespondents: Set<string>
+      max: number
+    }) => {
+      const responsesFormatted = new ZdtMap<Set<string>>()
+      responsesFormatted.set(slot, slotRespondents)
 
-    const classStyle = getTimeGridTimeslotClassStyle({
+      return getTimeGridTimeslotClassStyle({
       date: slot,
       row: 0,
       col: 0,
@@ -1000,15 +1007,27 @@ describe("scheduleOverlapRendering", () => {
       curRespondentsSet: new Set<string>(),
       respondents: [{ _id: "guest-1" }, { _id: "guest-2" }],
       curRespondentsMax: 0,
-      max: 1,
+      max,
       defaultState: states.HEATMAP,
       userHasResponded: false,
       curGuestId: "guest-2",
       authUserId: undefined,
       inDragRange: () => false,
+      })
+    }
+
+    const classStyle = getHeatmapClassStyle({
+      slotRespondents: new Set(["guest-1"]),
+      max: 1,
     })
 
-    expect(classStyle.style.backgroundColor).toBe("#00994C70")
+    expect(classStyle.style.backgroundColor).toBe("#00994CE1")
+    expect(
+      getHeatmapClassStyle({
+        slotRespondents: new Set(["guest-1", "guest-2"]),
+        max: 2,
+      }).style.backgroundColor,
+    ).toBe("#00994CFF")
   })
 
   it("renders specific-times heatmap slots with the normal unavailable token before any responses exist", () => {

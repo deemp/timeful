@@ -189,10 +189,7 @@ export const getBaseTimeslotClassStyle = ({
           s.backgroundColor = "#00994C88"
         }
       } else {
-        const fracDenominator = overlayAvailability
-          ? maxVal
-          : Math.max(totalRespondents, 1)
-        const frac = numRespondents / fracDenominator
+        const frac = numRespondents / maxVal
         let alpha: string
         if (!overlayAvailability) {
           alpha = Math.floor(frac * (255 - 30))
@@ -200,7 +197,12 @@ export const getBaseTimeslotClassStyle = ({
             .toUpperCase()
             .substring(0, 2)
             .padStart(2, "0")
-          if (numRespondents === totalRespondents) {
+          if (
+            frac === 1 &&
+            ((curRespondents.length > 0 &&
+              maxVal === curRespondents.length) ||
+              (curRespondents.length === 0 && maxVal === respondents.length))
+          ) {
             alpha = "FF"
           }
         } else {

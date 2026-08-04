@@ -546,7 +546,7 @@ describe("ScheduleOverlap", () => {
     expect(wrapper.findComponent({ name: "ScheduleOverlapSidebar" }).exists()).toBe(true)
   })
 
-  it("uses the lighter legacy heatmap tint in the normal post-submit grid after a guest adds a second response", async () => {
+  it("uses the legacy strong heatmap tint in the normal post-submit grid for disjoint guest responses", async () => {
     localStorage.setItem("showBestTimes", "false")
     localStorage.setItem(
       "evt-1.guestOwnershipCollection",
@@ -664,8 +664,8 @@ describe("ScheduleOverlap", () => {
 
     expect(timedGrid.toolRow.showBestTimes).toBe(false)
     expect(timedGrid.overlayAvailability).toBe(false)
-    expect(renderedColors).toContain("#00994C70")
-    expect(renderedColors).not.toContain("#00994CE1")
+    expect(renderedColors).toContain("#00994CE1")
+    expect(renderedColors).not.toContain("#00994C70")
   })
 
   it("passes cohesive sidebar and mobile overlay view models to extracted children", () => {
