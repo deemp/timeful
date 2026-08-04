@@ -478,7 +478,7 @@ describe("Event guest edit action", () => {
   it("uses explicit desktop rows for metadata actions", () => {
     expect(eventViewSource).toContain('id="event-header-meta-row"')
     expect(eventViewSource).toContain(
-      "event-header-row tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row",
+      "event-header-row tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-gap-4",
     )
   })
 

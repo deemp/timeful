@@ -37,6 +37,45 @@ test("event description stays aligned to the left header column on desktop", asy
   await expect(addDescriptionButton).toBeVisible()
   await expect(page.locator("#event-header-actions")).toBeVisible()
 
+  interface MetadataActionAlignmentMetrics {
+    buttonRowCenter: number
+    secondaryActionsCenter: number
+  }
+
+  const metadataActionAlignment =
+    await page.evaluate<MetadataActionAlignmentMetrics | null>(() => {
+      const buttonRow = document.querySelector<HTMLElement>(
+        "#event-header-button-row",
+      )
+      const secondaryActions = document.querySelector<HTMLElement>(
+        "#event-header-meta-row > .desktop-event-header-actions",
+      )
+
+      if (!buttonRow || !secondaryActions) {
+        return null
+      }
+
+      const buttonRowRect = buttonRow.getBoundingClientRect()
+      const secondaryActionsRect = secondaryActions.getBoundingClientRect()
+
+      return {
+        buttonRowCenter: buttonRowRect.top + buttonRowRect.height / 2,
+        secondaryActionsCenter:
+          secondaryActionsRect.top + secondaryActionsRect.height / 2,
+      }
+    })
+
+  expect(metadataActionAlignment).not.toBeNull()
+  if (!metadataActionAlignment) {
+    throw new Error("Expected metadata action alignment metrics")
+  }
+  expect(
+    Math.abs(
+      metadataActionAlignment.buttonRowCenter -
+        metadataActionAlignment.secondaryActionsCenter,
+    ),
+  ).toBeLessThanOrEqual(1)
+
   interface AddButtonMetrics {
     buttonRowLeft: number
     addButtonLeft: number

@@ -470,7 +470,7 @@
 
               <div
                 id="event-header-meta-row"
-                class="event-header-row tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-start sm:tw-gap-4"
+                class="event-header-row tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-gap-4"
               >
                 <div
                   id="event-header-button-row"
