@@ -2345,7 +2345,9 @@ describe("Event guest edit action", () => {
     )
   })
 
-  it("renders desktop editing actions with a flat save button", async () => {
+  it("aligns desktop availability editing controls with their related header rows", async () => {
+    curGuestIdState.value = "guest-1"
+
     const wrapper = shallowMount(EventView, {
       props: {
         eventId: "dEeaF",
@@ -2360,7 +2362,7 @@ describe("Event guest edit action", () => {
           MarkAvailabilityDialog: true,
           InvitationDialog: true,
           HelpDialog: true,
-          EventDescription: true,
+          EventDescription: eventDescriptionCanEditStub,
           AsyncPubliftAd: true,
           AccessDenied: true,
           NotSignedIn: true,
@@ -2384,9 +2386,28 @@ describe("Event guest edit action", () => {
     const saveButton = wrapper.get(".desktop-editing-save-button")
     expect(cancelButton.text()).toContain("Cancel")
     expect(cancelButton.attributes("data-variant")).toBe("outlined")
+    expect(eventViewSource).toContain('class="tw-flex tw-justify-end"')
     expect(saveButton.text()).toContain("Save")
     expect(saveButton.classes()).toContain("desktop-editing-save-button")
     expect(saveButton.attributes("disabled")).toBeUndefined()
+    expect(
+      wrapper
+        .get("#event-header-meta-row #desktop-editing-show-all-hours-toggle")
+        .classes(),
+    ).toContain("desktop-event-header-options__all-hours-switch")
+    expect(
+      wrapper.get("#desktop-editing-show-all-hours-toggle").classes(),
+    ).toContain("desktop-editing-all-hours-switch")
+    expect(wrapper.get("#desktop-delete-availability-btn").classes()).toContain(
+      "tw-w-[10.5rem]",
+    )
+    expect(eventViewSource).toContain(
+      "desktop-editing-delete-actions desktop-event-header-actions tw-flex tw-justify-end",
+    )
+    expect(eventViewSource).toContain(
+      ".desktop-editing-all-hours-switch :deep(.v-selection-control) {\n  justify-content: flex-end;",
+    )
+    expect(wrapper.find("#event-description-stub").exists()).toBe(false)
   })
 
   it("disables the desktop editing save button when respondent availability is empty", async () => {

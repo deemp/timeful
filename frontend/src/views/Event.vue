@@ -414,52 +414,22 @@
                       </template>
                     </template>
                     <template v-else-if="isEditing">
-                      <div class="tw-flex tw-flex-col tw-items-end">
-                        <div class="tw-flex tw-flex-col tw-items-end tw-gap-2">
-                          <div class="tw-flex tw-gap-2">
-                            <v-btn
-                              variant="outlined"
-                              class="desktop-editing-cancel-button tw-w-20 tw-text-red"
-                              @click="cancelEditing"
-                            >
-                              Cancel
-                            </v-btn>
-                            <v-btn
-                              class="desktop-editing-save-button tw-w-20 tw-text-white"
-                              :class="'tw-bg-green'"
-                              :disabled="respondentSaveDisabled"
-                              @click="saveChanges"
-                            >
-                              Save
-                            </v-btn>
-                          </div>
-                          <v-switch
-                            v-if="!scheduleOverlapEvent.daysOnly"
-                            inset
-                            class="schedule-overlap-compact-switch tw-self-start"
-                            hide-details
-                            :model-value="
-                              scheduleOverlap?.showAllHours ?? false
-                            "
-                            @update:model-value="
-                              (val: boolean | null) =>
-                                scheduleOverlap?.updateShowAllHours(!!val)
-                            "
-                          >
-                            <template #label>
-                              <div class="tw-text-sm tw-text-black">
-                                Show all hours
-                              </div>
-                            </template>
-                          </v-switch>
+                      <div class="tw-flex tw-justify-end">
+                        <div class="tw-flex tw-gap-2">
                           <v-btn
-                            v-if="showDeleteAvailabilityAction"
                             variant="outlined"
-                            color="error"
-                            class="tw-normal-case tw-w-full"
-                            @click="deleteAvailabilityDialog = true"
+                            class="desktop-editing-cancel-button tw-w-20 tw-text-red"
+                            @click="cancelEditing"
                           >
-                            Delete
+                            Cancel
+                          </v-btn>
+                          <v-btn
+                            class="desktop-editing-save-button tw-w-20 tw-text-white"
+                            :class="'tw-bg-green'"
+                            :disabled="respondentSaveDisabled"
+                            @click="saveChanges"
+                          >
+                            Save
                           </v-btn>
                         </div>
                       </div>
@@ -562,17 +532,63 @@
                     />
                   </div>
                 </div>
+                <div
+                  v-else-if="
+                    !isPhone &&
+                    !isGroup &&
+                    isEditing &&
+                    !scheduleOverlapEvent.daysOnly
+                  "
+                  class="desktop-event-header-actions"
+                >
+                  <v-switch
+                    id="desktop-editing-show-all-hours-toggle"
+                    class="desktop-editing-all-hours-switch desktop-event-header-control schedule-overlap-compact-switch desktop-event-header-options__all-hours-switch tw-w-full"
+                    inset
+                    hide-details
+                    :model-value="scheduleOverlap?.showAllHours ?? false"
+                    @update:model-value="
+                      (val: boolean | null) =>
+                        scheduleOverlap?.updateShowAllHours(!!val)
+                    "
+                  >
+                    <template #label>
+                      <div class="tw-text-sm tw-text-black">Show all hours</div>
+                    </template>
+                  </v-switch>
+                </div>
               </div>
 
               <div
+                v-if="!isEditing || showDeleteAvailabilityAction"
                 class="event-header-row tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-start sm:tw-gap-4"
               >
                 <div class="tw-min-w-0 tw-flex-1">
                   <EventDescription
+                    v-if="!isEditing"
                     v-model:event="event"
                     :can-edit="canEditMetadata"
                     class="event-header-description"
                   />
+                </div>
+                <div
+                  v-if="
+                    !isPhone &&
+                    !isGroup &&
+                    isEditing &&
+                    showDeleteAvailabilityAction
+                  "
+                  class="desktop-editing-delete-actions desktop-event-header-actions tw-flex tw-justify-end"
+                >
+                  <v-btn
+                    id="desktop-delete-availability-btn"
+                    variant="outlined"
+                    color="error"
+                    class="desktop-event-header-control tw-w-[10.5rem] tw-normal-case"
+                    @click="deleteAvailabilityDialog = true"
+                  >
+                    Delete
+                  </v-btn>
                 </div>
                 <div
                   v-if="
@@ -2633,6 +2649,10 @@ watch(
 .desktop-event-header-options__all-hours-switch
   :deep(.v-selection-control__wrapper) {
   margin-top: 0;
+}
+
+.desktop-editing-all-hours-switch :deep(.v-selection-control) {
+  justify-content: flex-end;
 }
 
 .desktop-event-header-options__menu-button {
