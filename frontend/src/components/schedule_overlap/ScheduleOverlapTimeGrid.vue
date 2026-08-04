@@ -204,7 +204,7 @@
                            style="pointer-events: none"
                          >
                           <div
-                            class="scheduled-event-block tw-h-full tw-w-full tw-overflow-hidden tw-text-ellipsis tw-rounded tw-border tw-border-solid tw-border-blue tw-bg-blue tw-p-px tw-text-xs"
+                            class="scheduled-event-block tw-h-full tw-w-full tw-overflow-hidden tw-text-ellipsis tw-rounded tw-border tw-border-solid tw-border-scheduled-event tw-bg-scheduled-event tw-p-px tw-text-xs tw-shadow-[0_0_8px_rgba(0,0,0,0.35)]"
                           ></div>
                         </div>
                         </template>

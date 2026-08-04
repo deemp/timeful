@@ -128,11 +128,11 @@ Anyone with the event link can schedule a selected time range on Timeful:
 
 - The Schedule menu shall list `Timeful` first, with a Timeful icon, followed by Google Calendar and Outlook.
 - The mobile Schedule action shall offer the same three destinations.
-- Selecting Timeful shall persist the selected range and render it as an unlabelled, solid blue indicator centered at 70% of its day-column width, so availability remains visible behind it.
+- Selecting Timeful shall persist the selected range and render it as an unlabelled, solid, shadowed `#76AFF2` indicator centered at 70% of its day-column width, so availability remains visible behind it.
 - Anyone with the event link can schedule, reschedule, or clear the Timeful schedule.
 - After saving a Timeful schedule, viewers shall see `Reschedule event` and `Clear` actions.
 - Starting rescheduling shall hide the saved block; saving a new Timeful range shall replace the prior schedule.
-- The legend shall permanently include a blue `Scheduled event` item matching the scheduled-event indicator.
+- The legend shall permanently include a `#76AFF2` `Scheduled event` item matching the scheduled-event indicator.
 
 ## FR-025
 

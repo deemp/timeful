@@ -22,7 +22,7 @@ describe("ColorLegend", () => {
     expect(wrapper.html()).toContain("tw-bg-gray")
     expect(wrapper.text()).toContain("Scheduled event")
     expect(wrapper.find(".scheduled-event-legend-indicator").classes()).toEqual(
-      expect.arrayContaining(["tw-border-blue", "tw-bg-blue"]),
+      expect.arrayContaining(["tw-border-scheduled-event", "tw-bg-scheduled-event"]),
     )
   }
 

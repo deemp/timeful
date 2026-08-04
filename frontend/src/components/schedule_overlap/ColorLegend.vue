@@ -48,7 +48,7 @@
     <div class="tw-flex tw-items-start">
       <div class="color-legend__indicator-slot">
         <div
-          class="scheduled-event-legend-indicator tw-h-4 tw-w-4 tw-rounded tw-border tw-border-blue tw-bg-blue"
+          class="scheduled-event-legend-indicator tw-h-4 tw-w-4 tw-rounded tw-border tw-border-scheduled-event tw-bg-scheduled-event"
         ></div>
       </div>
       <span class="tw-text-sm">Scheduled event</span>

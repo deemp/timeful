@@ -428,7 +428,7 @@ describe("ScheduleOverlap grid drag bindings", () => {
     expect(ifNeededBlock.classes()).toContain("overlay-avail-shadow-yellow")
   })
 
-  it("renders scheduled events as centered, solid blocks without names", () => {
+  it("renders scheduled events as centered, solid shadowed blocks without names", () => {
     const { timedGrid } = createTimeGridViewModel()
     timedGrid.dragStart = { row: 0, col: 0 }
     timedGrid.scheduledEventStyles = [{ top: "0px", height: "60px" }]
@@ -440,8 +440,9 @@ describe("ScheduleOverlap grid drag bindings", () => {
 
     const scheduledEvent = wrapper.get(".scheduled-event-block")
 
-    expect(scheduledEvent.classes()).toContain("tw-border-blue")
-    expect(scheduledEvent.classes()).toContain("tw-bg-blue")
+    expect(scheduledEvent.classes()).toContain("tw-border-scheduled-event")
+    expect(scheduledEvent.classes()).toContain("tw-bg-scheduled-event")
+    expect(scheduledEvent.classes()).toContain("tw-shadow-[0_0_8px_rgba(0,0,0,0.35)]")
     expect(scheduledEvent.text()).toBe("")
     expect(scheduledEvent.element.parentElement?.classList).toContain("tw-left-[15%]")
     expect(scheduledEvent.element.parentElement?.classList).toContain("tw-w-[70%]")

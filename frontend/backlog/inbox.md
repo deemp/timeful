@@ -169,7 +169,7 @@ Semi-structured TODO list
       - data quality and consistency
       - robustness against malformed input
       - maintainability of one canonical contract
-- [ ] make scheduled event color #4285F4 so that it's visible on the green background
+- [x] make scheduled event color #76AFF2 so that it's visible on the green background
 - [ ] Given on the edit availability page, when no timeslot is marked as available/if needed, then the Save button should be disabled
 - [ ] Given on the event page, when scrolled down, then clicked Edit event, then the navbar (timeful, create an event, etc.) must not move higher
 - [ ] Align "Edit event" with Show best times and More options row; Align the event description field wiht Schedule/Reschedule event
