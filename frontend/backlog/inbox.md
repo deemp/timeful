@@ -100,11 +100,10 @@ Semi-structured TODO list
 - [ ] How it works section still exists?
 - [ ] landing on mobile - no button at the top, better buttons like on desktop
 - [ ] should be able to edit specific times again
-- [ ] show all hours should show all hours, not trimmed. Currently, it trims wrong
 - [ ] not support recurring events to not bloat the localstorage with slots?
 - [ ] When hover over collapsed stripe, don't show the pointer for selecting hours
 - [ ] editing availability as - add input field to write the name over Available
-- [ ] on the event page, "Show all hours" should be over "Hide if needed times"
+- [ ] On the event page, in More options, "Show all hours" should be above "Hide if needed times"
 - [ ] Everyone should be unavailable in responses when hover over red, light-grey, or dark-grey
 - [ ] switch to when2meet in the repo
 - [ ] make the app name configurable and when2meet by default
@@ -132,7 +131,6 @@ Semi-structured TODO list
 - [ ] Introduce an index that tracks the status of SPECs
 - [ ] On mobile, when changing availability, don't show responses offcanvas panel
 - [ ] Set up CI/CD (maybe CD on releases only)
-- [ ] Click the button on the event to remove it? Allow multiple scheduled events?
 
 ## MUST
 
@@ -169,10 +167,6 @@ Semi-structured TODO list
       - data quality and consistency
       - robustness against malformed input
       - maintainability of one canonical contract
-- [x] make scheduled event color #76AFF2 so that it's visible on the green background
-- [ ] Given on the edit availability page, when no timeslot is marked as available/if needed, then the Save button should be disabled
-- [ ] Given on the event page, when scrolled down, then clicked Edit event, then the navbar (timeful, create an event, etc.) must not move higher
-- [ ] Align "Edit event" with Show best times and More options row; Align the event description field wiht Schedule/Reschedule event
 
 ## SHOULD
 
@@ -314,6 +308,42 @@ Semi-structured TODO list
 - [x] on mobile, tooltip should be below the Responses offcanvas panel
 - [x] get rid of the comparator, leave just inspect and update docs
 - [x] Given I'm on the event page, when I move the mouse cursor out of the grid, the Responses must show just the number of responses and not show who's available
+- [x] In the desktop version, the alignment of rows in add/edit availability should be similar to the event page.
+
+      - event title - Cancel, Save
+      - Edit event - Show all hours
+      - Add description - shouldn't be visible, actually
+- [x] make scheduled event color #76AFF2 so that it's visible on the green background
+- [x] Given on the event page, when scrolled down, then clicked Edit event, then the navbar (timeful, create an event, etc.) must not move higher
+- [x] On the event page, align:
+      - event title with Add availability/Edit availability
+      - "Edit event" and Copy link with Show best times and More options
+      - The event description with Schedule/Reschedule event
+- [x] When changing availability, there should be these buttons:
+  
+  - Cancel | Save
+  - Overlay availability | More options (Show all hours)
+  - Delete
+- [x] show all hours should show all hours, not trimmed. Currently, it trims wrong
+  - can't reproduce
+- [x] Given on the edit availability page, when no timeslot is marked as available/if needed, then the Save button should be disabled
+- [x] Allow multiple scheduled events.
+
+    Remove clear in Reschedule event because one can just wipe it by dragging the event cursor.
+
+    Should behave just like the availability cursor.
+
+    Given I clicked Reschedule event,
+    when I click a slot that belongs to the existing event, the slot gets cleared
+    and when I click a free slot, it becomes an event slot
+    and adjacent slots merge into a single event
+
+  - Won't implement because it makes the interface much more complicated.
+    If there's 0 slots selected, how to save?
+    If there's several events selected, need to warn that exactly one event is required to schedule on Google Calendar
+- [x] On desktop, the width of buttons when adding availability should be the same as on the event page
+- [x] On desktop, when rescheduling event, add availability, edit availability, edit event should be disabled
+
 
 ## SHOULD - Done
 
