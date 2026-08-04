@@ -263,7 +263,8 @@ const ScheduleOverlapStub = {
     cancelScheduleEvent: scheduleOverlapMethodMocks.cancelScheduleEvent,
     confirmScheduleEvent: scheduleOverlapMethodMocks.confirmScheduleEvent,
     clearScheduledEvent: scheduleOverlapMethodMocks.clearScheduledEvent,
-    editOwnedGuestAvailability: scheduleOverlapMethodMocks.editOwnedGuestAvailability,
+    editOwnedGuestAvailability:
+      scheduleOverlapMethodMocks.editOwnedGuestAvailability,
     updateShowBestTimes(this: Record<string, boolean>, value: boolean) {
       this.showBestTimes = value
     },
@@ -420,7 +421,7 @@ const invitationDialogStub = {
   props: {
     modelValue: { type: Boolean, required: true },
   },
-  template: "<div :data-invitation-open=\"String(modelValue)\" />",
+  template: '<div :data-invitation-open="String(modelValue)" />',
 }
 
 const buttonClickStub = {
@@ -456,7 +457,8 @@ const menuStub = {
       default: false,
     },
   },
-  template: '<div><slot name="activator" :props="{}" /><slot v-if="modelValue" /></div>',
+  template:
+    '<div><slot name="activator" :props="{}" /><slot v-if="modelValue" /></div>',
 }
 
 const iconTextStub = {
@@ -465,24 +467,27 @@ const iconTextStub = {
 
 describe("Event guest edit action", () => {
   it("switches the compact desktop header to the standard sm breakpoint", () => {
-    expect(eventViewSource).toContain("sm:tw-flex-row sm:tw-items-start sm:tw-gap-4")
+    expect(eventViewSource).toContain(
+      "sm:tw-flex-row sm:tw-items-start sm:tw-gap-4",
+    )
     expect(eventViewSource).not.toContain(
-      "md:tw-flex-row md:tw-items-start md:tw-gap-4"
+      "md:tw-flex-row md:tw-items-start md:tw-gap-4",
     )
   })
 
-  it("keeps the metadata actions stacked until the md breakpoint", () => {
+  it("uses explicit desktop rows for metadata actions", () => {
+    expect(eventViewSource).toContain('id="event-header-meta-row"')
     expect(eventViewSource).toContain(
-      "tw-flex tw-flex-col tw-gap-2 md:tw-flex-row md:tw-flex-wrap md:tw-items-center md:tw-gap-x-3 md:tw-gap-y-2"
+      "event-header-row tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row",
     )
   })
 
   it("compacts the single-row mobile footer actions below the sm breakpoint", () => {
     expect(eventViewSource).toContain(
-      "tw-flex tw-h-[4rem] tw-w-full tw-items-center tw-px-4 max-sm:tw-px-2"
+      "tw-flex tw-h-[4rem] tw-w-full tw-items-center tw-px-4 max-sm:tw-px-2",
     )
     expect(eventViewSource).toContain(
-      "tw-flex tw-min-w-0 tw-items-center tw-gap-2 max-sm:tw-gap-1"
+      "tw-flex tw-min-w-0 tw-items-center tw-gap-2 max-sm:tw-gap-1",
     )
     expect(eventViewSource).toContain("max-sm:tw-px-1 max-sm:tw-text-xs")
   })
@@ -493,7 +498,7 @@ describe("Event guest edit action", () => {
     vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) =>
       window.setTimeout(() => {
         callback(0)
-      }, 0)
+      }, 0),
     )
     authUserState.value = null
     isPhoneState.value = false
@@ -559,7 +564,7 @@ describe("Event guest edit action", () => {
 
     expect(wrapper.text()).toContain("Event not found")
     expect(wrapper.text()).toContain(
-      "This event may have been deleted, or the link may be incorrect."
+      "This event may have been deleted, or the link may be incorrect.",
     )
     expect(routerReplaceMock).not.toHaveBeenCalled()
     expect(showErrorMock).not.toHaveBeenCalled()
@@ -631,7 +636,7 @@ describe("Event guest edit action", () => {
         },
       },
       "",
-      "http://localhost:3000/e/dEeaF"
+      "http://localhost:3000/e/dEeaF",
     )
     loaderEventState.value = {
       ...createDefaultEventState(),
@@ -692,11 +697,11 @@ describe("Event guest edit action", () => {
           activeSlots?: unknown[]
           resetExistingTimes?: boolean
         }
-      ).activeSlots
+      ).activeSlots,
     ).toEqual([])
     expect(
       (window.history.state as { timefulSpecificTimesEntry?: unknown })
-        .timefulSpecificTimesEntry
+        .timefulSpecificTimesEntry,
     ).toBeUndefined()
 
     wrapper.unmount()
@@ -765,13 +770,13 @@ describe("Event guest edit action", () => {
     await flushDeferredMount()
 
     expect(wrapper.get("#desktop-primary-availability-btn").text()).toContain(
-      "Edit availability"
+      "Edit availability",
     )
-    expect(wrapper.get("#desktop-primary-availability-btn").classes()).toContain(
-      "desktop-primary-availability-button--edit"
-    )
+    expect(
+      wrapper.get("#desktop-primary-availability-btn").classes(),
+    ).toContain("desktop-primary-availability-button--edit")
     expect(wrapper.get("#desktop-secondary-availability-btn").text()).toContain(
-      "Add availability"
+      "Add availability",
     )
   })
 
@@ -816,13 +821,13 @@ describe("Event guest edit action", () => {
     await flushDeferredMount()
 
     expect(wrapper.get("#desktop-primary-availability-btn").text()).toContain(
-      "Edit availability"
+      "Edit availability",
     )
-    expect(wrapper.get("#desktop-primary-availability-btn").classes()).toContain(
-      "desktop-primary-availability-button--edit"
-    )
+    expect(
+      wrapper.get("#desktop-primary-availability-btn").classes(),
+    ).toContain("desktop-primary-availability-button--edit")
     expect(wrapper.get("#desktop-secondary-availability-btn").text()).toContain(
-      "Add guest availability"
+      "Add guest availability",
     )
   })
 
@@ -881,14 +886,14 @@ describe("Event guest edit action", () => {
     await nextTick()
     await nextTick()
 
-    expect(wrapper.get("#event-header-actions").classes()).toContain(
-      "desktop-event-header-actions"
-    )
-    expect(wrapper.get("#desktop-primary-availability-btn").classes()).toContain(
-      "desktop-event-header-control"
-    )
     expect(
-      wrapper.get("#desktop-secondary-availability-btn").classes()
+      wrapper.get("#event-header-actions").element.parentElement?.className,
+    ).toContain("desktop-event-header-actions")
+    expect(
+      wrapper.get("#desktop-primary-availability-btn").classes(),
+    ).toContain("desktop-event-header-control")
+    expect(
+      wrapper.get("#desktop-secondary-availability-btn").classes(),
     ).toContain("desktop-event-header-control")
     expect(wrapper.find("#show-best-times-header-toggle").exists()).toBe(true)
     expect(wrapper.find("#desktop-header-more-options").exists()).toBe(true)
@@ -937,11 +942,11 @@ describe("Event guest edit action", () => {
     await flushDeferredMount()
 
     expect(wrapper.get("#desktop-primary-availability-btn").text()).toContain(
-      "Add availability"
+      "Add availability",
     )
-    expect(wrapper.get("#desktop-primary-availability-btn").classes()).toContain(
-      "desktop-primary-availability-button--add"
-    )
+    expect(
+      wrapper.get("#desktop-primary-availability-btn").classes(),
+    ).toContain("desktop-primary-availability-button--add")
   })
 
   it("keeps edit availability visible but disabled when responses exist without an editable response", async () => {
@@ -981,13 +986,13 @@ describe("Event guest edit action", () => {
     await flushDeferredMount()
 
     expect(wrapper.get("#desktop-primary-availability-btn").text()).toContain(
-      "Edit availability"
+      "Edit availability",
     )
     expect(
-      wrapper.get("#desktop-primary-availability-btn").attributes("disabled")
+      wrapper.get("#desktop-primary-availability-btn").attributes("disabled"),
     ).toBe("")
     expect(wrapper.get("#desktop-secondary-availability-btn").text()).toContain(
-      "Add availability"
+      "Add availability",
     )
   })
 
@@ -1034,10 +1039,10 @@ describe("Event guest edit action", () => {
     await flushDeferredMount()
 
     expect(wrapper.get("#mobile-primary-availability-btn").text()).toContain(
-      "Add availability"
+      "Add availability",
     )
     expect(wrapper.get("#mobile-primary-availability-btn").classes()).toContain(
-      "mobile-primary-availability-button"
+      "mobile-primary-availability-button",
     )
   })
 
@@ -1080,13 +1085,13 @@ describe("Event guest edit action", () => {
     await flushDeferredMount()
 
     expect(wrapper.get("#mobile-primary-availability-btn").text()).toContain(
-      "Edit availability"
+      "Edit availability",
     )
     expect(
-      wrapper.get("#mobile-primary-availability-btn").attributes("disabled")
+      wrapper.get("#mobile-primary-availability-btn").attributes("disabled"),
     ).toBe("")
     expect(wrapper.get("#mobile-secondary-availability-btn").text()).toContain(
-      "Add availability"
+      "Add availability",
     )
   })
 
@@ -1134,8 +1139,12 @@ describe("Event guest edit action", () => {
 
     const actionClusterHtml = wrapper.get("#event-header-actions").html()
     expect(actionClusterHtml).toContain("desktop-event-header-inline-options")
-    expect(actionClusterHtml).toContain("desktop-event-header-inline-options__item")
-    expect(eventViewSource).toContain(".desktop-event-header-inline-options__item")
+    expect(actionClusterHtml).toContain(
+      "desktop-event-header-inline-options__item",
+    )
+    expect(eventViewSource).toContain(
+      ".desktop-event-header-inline-options__item",
+    )
     expect(eventViewSource).toContain("grid-column: 2;")
   })
 
@@ -1181,7 +1190,9 @@ describe("Event guest edit action", () => {
     const initialCallCount = addAvailabilityAsGuestMock.mock.calls.length
     await wrapper.get("#desktop-secondary-availability-btn").trigger("click")
 
-    expect(addAvailabilityAsGuestMock).toHaveBeenCalledTimes(initialCallCount + 1)
+    expect(addAvailabilityAsGuestMock).toHaveBeenCalledTimes(
+      initialCallCount + 1,
+    )
   })
 
   it("opens direct guest editing when exactly one owned guest response exists", async () => {
@@ -1232,7 +1243,7 @@ describe("Event guest edit action", () => {
     await guestEditButton.trigger("click")
 
     expect(editOwnedGuestAvailabilityMock).toHaveBeenCalledWith(
-      "000000000000000000000000"
+      "000000000000000000000000",
     )
   })
 
@@ -1420,17 +1431,18 @@ describe("Event guest edit action", () => {
     await nextTick()
 
     expect(
-      (wrapper.vm as unknown as { showGuestEditMenu: boolean }).showGuestEditMenu
+      (wrapper.vm as unknown as { showGuestEditMenu: boolean })
+        .showGuestEditMenu,
     ).toBe(true)
 
     const primaryAnchor = wrapper.get(".desktop-primary-availability-anchor")
-    expect(primaryAnchor.find("#desktop-primary-availability-btn").exists()).toBe(
-      true
-    )
+    expect(
+      primaryAnchor.find("#desktop-primary-availability-btn").exists(),
+    ).toBe(true)
     expect(primaryAnchor.findComponent({ name: "VMenu" }).exists()).toBe(true)
 
     const headerActionButtons = Array.from(
-      wrapper.get("#event-header-actions").element.children
+      wrapper.get("#event-header-actions").element.children,
     )
       .filter((child) => child.tagName === "BUTTON")
       .map((child) => child.textContent.trim())
@@ -1504,13 +1516,14 @@ describe("Event guest edit action", () => {
     await nextTick()
 
     expect(
-      (wrapper.vm as unknown as { showGuestEditMenu: boolean }).showGuestEditMenu
+      (wrapper.vm as unknown as { showGuestEditMenu: boolean })
+        .showGuestEditMenu,
     ).toBe(true)
     expect(wrapper.get("#mobile-primary-availability-btn").text()).toContain(
-      "Edit availability"
+      "Edit availability",
     )
     expect(wrapper.get("#mobile-primary-availability-btn").classes()).toContain(
-      "mobile-primary-availability-button--edit"
+      "mobile-primary-availability-button--edit",
     )
     expect(wrapper.findComponent({ name: "VMenu" }).exists()).toBe(true)
   })
@@ -1576,21 +1589,22 @@ describe("Event guest edit action", () => {
     })
 
     await flushDeferredMount()
-
     ;(
       wrapper.vm as unknown as { editSelectedGuestAvailability: () => void }
     ).editSelectedGuestAvailability()
     await nextTick()
 
     expect(
-      (wrapper.vm as unknown as { showGuestEditMenu: boolean }).showGuestEditMenu
+      (wrapper.vm as unknown as { showGuestEditMenu: boolean })
+        .showGuestEditMenu,
     ).toBe(true)
 
     document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }))
     await nextTick()
 
     expect(
-      (wrapper.vm as unknown as { showGuestEditMenu: boolean }).showGuestEditMenu
+      (wrapper.vm as unknown as { showGuestEditMenu: boolean })
+        .showGuestEditMenu,
     ).toBe(false)
     expect(editOwnedGuestAvailabilityMock).not.toHaveBeenCalled()
   })
@@ -1660,9 +1674,9 @@ describe("Event guest edit action", () => {
     await flushDeferredMount()
 
     expect(wrapper.text()).toContain("Edit availability")
-
-    ;(wrapper.vm as unknown as { editSelectedGuestAvailability: () => void })
-      .editSelectedGuestAvailability()
+    ;(
+      wrapper.vm as unknown as { editSelectedGuestAvailability: () => void }
+    ).editSelectedGuestAvailability()
     await nextTick()
 
     const vm = wrapper.vm as unknown as {
@@ -1670,7 +1684,7 @@ describe("Event guest edit action", () => {
       editOwnedGuestAvailability: (lookupKey: string) => void
     }
     const legacyOption = vm.ownedGuestEditOptions.find(
-      (option) => option.lookupKey === "legacy-user-id"
+      (option) => option.lookupKey === "legacy-user-id",
     )
     expect(legacyOption).toMatchObject({
       lookupKey: "legacy-user-id",
@@ -1680,7 +1694,9 @@ describe("Event guest edit action", () => {
     vm.editOwnedGuestAvailability("legacy-user-id")
     await nextTick()
 
-    expect(editOwnedGuestAvailabilityMock).toHaveBeenCalledWith("legacy-user-id")
+    expect(editOwnedGuestAvailabilityMock).toHaveBeenCalledWith(
+      "legacy-user-id",
+    )
   })
 
   it("matches token-owned guest menu options by guest id", async () => {
@@ -1749,9 +1765,9 @@ describe("Event guest edit action", () => {
     await flushDeferredMount()
 
     expect(wrapper.text()).toContain("Edit availability")
-
-    ;(wrapper.vm as unknown as { editSelectedGuestAvailability: () => void })
-      .editSelectedGuestAvailability()
+    ;(
+      wrapper.vm as unknown as { editSelectedGuestAvailability: () => void }
+    ).editSelectedGuestAvailability()
     await nextTick()
 
     const vm = wrapper.vm as unknown as {
@@ -1759,17 +1775,21 @@ describe("Event guest edit action", () => {
       editOwnedGuestAvailability: (lookupKey: string) => void
     }
     const tokenEntry = vm.ownedGuestEditOptions.find(
-      (option) => option.lookupKey === "guest-token-id"
+      (option) => option.lookupKey === "guest-token-id",
     )
     if (tokenEntry == null) {
-      throw new Error("Expected token guest menu option metadata to be available")
+      throw new Error(
+        "Expected token guest menu option metadata to be available",
+      )
     }
     expect(tokenEntry.name).toContain("token")
 
     vm.editOwnedGuestAvailability("guest-token-id")
     await nextTick()
 
-    expect(editOwnedGuestAvailabilityMock).toHaveBeenCalledWith("guest-token-id")
+    expect(editOwnedGuestAvailabilityMock).toHaveBeenCalledWith(
+      "guest-token-id",
+    )
   })
 
   it("passes loaded event responses through to the schedule-overlap boundary", async () => {
@@ -1807,7 +1827,9 @@ describe("Event guest edit action", () => {
 
     await flushDeferredMount()
 
-    const scheduleOverlapEvent = wrapper.findComponent(ScheduleOverlapStub).props("event") as {
+    const scheduleOverlapEvent = wrapper
+      .findComponent(ScheduleOverlapStub)
+      .props("event") as {
       responses?: Record<string, { user?: { firstName?: string } }>
     }
 
@@ -1903,9 +1925,7 @@ describe("Event guest edit action", () => {
     const buttonRow = wrapper.get("#event-header-button-row")
     const copyLinkButton = wrapper.get("#copy-link-btn")
 
-    expect(metaRow.classes()).toEqual(
-      expect.arrayContaining(["tw-mt-1", "sm:tw-mt-2"]),
-    )
+    expect(metaRow.classes()).toContain("event-header-row")
     expect(metaRow.text()).toContain("Copy link")
     expect(buttonRow.text()).toContain("Copy link")
     expect(copyLinkButton.attributes("data-variant")).toBe("outlined")
@@ -1977,7 +1997,7 @@ describe("Event guest edit action", () => {
     await flushDeferredMount()
 
     expect(wrapper.get("#event-header-meta-row").text()).not.toContain(
-      "5/28 - 5/29"
+      "5/28 - 5/29",
     )
   })
 
@@ -2050,7 +2070,7 @@ describe("Event guest edit action", () => {
     await flushDeferredMount()
 
     expect(wrapper.get("#event-header-meta-row").text()).not.toContain(
-      "5/27 - 5/28"
+      "5/27 - 5/28",
     )
   })
 
@@ -2099,7 +2119,7 @@ describe("Event guest edit action", () => {
 
     await flushDeferredMount()
 
-    expect(wrapper.get("#event-header-meta-row").text()).toContain("5/28 - 5/29")
+    expect(wrapper.get("#event-header").text()).toContain("5/28 - 5/29")
   })
 
   it("invokes copy link from the metadata action row", async () => {
@@ -2142,7 +2162,7 @@ describe("Event guest edit action", () => {
     expect(copyLinkMock).toHaveBeenCalled()
   })
 
-  it("renders the description under the metadata row inside the left header column", async () => {
+  it("renders related desktop header controls in explicit detail/action rows", async () => {
     const wrapper = shallowMount(EventView, {
       props: {
         eventId: "dEeaF",
@@ -2177,20 +2197,15 @@ describe("Event guest edit action", () => {
 
     await flushDeferredMount()
 
-    const rendered = wrapper.html()
-    const leftColumn = wrapper.find("#event-header > .tw-min-w-0.tw-flex-1")
+    const rows = wrapper.findAll(".event-header-row")
 
-    expect(rendered.indexOf("event-header-meta-row")).toBeGreaterThan(-1)
-    expect(rendered.indexOf("event-header-button-row")).toBeGreaterThan(
-      rendered.indexOf("event-header-meta-row")
-    )
-    expect(rendered.indexOf("event-description-stub")).toBeGreaterThan(
-      rendered.indexOf("event-header-meta-row")
-    )
-    expect(rendered.indexOf("event-description-stub")).toBeLessThan(
-      rendered.indexOf("event-header-actions")
-    )
-    expect(leftColumn.html()).toContain("event-description-stub")
+    expect(rows).toHaveLength(3)
+    expect(rows[0].html()).toContain("desktop-primary-availability-btn")
+    expect(rows[1].html()).toContain("event-header-button-row")
+    expect(rows[1].html()).toContain("desktop-header-show-best-times")
+    expect(rows[1].html()).toContain("desktop-header-more-options")
+    expect(rows[2].html()).toContain("event-description-stub")
+    expect(rows[2].html()).toContain("Schedule event")
   })
 
   it("keeps copy link explicit on phones instead of switching to a share icon", async () => {
@@ -2274,13 +2289,13 @@ describe("Event guest edit action", () => {
     await flushDeferredMount()
 
     expect(wrapper.get("#mobile-primary-availability-btn").text()).toContain(
-      "Edit availability"
+      "Edit availability",
     )
     expect(wrapper.get("#mobile-primary-availability-btn").classes()).toContain(
-      "mobile-primary-availability-button--edit"
+      "mobile-primary-availability-button--edit",
     )
     expect(wrapper.get("#mobile-secondary-availability-btn").text()).toContain(
-      "Add availability"
+      "Add availability",
     )
     expect(wrapper.text()).not.toContain("+ Add availability")
   })
@@ -2326,7 +2341,7 @@ describe("Event guest edit action", () => {
     await flushDeferredMount()
 
     expect(wrapper.get("#mobile-secondary-availability-btn").text()).toContain(
-      "Add guest"
+      "Add guest",
     )
   })
 
@@ -2409,9 +2424,9 @@ describe("Event guest edit action", () => {
 
     await flushDeferredMount()
 
-    expect(wrapper.get(".desktop-editing-save-button").attributes("disabled")).toBe(
-      ""
-    )
+    expect(
+      wrapper.get(".desktop-editing-save-button").attributes("disabled"),
+    ).toBe("")
   })
 
   it("renders mobile editing actions with outlined cancel and flat save", async () => {
@@ -2497,9 +2512,9 @@ describe("Event guest edit action", () => {
 
     await flushDeferredMount()
 
-    expect(wrapper.get(".mobile-editing-save-button").attributes("disabled")).toBe(
-      ""
-    )
+    expect(
+      wrapper.get(".mobile-editing-save-button").attributes("disabled"),
+    ).toBe("")
   })
 
   it("renders mobile scheduling actions with outlined cancel and blue active schedule colors", async () => {
@@ -2541,17 +2556,21 @@ describe("Event guest edit action", () => {
     await flushDeferredMount()
 
     const buttons = wrapper.findAll("button")
-    const cancelButton = buttons.find((button) => button.text().includes("Cancel"))
-    const scheduleButton = buttons.find((button) => button.text().includes("Schedule"))
+    const cancelButton = buttons.find((button) =>
+      button.text().includes("Cancel"),
+    )
+    const scheduleButton = buttons.find((button) =>
+      button.text().includes("Schedule"),
+    )
 
     expect(cancelButton?.attributes("data-variant")).toBe("outlined")
     expect(scheduleButton?.classes()).toContain("mobile-schedule-button")
-    expect(scheduleButton?.attributes("style")).toContain("background-color: #FFFFFF")
     expect(scheduleButton?.attributes("style")).toContain(
-      "color: #006BE8"
+      "background-color: #FFFFFF",
     )
+    expect(scheduleButton?.attributes("style")).toContain("color: #006BE8")
     expect(scheduleButton?.attributes("style")).toContain(
-      "border: 1px solid transparent"
+      "border: 1px solid transparent",
     )
   })
 
@@ -2595,15 +2614,25 @@ describe("Event guest edit action", () => {
     await flushDeferredMount()
 
     const buttons = wrapper.findAll("button")
-    const cancelIndex = buttons.findIndex((button) => button.text().trim() === "Cancel")
-    const clearIndex = buttons.findIndex((button) => button.text().trim() === "Clear")
-    const scheduleIndex = buttons.findIndex((button) => button.text().includes("Schedule"))
+    const cancelIndex = buttons.findIndex(
+      (button) => button.text().trim() === "Cancel",
+    )
+    const clearIndex = buttons.findIndex(
+      (button) => button.text().trim() === "Clear",
+    )
+    const scheduleIndex = buttons.findIndex((button) =>
+      button.text().includes("Schedule"),
+    )
 
     expect(clearIndex).toBeGreaterThan(cancelIndex)
     expect(clearIndex).toBeLessThan(scheduleIndex)
-    expect(buttons[clearIndex].element.parentElement?.className).toContain("tw-gap-2")
+    expect(buttons[clearIndex].element.parentElement?.className).toContain(
+      "tw-gap-2",
+    )
     await buttons[clearIndex].trigger("click")
-    expect(scheduleOverlapMethodMocks.clearScheduledEvent).toHaveBeenCalledOnce()
+    expect(
+      scheduleOverlapMethodMocks.clearScheduledEvent,
+    ).toHaveBeenCalledOnce()
   })
 
   it("places Clear beside Cancel while rescheduling on mobile", async () => {
@@ -2647,15 +2676,23 @@ describe("Event guest edit action", () => {
     await flushDeferredMount()
 
     const buttons = wrapper.findAll("button")
-    const cancelIndex = buttons.findIndex((button) => button.text().trim() === "Cancel")
-    const clearIndex = buttons.findIndex((button) => button.text().trim() === "Clear")
-    const scheduleIndex = buttons.findIndex((button) => button.text().includes("Schedule"))
+    const cancelIndex = buttons.findIndex(
+      (button) => button.text().trim() === "Cancel",
+    )
+    const clearIndex = buttons.findIndex(
+      (button) => button.text().trim() === "Clear",
+    )
+    const scheduleIndex = buttons.findIndex((button) =>
+      button.text().includes("Schedule"),
+    )
 
     expect(clearIndex).toBe(cancelIndex + 1)
     expect(clearIndex).toBeLessThan(scheduleIndex)
     expect(buttons[clearIndex].classes()).toContain("tw-ml-2")
     await buttons[clearIndex].trigger("click")
-    expect(scheduleOverlapMethodMocks.clearScheduledEvent).toHaveBeenCalledOnce()
+    expect(
+      scheduleOverlapMethodMocks.clearScheduledEvent,
+    ).toHaveBeenCalledOnce()
   })
 
   it("renders mobile scheduling actions with muted disabled schedule colors", async () => {
@@ -2697,18 +2734,22 @@ describe("Event guest edit action", () => {
     await flushDeferredMount()
 
     const buttons = wrapper.findAll("button")
-    const cancelButton = buttons.find((button) => button.text().includes("Cancel"))
-    const scheduleButton = buttons.find((button) => button.text().includes("Schedule"))
+    const cancelButton = buttons.find((button) =>
+      button.text().includes("Cancel"),
+    )
+    const scheduleButton = buttons.find((button) =>
+      button.text().includes("Schedule"),
+    )
 
     expect(cancelButton?.attributes("data-variant")).toBe("outlined")
     expect(scheduleButton?.attributes("style")).toContain(
-      "background-color: rgba(255, 255, 255, 0.12)"
+      "background-color: rgba(255, 255, 255, 0.12)",
     )
     expect(scheduleButton?.attributes("style")).toContain(
-      "color: rgba(255, 255, 255, 0.5)"
+      "color: rgba(255, 255, 255, 0.5)",
     )
     expect(scheduleButton?.attributes("style")).toContain(
-      "border: 1px solid rgba(255, 255, 255, 0.28)"
+      "border: 1px solid rgba(255, 255, 255, 0.28)",
     )
   })
 
@@ -2979,12 +3020,24 @@ describe("Event guest edit action", () => {
 
     expect(refreshEventMock).toHaveBeenCalled()
     expect(checkOwnerPremiumMock).toHaveBeenCalled()
-    expect(addEventListenerSpy).toHaveBeenCalledWith("beforeunload", expect.any(Function))
-    expect(addEventListenerSpy).toHaveBeenCalledWith("message", expect.any(Function))
+    expect(addEventListenerSpy).toHaveBeenCalledWith(
+      "beforeunload",
+      expect.any(Function),
+    )
+    expect(addEventListenerSpy).toHaveBeenCalledWith(
+      "message",
+      expect.any(Function),
+    )
 
     wrapper.unmount()
 
-    expect(removeEventListenerSpy).toHaveBeenCalledWith("beforeunload", expect.any(Function))
-    expect(removeEventListenerSpy).toHaveBeenCalledWith("message", expect.any(Function))
+    expect(removeEventListenerSpy).toHaveBeenCalledWith(
+      "beforeunload",
+      expect.any(Function),
+    )
+    expect(removeEventListenerSpy).toHaveBeenCalledWith(
+      "message",
+      expect.any(Function),
+    )
   })
 })

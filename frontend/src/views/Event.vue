@@ -98,17 +98,30 @@
       </v-dialog>
 
       <!-- Delete availability confirmation dialog -->
-      <v-dialog v-model="deleteAvailabilityDialog" width="500" :retain-focus="false">
+      <v-dialog
+        v-model="deleteAvailabilityDialog"
+        width="500"
+        :retain-focus="false"
+      >
         <v-card>
           <v-card-title>Are you sure?</v-card-title>
           <v-card-text class="tw-text-sm tw-text-dark-gray"
             >Are you sure you want to
-            {{ !isGroup ? "delete your availability from this event?" : "leave this group?" }}</v-card-text
+            {{
+              !isGroup
+                ? "delete your availability from this event?"
+                : "leave this group?"
+            }}</v-card-text
           >
           <v-card-actions>
             <v-spacer />
-            <v-btn variant="text" @click="deleteAvailabilityDialog = false">Cancel</v-btn>
-            <v-btn variant="text" color="error" @click="handleDeleteAvailabilityConfirm"
+            <v-btn variant="text" @click="deleteAvailabilityDialog = false"
+              >Cancel</v-btn
+            >
+            <v-btn
+              variant="text"
+              color="error"
+              @click="handleDeleteAvailabilityConfirm"
               >{{ !isGroup ? "Delete" : "Leave" }}</v-btn
             >
           </v-card-actions>
@@ -136,191 +149,203 @@
         </AsyncPubliftAd>
         <div class="tw-mx-auto tw-max-w-5xl tw-flex-1">
           <div v-if="!isSettingSpecificTimes" class="tw-mx-4">
-            <!-- Title and copy link -->
+            <!-- Desktop rows pair event details with their related controls. -->
             <div
               id="event-header"
-              class="tw-flex tw-flex-col tw-gap-3 tw-text-black sm:tw-flex-row sm:tw-items-start sm:tw-gap-4"
+              class="tw-flex tw-flex-col tw-gap-3 tw-text-black"
             >
-              <div class="tw-min-w-0 tw-flex-1">
-                <div
-                  class="sm:mb-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2"
-                >
+              <div
+                class="event-header-row tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-gap-4"
+              >
+                <div class="tw-min-w-0 tw-flex-1">
                   <div
-                    class="tw-text-xl sm:tw-text-3xl"
-                    :class="
-                      canEditMetadata &&
-                      '-tw-mx-2 -tw-my-1 tw-cursor-pointer tw-rounded tw-px-2 tw-py-1 tw-transition-all hover:tw-bg-light-gray'
-                    "
-                    @click="canEditMetadata && editEvent()"
+                    class="sm:mb-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2"
                   >
-                    {{ event.name }}
-                  </div>
-                  <v-chip
-                    v-if="event.when2meetHref && event.when2meetHref.length > 0"
-                    :href="`https://when2meet.com${event.when2meetHref}`"
-                    :small="isPhone"
-                    class="tw-cursor-pointer tw-select-none tw-rounded tw-bg-light-gray tw-px-2 tw-font-medium sm:tw-px-3"
-                    >Imported from when2meet</v-chip
-                  >
-                  <template v-if="isGroup">
-                    <div class="">
-                      <v-chip
-                        :small="isPhone"
-                        class="tw-cursor-pointer tw-select-none tw-rounded tw-bg-light-gray tw-px-2 tw-font-medium sm:tw-px-3"
-                        @click="helpDialog = true"
-                        >Availability group</v-chip
-                      >
+                    <div
+                      class="tw-text-xl sm:tw-text-3xl"
+                      :class="
+                        canEditMetadata &&
+                        '-tw-mx-2 -tw-my-1 tw-cursor-pointer tw-rounded tw-px-2 tw-py-1 tw-transition-all hover:tw-bg-light-gray'
+                      "
+                      @click="canEditMetadata && editEvent()"
+                    >
+                      {{ event.name }}
                     </div>
-                    <HelpDialog v-model="helpDialog">
-                      <template #header>Availability group</template>
-                      <div class="mb-4">
-                        Use availability groups to see group members' weekly
-                        calendar availabilities from Google Calendar. Your
-                        actual calendar events are NOT visible to others.
+                    <v-chip
+                      v-if="
+                        event.when2meetHref && event.when2meetHref.length > 0
+                      "
+                      :href="`https://when2meet.com${event.when2meetHref}`"
+                      :small="isPhone"
+                      class="tw-cursor-pointer tw-select-none tw-rounded tw-bg-light-gray tw-px-2 tw-font-medium sm:tw-px-3"
+                      >Imported from when2meet</v-chip
+                    >
+                    <template v-if="isGroup">
+                      <div class="">
+                        <v-chip
+                          :small="isPhone"
+                          class="tw-cursor-pointer tw-select-none tw-rounded tw-bg-light-gray tw-px-2 tw-font-medium sm:tw-px-3"
+                          @click="helpDialog = true"
+                          >Availability group</v-chip
+                        >
                       </div>
-                    </HelpDialog>
-                  </template>
-                </div>
-                <div
-                  id="event-header-meta-row"
-                  class="tw-mt-1 sm:tw-mt-2 tw-flex tw-flex-col tw-gap-2 md:tw-flex-row md:tw-flex-wrap md:tw-items-center md:tw-gap-x-3 md:tw-gap-y-2"
-                >
+                      <HelpDialog v-model="helpDialog">
+                        <template #header>Availability group</template>
+                        <div class="mb-4">
+                          Use availability groups to see group members' weekly
+                          calendar availabilities from Google Calendar. Your
+                          actual calendar events are NOT visible to others.
+                        </div>
+                      </HelpDialog>
+                    </template>
+                  </div>
                   <div
                     v-if="showHeaderDateSummary"
-                    class="tw-text-sm tw-font-normal tw-text-very-dark-gray sm:tw-text-base"
+                    class="tw-mt-1 tw-text-sm tw-font-normal tw-text-very-dark-gray sm:tw-mt-2 sm:tw-text-base"
                   >
                     {{ dateString }}
                   </div>
-                  <div
-                    id="event-header-button-row"
-                    class="tw-flex tw-flex-wrap tw-items-center tw-gap-2"
-                  >
-                    <template v-if="canEditMetadata">
-                      <v-btn
-                        id="edit-event-btn"
-                        variant="outlined"
-                        color="primary"
-                        class="event-metadata-action-button"
-                        @click="editEvent"
-                      >
-                        <v-icon class="tw-text-green">mdi-pencil</v-icon>
-                        <span class="tw-ml-1 tw-text-green"
-                          >Edit {{ isGroup ? "group" : "event" }}</span
-                        >
-                      </v-btn>
-                    </template>
-                    <v-btn
-                      v-if="!isGroup"
-                      id="copy-link-btn"
-                      variant="outlined"
-                      color="primary"
-                      class="event-metadata-action-button"
-                      @click="copyLink"
-                    >
-                      <v-icon class="tw-text-green">mdi-content-copy</v-icon>
-                      <span class="tw-ml-1 tw-text-green">Copy link</span>
-                    </v-btn>
-                  </div>
-                </div>
-                <EventDescription
-                  v-model:event="event"
-                  :can-edit="canEditMetadata"
-                />
-              </div>
-              <div
-                v-if="isGroup || (!isPhone && (!isSignUp || canEditAvailability))"
-                class="tw-flex tw-flex-row tw-items-center tw-gap-2.5"
-              >
-                <div v-if="isGroup">
-                  <v-btn
-                    v-if="
-                      event.startOnMonday ? weekOffset != 1 : weekOffset != 0
-                    "
-                    :icon="isPhone"
-                    :variant="isPhone ? 'text' : undefined"
-                    class="tw-mr-1 tw-text-very-dark-gray sm:tw-mr-2.5"
-                    @click="resetWeekOffset"
-                  >
-                    <v-icon class="sm:tw-mr-2">mdi-calendar-today</v-icon>
-                    <span v-if="!isPhone">Today</span>
-                  </v-btn>
-                  <v-btn
-                    :icon="isPhone"
-                    :variant="isPhone ? undefined : 'outlined'"
-                    :loading="loading"
-                    class="tw-text-green"
-                    @click="refreshCalendar"
-                  >
-                    <v-icon v-if="!isPhone" class="tw-mr-1">mdi-refresh</v-icon>
-                    <span v-if="!isPhone" class="tw-mr-2">Refresh</span>
-                    <v-icon v-else class="tw-text-green">mdi-refresh</v-icon>
-                  </v-btn>
                 </div>
                 <div
-                  v-if="!isPhone && (!isSignUp || canEditAvailability)"
-                  id="event-header-actions"
-                  ref="desktopGuestEditMenuRoot"
-                  class="desktop-event-header-actions tw-relative tw-flex tw-flex-col tw-gap-2"
+                  v-if="
+                    isGroup || (!isPhone && (!isSignUp || canEditAvailability))
+                  "
+                  class="desktop-event-header-actions tw-relative tw-flex tw-min-w-0 tw-flex-col tw-gap-2"
                 >
-                  <template v-if="!isEditing">
-                    <template v-if="desktopHasSecondaryOptions || !desktopShowInlineOptions">
-                      <div class="tw-flex tw-gap-2 tw-items-start">
-                        <div class="tw-flex tw-flex-col tw-gap-2 tw-flex-1 tw-min-w-0">
+                  <div
+                    v-if="isGroup"
+                    class="tw-flex tw-flex-row tw-items-center tw-gap-2.5"
+                  >
+                    <v-btn
+                      v-if="
+                        event.startOnMonday ? weekOffset != 1 : weekOffset != 0
+                      "
+                      :icon="isPhone"
+                      :variant="isPhone ? 'text' : undefined"
+                      class="tw-mr-1 tw-text-very-dark-gray sm:tw-mr-2.5"
+                      @click="resetWeekOffset"
+                    >
+                      <v-icon class="sm:tw-mr-2">mdi-calendar-today</v-icon>
+                      <span v-if="!isPhone">Today</span>
+                    </v-btn>
+                    <v-btn
+                      :icon="isPhone"
+                      :variant="isPhone ? undefined : 'outlined'"
+                      :loading="loading"
+                      class="tw-text-green"
+                      @click="refreshCalendar"
+                    >
+                      <v-icon v-if="!isPhone" class="tw-mr-1"
+                        >mdi-refresh</v-icon
+                      >
+                      <span v-if="!isPhone" class="tw-mr-2">Refresh</span>
+                      <v-icon v-else class="tw-text-green">mdi-refresh</v-icon>
+                    </v-btn>
+                  </div>
+                  <div
+                    v-else-if="!isPhone && (!isSignUp || canEditAvailability)"
+                    id="event-header-actions"
+                    ref="desktopGuestEditMenuRoot"
+                    class="tw-w-full"
+                  >
+                    <template v-if="!isEditing && !isScheduling">
+                      <template
+                        v-if="
+                          desktopHasSecondaryOptions ||
+                          !desktopShowInlineOptions
+                        "
+                      >
+                        <div class="tw-flex tw-w-full tw-items-start tw-gap-2">
+                          <div class="tw-min-w-0 tw-flex-1">
+                            <v-btn
+                              v-if="showSecondaryAddAvailabilityAction"
+                              id="desktop-secondary-availability-btn"
+                              variant="outlined"
+                              color="primary"
+                              class="desktop-event-header-control tw-w-full tw-whitespace-nowrap tw-px-3 tw-text-sm tw-text-green"
+                              @click="triggerSecondaryAddAvailability"
+                            >
+                              <v-icon>mdi-plus</v-icon>
+                              <span class="tw-ml-1">{{
+                                secondaryAddAvailabilityButtonText
+                              }}</span>
+                            </v-btn>
+                          </div>
+                          <div class="tw-min-w-0 tw-flex-1">
+                            <div
+                              class="desktop-primary-availability-anchor tw-relative tw-min-w-0"
+                            >
+                              <v-btn
+                                id="desktop-primary-availability-btn"
+                                class="desktop-event-header-control tw-w-full tw-bg-green tw-text-white"
+                                :class="desktopPrimaryAvailabilityButtonClass"
+                                :disabled="primaryAvailabilityButtonDisabled"
+                                @click="handlePrimaryAvailabilityAction"
+                              >
+                                <v-icon
+                                  v-if="
+                                    primaryAvailabilityButtonText.startsWith(
+                                      'Edit',
+                                    )
+                                  "
+                                  >mdi-pencil</v-icon
+                                >
+                                <v-icon v-else>mdi-plus</v-icon>
+                                <span class="tw-ml-1">{{
+                                  primaryAvailabilityButtonText
+                                }}</span>
+                              </v-btn>
+                              <v-menu
+                                v-if="
+                                  showGuestActionButton &&
+                                  hasMultipleOwnedGuestResponses
+                                "
+                                v-model="showGuestEditMenu"
+                                activator="#desktop-primary-availability-btn"
+                                :open-on-click="false"
+                                location="bottom end"
+                                offset="8"
+                              >
+                                <v-card min-width="164">
+                                  <div class="tw-py-1">
+                                    <button
+                                      v-for="option in ownedGuestEditOptions"
+                                      :key="option.lookupKey"
+                                      class="tw-block tw-w-full tw-px-3 tw-py-2 tw-text-left tw-text-sm hover:tw-bg-off-white"
+                                      @click="
+                                        editOwnedGuestAvailability(
+                                          option.lookupKey,
+                                        )
+                                      "
+                                    >
+                                      {{ option.name }}
+                                    </button>
+                                  </div>
+                                </v-card>
+                              </v-menu>
+                            </div>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <div
+                          class="desktop-event-header-inline-options tw-grid tw-grid-cols-2 tw-gap-2"
+                        >
                           <v-btn
                             v-if="showSecondaryAddAvailabilityAction"
                             id="desktop-secondary-availability-btn"
                             variant="outlined"
                             color="primary"
-                            class="desktop-event-header-control tw-w-full tw-whitespace-nowrap tw-px-3 tw-text-sm tw-text-green"
+                            class="desktop-event-header-control desktop-event-header-inline-options__item tw-w-full tw-whitespace-nowrap tw-px-3 tw-text-sm tw-text-green"
                             @click="triggerSecondaryAddAvailability"
                           >
                             <v-icon>mdi-plus</v-icon>
-                            <span class="tw-ml-1">{{ secondaryAddAvailabilityButtonText }}</span>
+                            <span class="tw-ml-1">{{
+                              secondaryAddAvailabilityButtonText
+                            }}</span>
                           </v-btn>
                           <div
-                            v-if="showBestTimesToggle"
-                            id="desktop-header-show-best-times"
-                            class="desktop-event-header-options__best-times-slot"
-                          >
-                            <v-switch
-                              id="show-best-times-header-toggle"
-                              class="desktop-event-header-control schedule-overlap-compact-switch desktop-event-header-options__best-times-switch"
-                              inset
-                              :model-value="desktopShowBestTimes"
-                              hide-details
-                              @update:model-value="updateDesktopShowBestTimes"
-                            >
-                              <template #label>
-                                <div class="tw-text-sm tw-text-black">
-                                  Show best {{ scheduleOverlapEvent.daysOnly ? "days" : "times" }}
-                                </div>
-                              </template>
-                            </v-switch>
-                          </div>
-                          <div
-                            v-if="showScheduleEventButton && isScheduling"
-                            class="tw-flex tw-gap-2"
-                          >
-                            <v-btn
-                              variant="outlined"
-                              class="desktop-event-header-control tw-flex-1 tw-text-red"
-                              @click="cancelScheduleEvent"
-                            >
-                              Cancel
-                            </v-btn>
-                            <v-btn
-                              v-if="hasSavedTimefulSchedule"
-                              variant="outlined"
-                              class="desktop-event-header-control tw-flex-1 tw-text-red"
-                              @click="clearScheduledEvent"
-                            >
-                              Clear
-                            </v-btn>
-                          </div>
-                        </div>
-                        <div class="tw-flex tw-flex-col tw-gap-2 tw-flex-1 tw-min-w-0">
-                          <div
-                            class="desktop-primary-availability-anchor tw-relative tw-min-w-0"
+                            class="desktop-primary-availability-anchor desktop-event-header-inline-options__item tw-relative tw-min-w-0"
                           >
                             <v-btn
                               id="desktop-primary-availability-btn"
@@ -329,9 +354,18 @@
                               :disabled="primaryAvailabilityButtonDisabled"
                               @click="handlePrimaryAvailabilityAction"
                             >
-                              <v-icon v-if="primaryAvailabilityButtonText.startsWith('Edit')">mdi-pencil</v-icon>
+                              <v-icon
+                                v-if="
+                                  primaryAvailabilityButtonText.startsWith(
+                                    'Edit',
+                                  )
+                                "
+                                >mdi-pencil</v-icon
+                              >
                               <v-icon v-else>mdi-plus</v-icon>
-                              <span class="tw-ml-1">{{ primaryAvailabilityButtonText }}</span>
+                              <span class="tw-ml-1">{{
+                                primaryAvailabilityButtonText
+                              }}</span>
                             </v-btn>
                             <v-menu
                               v-if="
@@ -350,7 +384,11 @@
                                     v-for="option in ownedGuestEditOptions"
                                     :key="option.lookupKey"
                                     class="tw-block tw-w-full tw-px-3 tw-py-2 tw-text-left tw-text-sm hover:tw-bg-off-white"
-                                    @click="editOwnedGuestAvailability(option.lookupKey)"
+                                    @click="
+                                      editOwnedGuestAvailability(
+                                        option.lookupKey,
+                                      )
+                                    "
                                   >
                                     {{ option.name }}
                                   </button>
@@ -358,230 +396,291 @@
                               </v-card>
                             </v-menu>
                           </div>
-                          <div
-                            v-if="desktopHasSecondaryOptions"
-                            id="desktop-header-more-options"
-                            class="desktop-event-header-options__menu"
+                          <v-switch
+                            id="show-all-hours-toggle"
+                            class="desktop-event-header-control desktop-event-header-inline-options__item schedule-overlap-compact-switch desktop-event-header-options__all-hours-switch tw-w-full"
+                            inset
+                            :model-value="desktopShowAllHours"
+                            hide-details
+                            @update:model-value="updateDesktopShowAllHours"
                           >
-                            <EventOptions
-                              variant="menu"
-                              :event="scheduleOverlapEvent"
-                              :show-best-times="desktopShowBestTimes"
-                              :hide-if-needed="desktopHideIfNeeded"
-                              :show-all-hours="desktopShowAllHours"
-                              :show-calendar-events="desktopShowCalendarEvents"
-                              :start-calendar-on-monday="desktopStartCalendarOnMonday"
-                              :num-responses="numResponses"
-                              :include-show-best-times="false"
-                              menu-button-label="More options"
-                              menu-activator-class="desktop-event-header-control desktop-event-header-options__menu-button tw-justify-between tw-w-full"
-                              @update:hide-if-needed="updateDesktopHideIfNeeded"
-                              @update:show-all-hours="updateDesktopShowAllHours"
-                              @update:show-calendar-events="updateDesktopShowCalendarEvents"
-                              @update:start-calendar-on-monday="
-                                updateDesktopStartCalendarOnMonday
-                              "
-                            />
-                          </div>
-                          <div v-if="showScheduleEventButton && isScheduling">
-                            <v-menu offset-y class="tw-z-20">
-                              <template #activator="{ props: activatorProps }">
-                                <v-btn
-                                  :disabled="!allowScheduleEvent"
-                                  class="desktop-event-header-control tw-w-full tw-bg-blue tw-text-white"
-                                  flat
-                                  v-bind="activatorProps"
-                                >
-                                  Schedule
-                                </v-btn>
-                              </template>
-                              <v-list density="compact">
-                                <v-list-item
-                                  class="schedule-event-menu__item"
-                                  @click="scheduleOverlap?.confirmScheduleEvent('timeful')"
-                                >
-                                  <div class="schedule-event-menu__content">
-                                    <img
-                                      src="/favicon-32x32.png"
-                                      alt=""
-                                      aria-hidden="true"
-                                      class="schedule-event-menu__icon tw-mr-2 tw-flex-none"
-                                    />
-                                    <div class="tw-flex tw-min-w-0 tw-flex-col">
-                                      <v-list-item-title>Timeful</v-list-item-title>
-                                    </div>
-                                  </div>
-                                </v-list-item>
-                                <v-list-item
-                                  class="schedule-event-menu__item"
-                                  @click="scheduleOverlap?.confirmScheduleEvent('google')"
-                                >
-                                  <div class="schedule-event-menu__content">
-                                    <img
-                                      src="@/assets/gcal_logo.png"
-                                      alt=""
-                                      aria-hidden="true"
-                                      class="schedule-event-menu__icon tw-mr-2 tw-flex-none"
-                                    />
-                                    <div class="tw-flex tw-min-w-0 tw-flex-col">
-                                      <v-list-item-title>Google Calendar</v-list-item-title>
-                                    </div>
-                                  </div>
-                                </v-list-item>
-                                <v-list-item
-                                  class="schedule-event-menu__item"
-                                  @click="scheduleOverlap?.confirmScheduleEvent('outlook')"
-                                >
-                                  <div class="schedule-event-menu__content">
-                                    <img
-                                      src="@/assets/outlook_logo.svg"
-                                      alt=""
-                                      aria-hidden="true"
-                                      class="schedule-event-menu__icon tw-mr-2 tw-flex-none"
-                                    />
-                                    <div class="tw-flex tw-min-w-0 tw-flex-col">
-                                      <v-list-item-title>Outlook</v-list-item-title>
-                                    </div>
-                                  </div>
-                                </v-list-item>
-                              </v-list>
-                            </v-menu>
-                          </div>
-                        </div>
-                      </div>
-                      <div
-                        v-if="showScheduleEventButton && !isScheduling"
-                        class="tw-flex tw-gap-2"
-                      >
-                        <v-btn
-                          variant="outlined"
-                          class="desktop-event-header-control tw-flex-1 tw-text-blue"
-                          @click="scheduleEvent"
-                        >
-                          <v-icon small>mdi-calendar-check</v-icon>
-                          <span class="tw-ml-2">{{ hasSavedTimefulSchedule ? 'Reschedule event' : 'Schedule event' }}</span>
-                        </v-btn>
-                      </div>
-                    </template>
-                    <template v-else>
-                      <div
-                        class="desktop-event-header-inline-options tw-grid tw-grid-cols-2 tw-gap-2"
-                      >
-                        <v-btn
-                          v-if="showSecondaryAddAvailabilityAction"
-                          id="desktop-secondary-availability-btn"
-                          variant="outlined"
-                          color="primary"
-                          class="desktop-event-header-control desktop-event-header-inline-options__item tw-w-full tw-whitespace-nowrap tw-px-3 tw-text-sm tw-text-green"
-                          @click="triggerSecondaryAddAvailability"
-                        >
-                          <v-icon>mdi-plus</v-icon>
-                          <span class="tw-ml-1">{{ secondaryAddAvailabilityButtonText }}</span>
-                        </v-btn>
-                        <div
-                          class="desktop-primary-availability-anchor desktop-event-header-inline-options__item tw-relative tw-min-w-0"
-                        >
-                          <v-btn
-                            id="desktop-primary-availability-btn"
-                            class="desktop-event-header-control tw-w-full tw-bg-green tw-text-white"
-                            :class="desktopPrimaryAvailabilityButtonClass"
-                            :disabled="primaryAvailabilityButtonDisabled"
-                            @click="handlePrimaryAvailabilityAction"
-                          >
-                            <v-icon v-if="primaryAvailabilityButtonText.startsWith('Edit')">mdi-pencil</v-icon>
-                            <v-icon v-else>mdi-plus</v-icon>
-                            <span class="tw-ml-1">{{ primaryAvailabilityButtonText }}</span>
-                          </v-btn>
-                          <v-menu
-                            v-if="
-                              showGuestActionButton &&
-                              hasMultipleOwnedGuestResponses
-                            "
-                            v-model="showGuestEditMenu"
-                            activator="#desktop-primary-availability-btn"
-                            :open-on-click="false"
-                            location="bottom end"
-                            offset="8"
-                          >
-                            <v-card min-width="164">
-                              <div class="tw-py-1">
-                                <button
-                                  v-for="option in ownedGuestEditOptions"
-                                  :key="option.lookupKey"
-                                  class="tw-block tw-w-full tw-px-3 tw-py-2 tw-text-left tw-text-sm hover:tw-bg-off-white"
-                                  @click="editOwnedGuestAvailability(option.lookupKey)"
-                                >
-                                  {{ option.name }}
-                                </button>
+                            <template #label>
+                              <div class="tw-text-sm tw-text-black">
+                                Show all hours
                               </div>
-                            </v-card>
-                          </v-menu>
+                            </template>
+                          </v-switch>
                         </div>
-                        <v-switch
-                          id="show-all-hours-toggle"
-                          class="desktop-event-header-control desktop-event-header-inline-options__item schedule-overlap-compact-switch desktop-event-header-options__all-hours-switch tw-w-full"
-                          inset
-                          :model-value="desktopShowAllHours"
-                          hide-details
-                          @update:model-value="updateDesktopShowAllHours"
-                        >
-                          <template #label>
-                            <div class="tw-text-sm tw-text-black">Show all hours</div>
-                          </template>
-                        </v-switch>
+                      </template>
+                    </template>
+                    <template v-else-if="isEditing">
+                      <div class="tw-flex tw-flex-col tw-items-end">
+                        <div class="tw-flex tw-flex-col tw-items-end tw-gap-2">
+                          <div class="tw-flex tw-gap-2">
+                            <v-btn
+                              variant="outlined"
+                              class="desktop-editing-cancel-button tw-w-20 tw-text-red"
+                              @click="cancelEditing"
+                            >
+                              Cancel
+                            </v-btn>
+                            <v-btn
+                              class="desktop-editing-save-button tw-w-20 tw-text-white"
+                              :class="'tw-bg-green'"
+                              :disabled="respondentSaveDisabled"
+                              @click="saveChanges"
+                            >
+                              Save
+                            </v-btn>
+                          </div>
+                          <v-switch
+                            v-if="!scheduleOverlapEvent.daysOnly"
+                            inset
+                            class="schedule-overlap-compact-switch tw-self-start"
+                            hide-details
+                            :model-value="
+                              scheduleOverlap?.showAllHours ?? false
+                            "
+                            @update:model-value="
+                              (val: boolean | null) =>
+                                scheduleOverlap?.updateShowAllHours(!!val)
+                            "
+                          >
+                            <template #label>
+                              <div class="tw-text-sm tw-text-black">
+                                Show all hours
+                              </div>
+                            </template>
+                          </v-switch>
+                          <v-btn
+                            v-if="showDeleteAvailabilityAction"
+                            variant="outlined"
+                            color="error"
+                            class="tw-normal-case tw-w-full"
+                            @click="deleteAvailabilityDialog = true"
+                          >
+                            Delete
+                          </v-btn>
+                        </div>
                       </div>
                     </template>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                id="event-header-meta-row"
+                class="event-header-row tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-start sm:tw-gap-4"
+              >
+                <div
+                  id="event-header-button-row"
+                  class="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-2"
+                >
+                  <template v-if="canEditMetadata">
+                    <v-btn
+                      id="edit-event-btn"
+                      variant="outlined"
+                      color="primary"
+                      class="event-metadata-action-button"
+                      @click="editEvent"
+                    >
+                      <v-icon class="tw-text-green">mdi-pencil</v-icon>
+                      <span class="tw-ml-1 tw-text-green"
+                        >Edit {{ isGroup ? "group" : "event" }}</span
+                      >
+                    </v-btn>
                   </template>
-                  <template v-else>
-                    <div class="tw-flex tw-flex-col tw-items-end">
-                      <div class="tw-flex tw-flex-col tw-items-end tw-gap-2">
-                        <div class="tw-flex tw-gap-2">
-                          <v-btn
-                            variant="outlined"
-                            class="desktop-editing-cancel-button tw-w-20 tw-text-red"
-                            @click="cancelEditing"
-                          >
-                            Cancel
-                          </v-btn>
-                          <v-btn
-                            class="desktop-editing-save-button tw-w-20 tw-text-white"
-                            :class="'tw-bg-green'"
-                            :disabled="respondentSaveDisabled"
-                            @click="saveChanges"
-                          >
-                            Save
-                          </v-btn>
+                  <v-btn
+                    v-if="!isGroup"
+                    id="copy-link-btn"
+                    variant="outlined"
+                    color="primary"
+                    class="event-metadata-action-button"
+                    @click="copyLink"
+                  >
+                    <v-icon class="tw-text-green">mdi-content-copy</v-icon>
+                    <span class="tw-ml-1 tw-text-green">Copy link</span>
+                  </v-btn>
+                </div>
+                <div
+                  v-if="
+                    !isPhone &&
+                    !isGroup &&
+                    !isEditing &&
+                    !isScheduling &&
+                    desktopHasSecondaryOptions
+                  "
+                  class="desktop-event-header-actions tw-flex tw-min-w-0 tw-gap-2"
+                >
+                  <div
+                    v-if="showBestTimesToggle"
+                    id="desktop-header-show-best-times"
+                    class="desktop-event-header-options__best-times-slot tw-flex-1"
+                  >
+                    <v-switch
+                      id="show-best-times-header-toggle"
+                      class="desktop-event-header-control schedule-overlap-compact-switch desktop-event-header-options__best-times-switch"
+                      inset
+                      :model-value="desktopShowBestTimes"
+                      hide-details
+                      @update:model-value="updateDesktopShowBestTimes"
+                    >
+                      <template #label>
+                        <div
+                          class="tw-whitespace-nowrap tw-text-sm tw-text-black"
+                        >
+                          Show best
+                          {{ scheduleOverlapEvent.daysOnly ? "days" : "times" }}
                         </div>
-                        <v-switch
-                          v-if="!scheduleOverlapEvent.daysOnly"
-                          inset
-                          class="schedule-overlap-compact-switch tw-self-start"
-                          hide-details
-                          :model-value="scheduleOverlap?.showAllHours ?? false"
-                          @update:model-value="
-                            (val: boolean | null) => scheduleOverlap?.updateShowAllHours(!!val)
-                          "
-                        >
-                          <template #label>
-                            <div class="tw-text-sm tw-text-black">Show all hours</div>
-                          </template>
-                        </v-switch>
-                        <v-btn
-                          v-if="showDeleteAvailabilityAction"
-                          variant="outlined"
-                          color="error"
-                          class="tw-normal-case tw-w-full"
-                          @click="deleteAvailabilityDialog = true"
-                        >
-                          Delete
-                        </v-btn>
-                      </div>
-                    </div>
-                  </template>
+                      </template>
+                    </v-switch>
+                  </div>
+                  <div
+                    id="desktop-header-more-options"
+                    class="desktop-event-header-options__menu tw-flex-1"
+                  >
+                    <EventOptions
+                      variant="menu"
+                      :event="scheduleOverlapEvent"
+                      :show-best-times="desktopShowBestTimes"
+                      :hide-if-needed="desktopHideIfNeeded"
+                      :show-all-hours="desktopShowAllHours"
+                      :show-calendar-events="desktopShowCalendarEvents"
+                      :start-calendar-on-monday="desktopStartCalendarOnMonday"
+                      :num-responses="numResponses"
+                      :include-show-best-times="false"
+                      menu-button-label="More options"
+                      menu-activator-class="desktop-event-header-control desktop-event-header-options__menu-button tw-justify-between tw-w-full"
+                      @update:hide-if-needed="updateDesktopHideIfNeeded"
+                      @update:show-all-hours="updateDesktopShowAllHours"
+                      @update:show-calendar-events="
+                        updateDesktopShowCalendarEvents
+                      "
+                      @update:start-calendar-on-monday="
+                        updateDesktopStartCalendarOnMonday
+                      "
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="event-header-row tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-start sm:tw-gap-4"
+              >
+                <div class="tw-min-w-0 tw-flex-1">
+                  <EventDescription
+                    v-model:event="event"
+                    :can-edit="canEditMetadata"
+                    class="event-header-description"
+                  />
+                </div>
+                <div
+                  v-if="
+                    !isPhone &&
+                    !isGroup &&
+                    !isEditing &&
+                    !isScheduling &&
+                    showScheduleEventButton
+                  "
+                  class="desktop-event-header-actions"
+                >
+                  <v-btn
+                    variant="outlined"
+                    class="desktop-event-header-control tw-w-full tw-text-blue"
+                    @click="scheduleEvent"
+                  >
+                    <v-icon small>mdi-calendar-check</v-icon>
+                    <span class="tw-ml-2">{{
+                      hasSavedTimefulSchedule
+                        ? "Reschedule event"
+                        : "Schedule event"
+                    }}</span>
+                  </v-btn>
+                </div>
+                <div
+                  v-else-if="
+                    !isPhone &&
+                    !isGroup &&
+                    !isEditing &&
+                    isScheduling &&
+                    showScheduleEventButton
+                  "
+                  class="desktop-event-header-actions tw-flex tw-gap-2"
+                >
+                  <v-btn
+                    variant="outlined"
+                    class="desktop-event-header-control tw-flex-1 tw-text-red"
+                    @click="cancelScheduleEvent"
+                  >
+                    Cancel
+                  </v-btn>
+                  <v-btn
+                    v-if="hasSavedTimefulSchedule"
+                    variant="outlined"
+                    class="desktop-event-header-control tw-flex-1 tw-text-red"
+                    @click="clearScheduledEvent"
+                  >
+                    Clear
+                  </v-btn>
+                  <v-menu offset-y class="tw-z-20">
+                    <template #activator="{ props: activatorProps }">
+                      <v-btn
+                        :disabled="!allowScheduleEvent"
+                        class="desktop-event-header-control tw-flex-1 tw-bg-blue tw-text-white"
+                        flat
+                        v-bind="activatorProps"
+                      >
+                        Schedule
+                      </v-btn>
+                    </template>
+                    <v-list density="compact">
+                      <v-list-item
+                        class="schedule-event-menu__item"
+                        @click="confirmScheduleEvent('timeful')"
+                      >
+                        <div class="schedule-event-menu__content">
+                          <img
+                            src="/favicon-32x32.png"
+                            alt=""
+                            aria-hidden="true"
+                            class="schedule-event-menu__icon tw-mr-2 tw-flex-none"
+                          />
+                          <v-list-item-title>Timeful</v-list-item-title>
+                        </div>
+                      </v-list-item>
+                      <v-list-item
+                        class="schedule-event-menu__item"
+                        @click="confirmScheduleEvent('google')"
+                      >
+                        <div class="schedule-event-menu__content">
+                          <img
+                            src="@/assets/gcal_logo.png"
+                            alt=""
+                            aria-hidden="true"
+                            class="schedule-event-menu__icon tw-mr-2 tw-flex-none"
+                          />
+                          <v-list-item-title>Google Calendar</v-list-item-title>
+                        </div>
+                      </v-list-item>
+                      <v-list-item
+                        class="schedule-event-menu__item"
+                        @click="confirmScheduleEvent('outlook')"
+                      >
+                        <div class="schedule-event-menu__content">
+                          <img
+                            src="@/assets/outlook_logo.svg"
+                            alt=""
+                            aria-hidden="true"
+                            class="schedule-event-menu__icon tw-mr-2 tw-flex-none"
+                          />
+                          <v-list-item-title>Outlook</v-list-item-title>
+                        </div>
+                      </v-list-item>
+                    </v-list>
+                  </v-menu>
                 </div>
               </div>
             </div>
-
           </div>
 
           <!-- Calendar -->
@@ -748,18 +847,25 @@
           }`"
         >
           <template v-if="!isEditing && !isScheduling">
-            <div v-if="showScheduleEventButton" class="tw-flex tw-items-center tw-gap-1">
-                <v-btn
-                  variant="outlined"
-                  class="tw-border-white tw-px-2 tw-text-[13px] tw-text-white max-sm:tw-px-1 max-sm:tw-text-xs"
+            <div
+              v-if="showScheduleEventButton"
+              class="tw-flex tw-items-center tw-gap-1"
+            >
+              <v-btn
+                variant="outlined"
+                class="tw-border-white tw-px-2 tw-text-[13px] tw-text-white max-sm:tw-px-1 max-sm:tw-text-xs"
                 @click="scheduleEvent"
               >
-                  <v-icon>mdi-calendar-check</v-icon>
-                  <span class="tw-ml-1">{{ hasSavedTimefulSchedule ? 'Reschedule' : 'Schedule' }}</span>
-                </v-btn>
+                <v-icon>mdi-calendar-check</v-icon>
+                <span class="tw-ml-1">{{
+                  hasSavedTimefulSchedule ? "Reschedule" : "Schedule"
+                }}</span>
+              </v-btn>
             </div>
             <v-spacer />
-            <div class="tw-flex tw-min-w-0 tw-items-center tw-gap-2 max-sm:tw-gap-1">
+            <div
+              class="tw-flex tw-min-w-0 tw-items-center tw-gap-2 max-sm:tw-gap-1"
+            >
               <v-btn
                 v-if="showSecondaryAddAvailabilityAction"
                 id="mobile-secondary-availability-btn"
@@ -768,7 +874,9 @@
                 @click="triggerSecondaryAddAvailability"
               >
                 <v-icon>mdi-plus</v-icon>
-                <span class="tw-ml-1">{{ secondaryAddAvailabilityButtonText }}</span>
+                <span class="tw-ml-1">{{
+                  secondaryAddAvailabilityButtonText
+                }}</span>
               </v-btn>
               <v-btn
                 id="mobile-primary-availability-btn"
@@ -784,9 +892,14 @@
                 :style="{ opacity: availabilityBtnOpacity }"
                 @click="handlePrimaryAvailabilityAction"
               >
-                <v-icon v-if="mobilePrimaryAvailabilityButtonText.startsWith('Edit')">mdi-pencil</v-icon>
+                <v-icon
+                  v-if="mobilePrimaryAvailabilityButtonText.startsWith('Edit')"
+                  >mdi-pencil</v-icon
+                >
                 <v-icon v-else>mdi-plus</v-icon>
-                <span class="tw-ml-1">{{ mobilePrimaryAvailabilityButtonText }}</span>
+                <span class="tw-ml-1">{{
+                  mobilePrimaryAvailabilityButtonText
+                }}</span>
               </v-btn>
             </div>
           </template>
@@ -801,11 +914,7 @@
             </v-btn>
             <v-spacer />
             <div class="tw-flex tw-gap-2">
-              <v-menu
-                location="top"
-                offset="8"
-                :close-on-content-click="false"
-              >
+              <v-menu location="top" offset="8" :close-on-content-click="false">
                 <template #activator="{ props: activatorProps }">
                   <v-btn
                     variant="outlined"
@@ -823,11 +932,14 @@
                       hide-details
                       :model-value="scheduleOverlap?.showAllHours ?? false"
                       @update:model-value="
-                        (val: boolean | null) => scheduleOverlap?.updateShowAllHours(!!val)
+                        (val: boolean | null) =>
+                          scheduleOverlap?.updateShowAllHours(!!val)
                       "
                     >
                       <template #label>
-                        <div class="tw-text-sm tw-text-black">Show all hours</div>
+                        <div class="tw-text-sm tw-text-black">
+                          Show all hours
+                        </div>
                       </template>
                     </v-switch>
                   </v-card-text>
@@ -879,21 +991,45 @@
                 </v-btn>
               </template>
               <v-list density="compact">
-                <v-list-item class="schedule-event-menu__item" @click="confirmScheduleEvent('timeful')">
+                <v-list-item
+                  class="schedule-event-menu__item"
+                  @click="confirmScheduleEvent('timeful')"
+                >
                   <div class="schedule-event-menu__content">
-                    <img src="/favicon-32x32.png" alt="" aria-hidden="true" class="schedule-event-menu__icon tw-mr-2 tw-flex-none" />
+                    <img
+                      src="/favicon-32x32.png"
+                      alt=""
+                      aria-hidden="true"
+                      class="schedule-event-menu__icon tw-mr-2 tw-flex-none"
+                    />
                     <v-list-item-title>Timeful</v-list-item-title>
                   </div>
                 </v-list-item>
-                <v-list-item class="schedule-event-menu__item" @click="confirmScheduleEvent('google')">
+                <v-list-item
+                  class="schedule-event-menu__item"
+                  @click="confirmScheduleEvent('google')"
+                >
                   <div class="schedule-event-menu__content">
-                    <img src="@/assets/gcal_logo.png" alt="" aria-hidden="true" class="schedule-event-menu__icon tw-mr-2 tw-flex-none" />
+                    <img
+                      src="@/assets/gcal_logo.png"
+                      alt=""
+                      aria-hidden="true"
+                      class="schedule-event-menu__icon tw-mr-2 tw-flex-none"
+                    />
                     <v-list-item-title>Google Calendar</v-list-item-title>
                   </div>
                 </v-list-item>
-                <v-list-item class="schedule-event-menu__item" @click="confirmScheduleEvent('outlook')">
+                <v-list-item
+                  class="schedule-event-menu__item"
+                  @click="confirmScheduleEvent('outlook')"
+                >
                   <div class="schedule-event-menu__content">
-                    <img src="@/assets/outlook_logo.svg" alt="" aria-hidden="true" class="schedule-event-menu__icon tw-mr-2 tw-flex-none" />
+                    <img
+                      src="@/assets/outlook_logo.svg"
+                      alt=""
+                      aria-hidden="true"
+                      class="schedule-event-menu__icon tw-mr-2 tw-flex-none"
+                    />
                     <v-list-item-title>Outlook</v-list-item-title>
                   </div>
                 </v-list-item>
@@ -938,7 +1074,9 @@
           This event may have been deleted, or the link may be incorrect.
         </p>
         <RouterLink to="/home">
-          <v-btn class="timeful-elevated-button tw-mt-6 tw-bg-green tw-text-white">
+          <v-btn
+            class="timeful-elevated-button tw-mt-6 tw-bg-green tw-text-white"
+          >
             Back to home
           </v-btn>
         </RouterLink>
@@ -1044,7 +1182,7 @@ import {
 } from "@/composables/event/eventOwnership"
 
 const ScheduleOverlap = defineAsyncComponent(
-  () => import("@/components/schedule_overlap/ScheduleOverlap.vue")
+  () => import("@/components/schedule_overlap/ScheduleOverlap.vue"),
 )
 
 defineOptions({ name: "AppEvent" })
@@ -1093,37 +1231,37 @@ const eventLoadStatus = ref<"loading" | "ready" | "notFound">("loading")
 const isEditing = computed(() => scheduleOverlap.value?.editing ?? false)
 const isScheduling = computed(() => scheduleOverlap.value?.scheduling ?? false)
 const allowScheduleEvent = computed(
-  () => scheduleOverlap.value?.allowScheduleEvent ?? false
+  () => scheduleOverlap.value?.allowScheduleEvent ?? false,
 )
 const respondentSaveAllowed = computed(
-  () => scheduleOverlap.value?.respondentSaveAllowed ?? true
+  () => scheduleOverlap.value?.respondentSaveAllowed ?? true,
 )
 const respondentSaveDisabled = computed(
-  () => !isSignUp.value && !respondentSaveAllowed.value
+  () => !isSignUp.value && !respondentSaveAllowed.value,
 )
 const mobileScheduleButtonStyle = computed<Record<string, string>>(() => ({
   backgroundColor: allowScheduleEvent.value
     ? "#FFFFFF"
     : "rgba(255,255,255,0.12)",
-  color: allowScheduleEvent.value
-    ? "#006BE8"
-    : "rgba(255,255,255,0.5)",
+  color: allowScheduleEvent.value ? "#006BE8" : "rgba(255,255,255,0.5)",
   border: allowScheduleEvent.value
     ? "1px solid transparent"
     : "1px solid rgba(255,255,255,0.28)",
 }))
 const showDeleteAvailabilityAction = computed(
-  () => (!addingAvailabilityAsGuest.value && userHasResponded.value) || Boolean(curGuestId.value)
+  () =>
+    (!addingAvailabilityAsGuest.value && userHasResponded.value) ||
+    Boolean(curGuestId.value),
 )
 
 const areUnsavedChanges = computed(
-  () => scheduleOverlap.value?.unsavedChanges ?? false
+  () => scheduleOverlap.value?.unsavedChanges ?? false,
 )
 const ownedGuestResponses = computed(
-  () => scheduleOverlap.value?.ownedGuestResponses ?? []
+  () => scheduleOverlap.value?.ownedGuestResponses ?? [],
 )
 const numResponses = computed(
-  () => scheduleOverlap.value?.respondents.length ?? 0
+  () => scheduleOverlap.value?.respondents.length ?? 0,
 )
 const isSettingSpecificTimes = computed(() => {
   const so = scheduleOverlap.value
@@ -1145,27 +1283,27 @@ const eventType = computed(() => {
   return "event"
 })
 const canEditAvailability = computed(() =>
-  canEditAvailabilityAsCurrentViewer(loader.event.value, authUser.value)
+  canEditAvailabilityAsCurrentViewer(loader.event.value, authUser.value),
 )
 const isOwner = computed(() =>
-  isSignedInOwner(loader.event.value, authUser.value)
+  isSignedInOwner(loader.event.value, authUser.value),
 )
 const canEditMetadata = computed(() =>
-  canEditEventMetadata(loader.event.value, authUser.value)
+  canEditEventMetadata(loader.event.value, authUser.value),
 )
 const eventHeaderTimezone = computed(
-  () => scheduleOverlap.value?.curTimezone ?? props.initialTimezone
+  () => scheduleOverlap.value?.curTimezone ?? props.initialTimezone,
 )
 const userHasResponded = computed(() => {
   const ev = loader.event.value
   return Boolean(
-    authUser.value?._id && ev?.responses && authUser.value._id in ev.responses
+    authUser.value?._id && ev?.responses && authUser.value._id in ev.responses,
   )
 })
 const dateString = computed(() =>
   loader.event.value
     ? getDateRangeStringForEvent(loader.event.value, eventHeaderTimezone.value)
-    : ""
+    : "",
 )
 const showHeaderDateSummary = computed(() => {
   const event = loader.event.value
@@ -1182,7 +1320,7 @@ const showAds = computed(
     loader.ownerPremiumChecked.value &&
     !loader.ownerIsPremium.value &&
     !viewerHasPremiumAccess.value &&
-    !isSettingSpecificTimes.value
+    !isSettingSpecificTimes.value,
 )
 const showFeedbackBtn = computed(() => isPhone.value)
 const guestAddedAvailability = computed(() =>
@@ -1190,9 +1328,9 @@ const guestAddedAvailability = computed(() =>
     Object.values(loader.event.value?.responses ?? {}).some((response) =>
       response.guestOwnershipMode === "token"
         ? response.guestId === ownedGuest.lookupKey
-        : response.user?._id === ownedGuest.lookupKey
-    )
-  )
+        : response.user?._id === ownedGuest.lookupKey,
+    ),
+  ),
 )
 const actionButtonText = computed(() => {
   if (isSignUp.value) return "Edit slots"
@@ -1202,11 +1340,11 @@ const actionButtonText = computed(() => {
 function getOwnedGuestLookupKeyForResponse(
   responseId: string,
   response: {
-  guestOwnershipMode?: "legacy" | "token"
-  guestId?: string
-  user?: { _id?: string }
-  name?: string
-}
+    guestOwnershipMode?: "legacy" | "token"
+    guestId?: string
+    user?: { _id?: string }
+    name?: string
+  },
 ) {
   if (response.guestOwnershipMode === "token") {
     return response.guestId
@@ -1219,40 +1357,40 @@ const ownedGuestEditOptions = computed(() =>
   ownedGuestResponses.value
     .map((ownedGuest) => {
       const matchingResponse = Object.entries(
-        loader.event.value?.responses ?? {}
+        loader.event.value?.responses ?? {},
       ).find(
         ([responseId, response]) =>
           getOwnedGuestLookupKeyForResponse(responseId, response) ===
-          ownedGuest.lookupKey
+          ownedGuest.lookupKey,
       )
       return {
         lookupKey: ownedGuest.lookupKey,
         name: matchingResponse?.[1]
           ? getResponseDisplayName(matchingResponse[1])
-          : ownedGuest.name ?? ownedGuest.lookupKey,
+          : (ownedGuest.name ?? ownedGuest.lookupKey),
         responseId: matchingResponse?.[0] ?? "",
       }
     })
-    .filter((option) => option.responseId.length > 0)
+    .filter((option) => option.responseId.length > 0),
 )
 const showGuestActionButton = computed(
   () =>
     !isGroup.value &&
     !userHasResponded.value &&
-    ownedGuestEditOptions.value.length > 0
+    ownedGuestEditOptions.value.length > 0,
 )
 const hasEditableAvailability = computed(
-  () => userHasResponded.value || showGuestActionButton.value
+  () => userHasResponded.value || showGuestActionButton.value,
 )
 const showDisabledEditAvailabilityPrimary = computed(
   () =>
     !isGroup.value &&
     !isSignUp.value &&
     numResponses.value > 0 &&
-    !hasEditableAvailability.value
+    !hasEditableAvailability.value,
 )
 const hasMultipleOwnedGuestResponses = computed(
-  () => ownedGuestEditOptions.value.length > 1
+  () => ownedGuestEditOptions.value.length > 1,
 )
 const guestActionButtonText = computed(() => "Edit availability")
 const secondaryAddAvailabilityButtonText = computed(() => {
@@ -1270,12 +1408,10 @@ const showSecondaryAddAvailabilityAction = computed(() => {
 })
 const showScheduleEventButton = computed(
   () =>
-    !scheduleOverlapEvent.value.daysOnly &&
-    !isEditing.value &&
-    !isSignUp.value
+    !scheduleOverlapEvent.value.daysOnly && !isEditing.value && !isSignUp.value,
 )
-const hasSavedTimefulSchedule = computed(
-  () => Boolean(loader.event.value?.scheduledEvent)
+const hasSavedTimefulSchedule = computed(() =>
+  Boolean(loader.event.value?.scheduledEvent),
 )
 const primaryAvailabilityButtonText = computed(() => {
   if (showDisabledEditAvailabilityPrimary.value) return "Edit availability"
@@ -1285,7 +1421,7 @@ const primaryAvailabilityButtonText = computed(() => {
 const primaryAvailabilityButtonDisabled = computed(
   () =>
     showDisabledEditAvailabilityPrimary.value ||
-    (loading.value && !showGuestActionButton.value && !userHasResponded.value)
+    (loading.value && !showGuestActionButton.value && !userHasResponded.value),
 )
 const desktopPrimaryAvailabilityButtonClass = computed(() => ({
   "desktop-primary-availability-button": true,
@@ -1304,7 +1440,7 @@ const guestRespondentNames = computed(() =>
     }
     const displayName = getResponseDisplayName(response)
     return displayName.length > 0 ? [displayName] : []
-  })
+  }),
 )
 const mobilePrimaryAvailabilityButtonText = computed(() => {
   if (showDisabledEditAvailabilityPrimary.value) return "Edit availability"
@@ -1317,34 +1453,36 @@ const mobilePrimaryAvailabilityButtonClass = computed(() => ({
 }))
 const isIOS = computed(() => isIOSFn())
 const desktopShowBestTimes = computed(
-  () => scheduleOverlap.value?.showBestTimes ?? false
+  () => scheduleOverlap.value?.showBestTimes ?? false,
 )
 const desktopHideIfNeeded = computed(
-  () => scheduleOverlap.value?.hideIfNeeded ?? false
+  () => scheduleOverlap.value?.hideIfNeeded ?? false,
 )
 const desktopShowAllHours = computed(
-  () => scheduleOverlap.value?.showAllHours ?? false
+  () => scheduleOverlap.value?.showAllHours ?? false,
 )
 const desktopShowCalendarEvents = computed(
-  () => scheduleOverlap.value?.showCalendarEvents ?? false
+  () => scheduleOverlap.value?.showCalendarEvents ?? false,
 )
 const desktopStartCalendarOnMonday = computed(
-  () => scheduleOverlap.value?.startCalendarOnMonday ?? false
+  () => scheduleOverlap.value?.startCalendarOnMonday ?? false,
 )
 const showBestTimesToggle = computed(
-  () => !isSignUp.value && numResponses.value >= 1
+  () => !isSignUp.value && numResponses.value >= 1,
 )
 const desktopHasSecondaryOptions = computed(
   () =>
     !isSignUp.value &&
-    (numResponses.value >= 1 || isGroup.value || scheduleOverlapEvent.value.daysOnly)
+    (numResponses.value >= 1 ||
+      isGroup.value ||
+      scheduleOverlapEvent.value.daysOnly),
 )
 const desktopShowInlineOptions = computed(
   () =>
     scheduleOverlapReady.value &&
     !isSignUp.value &&
     numResponses.value < 1 &&
-    !scheduleOverlapEvent.value.daysOnly
+    !scheduleOverlapEvent.value.daysOnly,
 )
 
 function closeGuestEditMenu() {
@@ -1464,13 +1602,13 @@ const {
 } = loader
 
 const scheduleOverlapEvent = computed(() =>
-  toScheduleOverlapEvent(event.value as Event)
+  toScheduleOverlapEvent(event.value as Event),
 )
 
 function editSelectedGuestAvailability() {
   if (ownedGuestEditOptions.value.length === 1) {
     scheduleOverlap.value?.editOwnedGuestAvailability(
-      ownedGuestEditOptions.value[0].lookupKey
+      ownedGuestEditOptions.value[0].lookupKey,
     )
     closeGuestEditMenu()
     return
@@ -1512,7 +1650,11 @@ function handleDeleteAvailabilityConfirm() {
 
 watch(
   [showGuestActionButton, hasMultipleOwnedGuestResponses, isEditing],
-  ([showGuestActionButtonValue, hasMultipleOwnedGuestResponsesValue, isEditingValue]) => {
+  ([
+    showGuestActionButtonValue,
+    hasMultipleOwnedGuestResponsesValue,
+    isEditingValue,
+  ]) => {
     if (
       !showGuestActionButtonValue ||
       !hasMultipleOwnedGuestResponsesValue ||
@@ -1520,7 +1662,7 @@ watch(
     ) {
       closeGuestEditMenu()
     }
-  }
+  },
 )
 
 onMounted(() => {
@@ -1634,7 +1776,7 @@ function queueSecondaryBootWork() {
       () => {
         void nextTick().then(run)
       },
-      { timeout: 1500 }
+      { timeout: 1500 },
     )
     return
   }
@@ -1670,7 +1812,9 @@ const scheduleEvent = () => {
 const cancelScheduleEvent = () => {
   scheduleOverlap.value?.cancelScheduleEvent()
 }
-const confirmScheduleEvent = (destination: "timeful" | "google" | "outlook") => {
+const confirmScheduleEvent = (
+  destination: "timeful" | "google" | "outlook",
+) => {
   scheduleOverlap.value?.confirmScheduleEvent(destination)
 }
 const clearScheduledEvent = () => {
@@ -1748,8 +1892,8 @@ function _interceptPluginResponses(e: MessageEvent<PluginMessageData>) {
         const timezoneValue = debugPayload.timezone ?? "—"
         console.log(
           `[PLUGIN RESPONSE - SUCCESS] ${command} | timeIncrement: ${String(
-            timeIncrement
-          )} | timezone: ${timezoneValue}`
+            timeIncrement,
+          )} | timezone: ${timezoneValue}`,
         )
         Object.entries(slots).forEach(([userId, u]) => {
           const label = [u.name, u.email].filter(Boolean).join(" ") || userId
@@ -1768,8 +1912,8 @@ function _interceptPluginResponses(e: MessageEvent<PluginMessageData>) {
     } else {
       const errMsg =
         typeof errData === "object"
-          ? errData.message ?? JSON.stringify(errData)
-          : errData ?? ""
+          ? (errData.message ?? JSON.stringify(errData))
+          : (errData ?? "")
       console.error(`[PLUGIN RESPONSE - ERROR] ${command ?? ""}`, {
         requestId,
         error: errMsg,
@@ -1804,7 +1948,7 @@ async function setSlots(e: MessageEvent<PluginMessageData>) {
       sendPluginError(
         requestId,
         command,
-        "Non-owners cannot set guest availability when 'Hide responses from respondents' is enabled."
+        "Non-owners cannot set guest availability when 'Hide responses from respondents' is enabled.",
       )
       return
     }
@@ -1816,14 +1960,14 @@ async function setSlots(e: MessageEvent<PluginMessageData>) {
   if (isGuest) {
     const guestNameKey = getGuestNameStorageKey(ev._id ?? "")
     const guestOwnershipCollection = readGuestOwnershipCollectionForEvent(
-      ev._id ?? ""
+      ev._id ?? "",
     )
     const selectedGuestOwnership = getSelectedGuestOwnership(
-      guestOwnershipCollection
+      guestOwnershipCollection,
     )
     const namedGuestOwnership =
       guestOwnershipCollection?.records.find(
-        (record) => record.name === payloadGuestName
+        (record) => record.name === payloadGuestName,
       ) ?? selectedGuestOwnership
     if (forceGuestMode) {
       guestName = payloadGuestName
@@ -1834,7 +1978,7 @@ async function setSlots(e: MessageEvent<PluginMessageData>) {
           sendPluginError(
             requestId,
             command,
-            "Guest email is required because this event collects emails. Please provide 'guestEmail' in the payload."
+            "Guest email is required because this event collects emails. Please provide 'guestEmail' in the payload.",
           )
           return
         }
@@ -1842,7 +1986,7 @@ async function setSlots(e: MessageEvent<PluginMessageData>) {
           sendPluginError(
             requestId,
             command,
-            `Invalid email format: ${guestEmail}`
+            `Invalid email format: ${guestEmail}`,
           )
           return
         }
@@ -1860,7 +2004,7 @@ async function setSlots(e: MessageEvent<PluginMessageData>) {
         sendPluginError(
           requestId,
           command,
-          "Guest name is required. Please provide 'guestName' in the payload or add your availability through the UI first."
+          "Guest name is required. Please provide 'guestName' in the payload or add your availability through the UI first.",
         )
         return
       }
@@ -1894,7 +2038,7 @@ async function setSlots(e: MessageEvent<PluginMessageData>) {
       sendPluginError(
         requestId,
         command,
-        `Invalid timezone: "${timezoneValue}". Please provide a valid IANA timezone name from the supported timezones list.`
+        `Invalid timezone: "${timezoneValue}". Please provide a valid IANA timezone name from the supported timezones list.`,
       )
       return
     }
@@ -1910,7 +2054,7 @@ async function setSlots(e: MessageEvent<PluginMessageData>) {
       sendPluginError(
         requestId,
         command,
-        `Slot at index ${String(i)} is missing required 'start' or 'end' field`
+        `Slot at index ${String(i)} is missing required 'start' or 'end' field`,
       )
       return
     }
@@ -1918,7 +2062,7 @@ async function setSlots(e: MessageEvent<PluginMessageData>) {
       sendPluginError(
         requestId,
         command,
-        `Slot at index ${String(i)} is missing required 'status' field`
+        `Slot at index ${String(i)} is missing required 'status' field`,
       )
       return
     }
@@ -1927,8 +2071,8 @@ async function setSlots(e: MessageEvent<PluginMessageData>) {
         requestId,
         command,
         `Invalid status '${slot.status}' at index ${String(
-          i
-        )}. Must be 'available' or 'if-needed'`
+          i,
+        )}. Must be 'available' or 'if-needed'`,
       )
       return
     }
@@ -1936,7 +2080,7 @@ async function setSlots(e: MessageEvent<PluginMessageData>) {
   const normalizedSlotsResult = normalizePluginSetSlots(
     slots,
     effectiveTimezoneValue,
-    ev.type
+    ev.type,
   )
   if (!normalizedSlotsResult.ok) {
     sendPluginError(requestId, command, normalizedSlotsResult.error)
@@ -1962,7 +2106,7 @@ async function setSlots(e: MessageEvent<PluginMessageData>) {
           startTime: Temporal.ZonedDateTime
           endTime: Temporal.ZonedDateTime
         },
-        _key: number
+        _key: number,
       ) => {
         const slotStartMs = value.startTime.epochMilliseconds
         const slotEndMs = value.endTime.epochMilliseconds
@@ -1981,8 +2125,8 @@ async function setSlots(e: MessageEvent<PluginMessageData>) {
                   requestId,
                   command,
                   `Time slot at index ${String(
-                    i
-                  )} overlaps with another time slot with different status`
+                    i,
+                  )} overlaps with another time slot with different status`,
                 )
                 return
               }
@@ -1998,7 +2142,7 @@ async function setSlots(e: MessageEvent<PluginMessageData>) {
             if (currentTimeMs > intersectionEndMs) break
           }
         }
-      }
+      },
     )
     if (coveredWidth < intWidth) {
       sendPluginError(
@@ -2006,7 +2150,7 @@ async function setSlots(e: MessageEvent<PluginMessageData>) {
         command,
         `Time slot at index ${String(i)} (${slot.start} to ${
           slot.end
-        }) falls outside the event's date/time range.`
+        }) falls outside the event's date/time range.`,
       )
       isBrokenBounds = true
     }
@@ -2016,14 +2160,14 @@ async function setSlots(e: MessageEvent<PluginMessageData>) {
   try {
     const sanitizedId = props.eventId.replaceAll(".", "")
     const availability = allAvailabilityTimestamps.map((ms) =>
-      Temporal.Instant.fromEpochMilliseconds(ms).toZonedDateTimeISO("UTC")
+      Temporal.Instant.fromEpochMilliseconds(ms).toZonedDateTimeISO("UTC"),
     )
     const ifNeeded = allIfNeededTimestamps.map((ms) =>
-      Temporal.Instant.fromEpochMilliseconds(ms).toZonedDateTimeISO("UTC")
+      Temporal.Instant.fromEpochMilliseconds(ms).toZonedDateTimeISO("UTC"),
     )
     const storedGuestOwnership = event.value._id
       ? getSelectedGuestOwnership(
-          readGuestOwnershipCollectionForEvent(event.value._id)
+          readGuestOwnershipCollectionForEvent(event.value._id),
         )
       : undefined
     const payload = encodeEventResponseSubmissionPayload(
@@ -2045,7 +2189,7 @@ async function setSlots(e: MessageEvent<PluginMessageData>) {
               : storedGuestOwnership?.guestEditToken,
           guestEditPolicy: storedGuestOwnership?.guestEditPolicy ?? "protected",
         },
-      })
+      }),
     )
     const response = await post<{
       guestCredentials?: {
@@ -2059,9 +2203,9 @@ async function setSlots(e: MessageEvent<PluginMessageData>) {
       appendGuestIdentityQuery(
         `/events/${sanitizedId}/response`,
         storedGuestOwnership,
-        guestName
+        guestName,
       ),
-      payload
+      payload,
     )
     if (isGuest && ev._id && response.guestCredentials) {
       const nextCollection = upsertGuestOwnershipRecord(
@@ -2072,11 +2216,11 @@ async function setSlots(e: MessageEvent<PluginMessageData>) {
           guestEditToken: response.guestCredentials.guestEditToken,
           guestEditPolicy: response.guestCredentials.guestEditPolicy,
           guestOwnershipMode: response.guestCredentials.guestOwnershipMode,
-        }
+        },
       )
       writeGuestOwnershipCollection(
         getGuestOwnershipCollectionStorageKey(ev._id),
-        nextCollection
+        nextCollection,
       )
     }
     await loader.refreshEvent()
@@ -2107,7 +2251,7 @@ async function getSlots(e: MessageEvent<PluginMessageData>) {
       sendPluginError(
         requestId,
         command,
-        `Invalid timezone: "${providedTimezone}". Please provide a valid IANA timezone name from the supported timezones list.`
+        `Invalid timezone: "${providedTimezone}". Please provide a valid IANA timezone name from the supported timezones list.`,
       )
       return
     }
@@ -2121,7 +2265,7 @@ async function getSlots(e: MessageEvent<PluginMessageData>) {
     sendPluginError(
       requestId,
       command,
-      "Could not calculate timeMin and timeMax"
+      "Could not calculate timeMin and timeMax",
     )
     return
   }
@@ -2132,9 +2276,9 @@ async function getSlots(e: MessageEvent<PluginMessageData>) {
       : undefined
     const url = appendGuestIdentityQuery(
       `/events/${sanitizedId}/responses?timeMin=${toQueryInstantString(
-        timeMin
+        timeMin,
       )}&timeMax=${toQueryInstantString(timeMax)}`,
-      guestOwnership
+      guestOwnership,
     )
     const responses = await fetchEventResponses(url)
     const pluginResponses: Record<string, PluginResponseInput> =
@@ -2145,7 +2289,7 @@ async function getSlots(e: MessageEvent<PluginMessageData>) {
             response,
             responseMetadata: event.value?.responses?.[userId],
           },
-        ])
+        ]),
       )
     const allSlots = normalizePluginResponses({
       responses: pluginResponses,
@@ -2300,7 +2444,7 @@ watch(
   () => {
     logEventBoot("EventView", "watch:authUser.calendarAccounts")
     void loader.fetchAuthUserCalendarEvents()
-  }
+  },
 )
 </script>
 
@@ -2308,8 +2452,8 @@ watch(
 .desktop-event-header-actions {
   --desktop-event-header-control-height: 2.5rem;
   --desktop-event-header-control-radius: 0.375rem;
-  --desktop-event-header-control-width: 10.25rem;
-  min-width: 21rem;
+  width: 22rem;
+  min-width: 22rem;
 }
 
 .desktop-event-header-control {
@@ -2318,6 +2462,10 @@ watch(
   block-size: var(--desktop-event-header-control-height);
   min-block-size: var(--desktop-event-header-control-height);
   border-radius: var(--desktop-event-header-control-radius);
+}
+
+.event-header-description {
+  margin-top: 0 !important;
 }
 
 .event-metadata-action-button {
@@ -2383,7 +2531,10 @@ watch(
 }
 </style>
 
-<style scoped src="@/components/schedule_overlap/ScheduleOverlapCompactSwitch.css"></style>
+<style
+  scoped
+  src="@/components/schedule_overlap/ScheduleOverlapCompactSwitch.css"
+></style>
 
 <style scoped>
 @keyframes timeful-availability-button-attention {
@@ -2448,7 +2599,8 @@ watch(
   margin-inline-start: 0.35rem;
 }
 
-.desktop-event-header-options__best-times-switch :deep(.v-selection-control__wrapper) {
+.desktop-event-header-options__best-times-switch
+  :deep(.v-selection-control__wrapper) {
   margin-top: 0;
 }
 
@@ -2478,7 +2630,8 @@ watch(
   margin-inline-start: 0.35rem;
 }
 
-.desktop-event-header-options__all-hours-switch :deep(.v-selection-control__wrapper) {
+.desktop-event-header-options__all-hours-switch
+  :deep(.v-selection-control__wrapper) {
   margin-top: 0;
 }
 
