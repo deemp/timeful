@@ -159,8 +159,10 @@ Semi-structured TODO list
   - grid split in +12 although shouldn't
 - [ ] Introduce a log of non-architectural decisions with SPEC-NNN identifiers
 - [ ] Introduce an index that tracks the status of SPECs
-- [ ] "select in Add/Edit availability" -> "change in ..."
-- [ ] On mobile, on the event page, when not interacting with the grid, make it scrollable with finger on the grid
+- [ ] On mobile, when changing availability, don't show responses offcanvas panel
+- [ ] Set up CI/CD (maybe CD on releases only)
+- [ ] Click the button on the event to remove it? Allow multiple scheduled events?
+- [ ] tooltip should be below the Responses offcanvas panel
 
 ## MUST
 
@@ -302,3 +304,6 @@ Semi-structured TODO list
 - [x] "Best times" toggle should appear when there is at least one response, not more than one
 - [x] When Best times and More options are both visible, they should be side by side
 - [x] On mobile, on the event page, when swiping inside the grid, the grid should scroll just like when swiping outside
+- [x] "select in Add/Edit availability" -> "change in ..."
+- [x] On mobile, on the event page, when not interacting with the grid, make it scrollable with finger on the grid
+- [x] Disabled padding cells - "Unavailable, outside the event dates in the event timezone"
