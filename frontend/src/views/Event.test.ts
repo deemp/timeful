@@ -2656,6 +2656,55 @@ describe("Event guest edit action", () => {
     ).toHaveBeenCalledOnce()
   })
 
+  it("keeps desktop availability and display controls visible while rescheduling", async () => {
+    loaderEventState.value = {
+      ...loaderEventState.value,
+      scheduledEvent: {},
+    }
+
+    const wrapper = shallowMount(EventView, {
+      props: { eventId: "dEeaF" },
+      global: {
+        stubs: {
+          ScheduleOverlap: ScheduleOverlapSchedulingStub,
+          NewDialog: true,
+          GuestDialog: true,
+          SignUpForSlotDialog: true,
+          SignInNotSupportedDialog: true,
+          MarkAvailabilityDialog: true,
+          InvitationDialog: true,
+          HelpDialog: true,
+          EventDescription: true,
+          AsyncPubliftAd: true,
+          AccessDenied: true,
+          NotSignedIn: true,
+          RouterLink: true,
+          "v-chip": true,
+          "v-icon": iconTextStub,
+          "v-card": true,
+          "v-card-title": true,
+          "v-card-text": true,
+          "v-card-actions": true,
+          "v-dialog": true,
+          "v-spacer": true,
+          "v-menu": menuStub,
+          "v-btn": buttonSemanticStub,
+        },
+      },
+    })
+
+    await flushDeferredMount()
+
+    expect(wrapper.get("#desktop-secondary-availability-btn").text()).toContain(
+      "Add availability",
+    )
+    expect(wrapper.find("#show-best-times-header-toggle").exists()).toBe(true)
+    expect(wrapper.find("#desktop-header-more-options").exists()).toBe(true)
+    expect(wrapper.text()).toContain("Cancel")
+    expect(wrapper.text()).toContain("Clear")
+    expect(wrapper.text()).toContain("Schedule")
+  })
+
   it("places Clear beside Cancel while rescheduling on mobile", async () => {
     isPhoneState.value = true
     loaderEventState.value = {

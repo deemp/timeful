@@ -248,7 +248,7 @@
                     ref="desktopGuestEditMenuRoot"
                     class="tw-w-full"
                   >
-                    <template v-if="!isEditing && !isScheduling">
+                    <template v-if="!isEditing">
                       <template
                         v-if="
                           desktopHasSecondaryOptions ||
@@ -477,7 +477,6 @@
                     !isPhone &&
                     !isGroup &&
                     !isEditing &&
-                    !isScheduling &&
                     desktopHasSecondaryOptions
                   "
                   class="desktop-event-header-actions tw-flex tw-min-w-0 tw-gap-2"
