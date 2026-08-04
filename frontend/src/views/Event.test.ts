@@ -2690,10 +2690,23 @@ describe("Event guest edit action", () => {
     ).toHaveBeenCalledOnce()
   })
 
-  it("keeps desktop availability and display controls visible while rescheduling", async () => {
+  it("disables desktop editing actions while rescheduling", async () => {
+    authUserState.value = { _id: "owner-1" }
     loaderEventState.value = {
       ...loaderEventState.value,
       scheduledEvent: {},
+      responses: {
+        "owner-1": {
+          name: "Owner",
+          user: {
+            _id: "owner-1",
+            firstName: "Owner",
+            lastName: "",
+            email: "owner@example.com",
+          },
+          availability: [],
+        },
+      },
     }
 
     const wrapper = shallowMount(EventView, {
@@ -2729,9 +2742,21 @@ describe("Event guest edit action", () => {
 
     await flushDeferredMount()
 
-    expect(wrapper.get("#desktop-secondary-availability-btn").text()).toContain(
-      "Add availability",
+    const addAvailabilityButton = wrapper.get(
+      "#desktop-secondary-availability-btn",
     )
+    const editAvailabilityButton = wrapper.get(
+      "#desktop-primary-availability-btn",
+    )
+    const editEventButton = wrapper.get("#edit-event-btn")
+
+    expect(addAvailabilityButton.text()).toContain("Add guest availability")
+    expect(addAvailabilityButton.attributes("disabled")).toBeDefined()
+    expect(editAvailabilityButton.text()).toContain("Edit availability")
+    expect(editAvailabilityButton.attributes("disabled")).toBeDefined()
+    expect(editEventButton.attributes("disabled")).toBeDefined()
+    await wrapper.find(".tw-text-xl").trigger("click")
+    expect(editEventMock).not.toHaveBeenCalled()
     expect(wrapper.find("#show-best-times-header-toggle").exists()).toBe(true)
     expect(wrapper.find("#desktop-header-more-options").exists()).toBe(true)
     expect(wrapper.text()).toContain("Cancel")

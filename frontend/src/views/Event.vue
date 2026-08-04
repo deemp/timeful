@@ -167,7 +167,7 @@
                         canEditMetadata &&
                         '-tw-mx-2 -tw-my-1 tw-cursor-pointer tw-rounded tw-px-2 tw-py-1 tw-transition-all hover:tw-bg-light-gray'
                       "
-                      @click="canEditMetadata && editEvent()"
+                      @click="canEditMetadata && !isScheduling && editEvent()"
                     >
                       {{ event.name }}
                     </div>
@@ -263,6 +263,7 @@
                               variant="outlined"
                               color="primary"
                               class="desktop-event-header-control tw-w-full tw-whitespace-nowrap tw-px-3 tw-text-sm tw-text-green"
+                              :disabled="isScheduling"
                               @click="triggerSecondaryAddAvailability"
                             >
                               <v-icon>mdi-plus</v-icon>
@@ -279,7 +280,7 @@
                                 id="desktop-primary-availability-btn"
                                 class="desktop-event-header-control tw-w-full tw-bg-green tw-text-white"
                                 :class="desktopPrimaryAvailabilityButtonClass"
-                                :disabled="primaryAvailabilityButtonDisabled"
+                                :disabled="isScheduling || primaryAvailabilityButtonDisabled"
                                 @click="handlePrimaryAvailabilityAction"
                               >
                                 <v-icon
@@ -337,6 +338,7 @@
                             variant="outlined"
                             color="primary"
                             class="desktop-event-header-control desktop-event-header-inline-options__item tw-w-full tw-whitespace-nowrap tw-px-3 tw-text-sm tw-text-green"
+                            :disabled="isScheduling"
                             @click="triggerSecondaryAddAvailability"
                           >
                             <v-icon>mdi-plus</v-icon>
@@ -351,7 +353,7 @@
                               id="desktop-primary-availability-btn"
                               class="desktop-event-header-control tw-w-full tw-bg-green tw-text-white"
                               :class="desktopPrimaryAvailabilityButtonClass"
-                              :disabled="primaryAvailabilityButtonDisabled"
+                              :disabled="isScheduling || primaryAvailabilityButtonDisabled"
                               @click="handlePrimaryAvailabilityAction"
                             >
                               <v-icon
@@ -452,6 +454,7 @@
                       variant="outlined"
                       color="primary"
                       class="event-metadata-action-button"
+                      :disabled="isScheduling"
                       @click="editEvent"
                     >
                       <v-icon class="tw-text-green">mdi-pencil</v-icon>
