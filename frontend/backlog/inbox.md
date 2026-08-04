@@ -16,8 +16,6 @@ Semi-structured TODO list
 - [ ] avoid !important
 - [ ] make a design system
 - [ ] why is the button not blocked when none of the dates is selected
-- [ ] doesn't show time on hover after clicking and moving the cursor - <http://127.0.0.1:4173/e/dEeaF>
-- [ ] In Firefox, when not editing, after I click inside the grid, then release, then move cursor within the grid, the selection doesn't follow like it does if I don't click first and just move the cursor within the grid. Why so?
 - [ ] refactoring - get rid of duplication
 - [ ] add more instrumentation?
 - [ ] don't modify vuetify internals (deep)
@@ -39,45 +37,18 @@ Semi-structured TODO list
   - [ ] `eslint-disable vue/one-component-per-file`
 - [ ] When editing the event, shouldn't be able to edit personal time (the button shouldn't be visible)
 - [ ] event creator can edit other's availabilities (less probability that both guest event creator and guest clear both cookies and localstorage)?
-- [ ] When the guest adds availability several times, there should be several records in localstorage
 - [ ] optional password for restoring. edit own responses and open for editing, can click the lock button to enter password and edit others' responses
 - [ ] edit button always visible
 - [ ] add description if initial event description is empty
-- [ ] when user clicks edit availability, they should see a drop-down list of all respondents whose availability they can change. own availabilities first, open for editing next, people with password last
-- [ ] Enforce that the user name is always non-empty
-
-      The core of this is a functional requirement:
-
-      - which guest names are accepted or rejected
-      - how respondent names are normalized
-      - what data the API returns
-      - how duplicates and legacy rows are handled
-
-      It has some non-functional aspects:
-
-      - data quality and consistency
-      - robustness against malformed input
-      - maintainability of one canonical contract
 - [ ] the selection box overlaps vertical lines on the left at the border of a grid of subsequent dates
-- [ ] when I click somewhere in the red zone, the edit availability doesn't blink
-- [ ] the grid lines should be black, not grey
-- [ ] 404 isn't centered vertically on a non-existing event page
-- [ ] do we need split-gap
 - [ ] add instructions for the agent to write scripts for the browser and edit it instead of inline scripts
 - [ ] which replaced tests should be restored and adjusted?
-- [ ] added days in edit event but they're not available for editing specific times
-- [ ] get rid of the comparator, leave just inspect and update docs
 - [ ] after scrolling the grid, the circle inside the toggle is misaligned vertically, the No responses yet also changes the position
-- [ ] options should be over responses
+- [ ] Options should be higher than Responses?
 - [ ] specify how the color at overlapping slots is calculated
-- [ ] there's no time when all 8 respondents are available should be over responses
-- [ ] when I move the mouse cursor out of the grid, the responses still show who's available and unavailable at specific time
 - [ ] event Dates, edit event at the same height as best times, more options
-- [ ] When scrolled, then clicked edit event, the header moves higher (timeful, create an event, etc.)
-- [ ] Add concurrency control (two people edit the event simultaneously)
-- [ ] Disallow saving empty availability set
 - [ ] Create an event with specific times for dates May 30, 31, mark hours 0-4 for both dates, edit event, set dates for 28, 29, click next. See May 28, 30, 31 in specific times page, and May 30, 31 on the event page.
-- [ ] Mark dates for only one day in specific times, save, edit again and see only one day
+- [ ] Mark dates for only one day in specific times, save, edit again and see only one day on the event page
 - [ ] Create an event for may 28 with availability from 0 to 4 and timezone +02:00. If you open the date picker in +0:00, should you see two days marked in the date picker?
 - [ ] When adding availability, cancel and save should be aligned to the right
 - [ ] Who are the group respondents?
@@ -162,7 +133,6 @@ Semi-structured TODO list
 - [ ] On mobile, when changing availability, don't show responses offcanvas panel
 - [ ] Set up CI/CD (maybe CD on releases only)
 - [ ] Click the button on the event to remove it? Allow multiple scheduled events?
-- [ ] tooltip should be below the Responses offcanvas panel
 
 ## MUST
 
@@ -177,6 +147,36 @@ Semi-structured TODO list
   - [ ] use dbfirst
   - [ ] don't fix sign in functionality in the Go version
   - [ ] keep the original code in comments for line-by-line rewriting
+- [ ] Remove split-gap
+- [ ] given new days are added in edit event with specific times, when the specific times page is opened, then the new days should be available for editing
+- [ ] there's no time when all 8 respondents are available should be over responses
+- [ ] On a non-existing page, 404 must be centered vertically and horizontally
+- [ ] Given I'm on the event page in read mode, when I click somewhere in the red zone, then the Add availability and/or Edit availability must blink
+- [ ] On the event page, when a multi-line description is saved, then all lines should be displayed
+- [ ] When the guest adds several responses, there should be a record for each response in localstorage
+- [ ] when user clicks edit availability, they should see a drop-down list of all respondents whose availability they can change. own availabilities first, open for editing next, people with password last
+- [ ] Enforce that the user name is always non-empty
+
+      The core of this is a functional requirement:
+
+      - which guest names are accepted or rejected
+      - how respondent names are normalized
+      - what data the API returns
+      - how duplicates and legacy rows are handled
+
+      It has some non-functional aspects:
+
+      - data quality and consistency
+      - robustness against malformed input
+      - maintainability of one canonical contract
+- [ ] make scheduled event color medium turquoise so that it's visible on the green background
+- [ ] Given on the edit availability page, when no timeslot is marked as available/if needed, then the Save button should be disabled
+- [ ] When scrolled down, then clicked Edit event, then the navbar (timeful, create an event, etc.) must not move higher
+
+## SHOULD
+
+- [ ] the grid lines should be black, not grey
+- [ ] Add concurrency control (two people edit the event simultaneously)
 
 ## COULD
 
@@ -184,7 +184,7 @@ Semi-structured TODO list
 - [ ] use @dicebear/identicon for avatars, not generic head?
       The downside is that after updating the name, the avatar will change too.
 
-## Done
+## MUST - Done
 
 - [x] use `.env.example` instead of `.env.template`
   - We use `.env.development.example` and `.env.production.example`
@@ -307,3 +307,13 @@ Semi-structured TODO list
 - [x] "select in Add/Edit availability" -> "change in ..."
 - [x] On mobile, on the event page, when not interacting with the grid, make it scrollable with finger on the grid
 - [x] Disabled padding cells - "Unavailable, outside the event dates in the event timezone"
+- [x] In desktop app, in firefox, the selected timeslot must follow the mouse when it moves inside the grid, no matter clicks.
+- [x] doesn't show time on hover after clicking and moving the cursor - <http://127.0.0.1:4173/e/dEeaF>
+  - Can't reproduce
+- [x] on mobile, tooltip should be below the Responses offcanvas panel
+- [x] get rid of the comparator, leave just inspect and update docs
+- [x] Given I'm on the event page, when I move the mouse cursor out of the grid, the Responses must show just the number of responses and not show who's available
+
+## SHOULD - Done
+
+## COULD - Done
