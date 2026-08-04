@@ -471,13 +471,17 @@ const iconTextStub = {
 }
 
 describe("Event guest edit action", () => {
-  it("switches the compact desktop header to the standard sm breakpoint", () => {
+  it("uses the standard sm breakpoint for the compact desktop header", () => {
     expect(eventViewSource).toContain(
       "sm:tw-flex-row sm:tw-items-start sm:tw-gap-4",
     )
     expect(eventViewSource).not.toContain(
       "md:tw-flex-row md:tw-items-start md:tw-gap-4",
     )
+  })
+
+  it("matches the desktop title line height to availability controls", () => {
+    expect(eventViewSource).toContain("sm:tw-text-3xl sm:tw-leading-10")
   })
 
   it("uses explicit desktop rows for metadata actions", () => {

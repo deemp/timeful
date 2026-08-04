@@ -162,7 +162,7 @@
                     class="sm:mb-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2"
                   >
                     <div
-                      class="tw-text-xl sm:tw-text-3xl"
+                      class="tw-text-xl sm:tw-text-3xl sm:tw-leading-10"
                       :class="
                         canEditMetadata &&
                         '-tw-mx-2 -tw-my-1 tw-cursor-pointer tw-rounded tw-px-2 tw-py-1 tw-transition-all hover:tw-bg-light-gray'
