@@ -47,6 +47,7 @@
         :contacts-payload="contactsPayload"
         edit
         no-tabs
+        scroll-strategy="none"
         @refresh-event="handleEditDialogRefresh"
       />
 
