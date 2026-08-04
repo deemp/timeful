@@ -207,6 +207,7 @@ const props = withDefaults(
     startCalendarOnMonday?: boolean
     variant?: "section" | "menu"
     includeShowBestTimes?: boolean
+    includeHideIfNeeded?: boolean
     menuButtonLabel?: string
     menuActivatorClass?: string
   }>(),
@@ -216,6 +217,7 @@ const props = withDefaults(
     startCalendarOnMonday: false,
     variant: "section",
     includeShowBestTimes: true,
+    includeHideIfNeeded: true,
     menuButtonLabel: "Options",
     menuActivatorClass: "",
   }
@@ -236,7 +238,7 @@ const showBestTimesToggle = computed(
   () => props.includeShowBestTimes && props.numResponses >= 1
 )
 const showHideIfNeededToggle = computed(
-  () => props.numResponses >= 1 && !isGroup.value
+  () => props.includeHideIfNeeded && props.numResponses >= 1 && !isGroup.value
 )
 const showAllHoursToggle = computed(
   () => !props.event.daysOnly && props.showAllHours !== undefined

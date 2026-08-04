@@ -156,7 +156,7 @@ describe("ScheduleOverlapSidebar", () => {
     expect(wrapper.text()).toContain("Disabled, change in Edit event")
   })
 
-  it("renders the overlay availability switch with the compact switch styling", () => {
+  it("does not render the overlay availability switch in the sidebar", () => {
     const wrapper = mount(ScheduleOverlapSidebar, {
       props: {
         sidebar: {
@@ -173,8 +173,7 @@ describe("ScheduleOverlapSidebar", () => {
 
     const overlaySwitch = wrapper.find("#overlay-availabilities-toggle")
 
-    expect(overlaySwitch.exists()).toBe(true)
-    expect(overlaySwitch.classes()).toContain("schedule-overlap-compact-switch")
+    expect(overlaySwitch.exists()).toBe(false)
   })
 
   it("does not render the ad wrapper when the sidebar view model disables ads", () => {

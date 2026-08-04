@@ -130,29 +130,6 @@
           @toggle-sub-calendar-account="emit('toggleSubCalendarAccount', $event)"
         ></CalendarAccounts>
 
-        <div v-if="sidebar.showOverlayAvailabilityToggle">
-          <v-switch
-            id="overlay-availabilities-toggle"
-            class="schedule-overlap-compact-switch"
-            inset
-            :model-value="sidebar.overlayAvailability"
-            hide-details
-            @update:model-value="
-              (value: boolean | null) => emit('updateOverlayAvailability', !!value)
-            "
-          >
-            <template #label>
-              <div class="tw-text-sm tw-text-black">
-                Overlay availabilities
-              </div>
-            </template>
-          </v-switch>
-
-          <div class="tw-mt-2 tw-text-xs tw-text-dark-gray">
-            View everyone's availability while inputting your own
-          </div>
-        </div>
-
         <div
           v-if="!sidebar.event.daysOnly && sidebar.showCalendarOptions"
           ref="optionsSectionRef"

@@ -252,6 +252,8 @@ const ScheduleOverlapStub = {
       showAllHours: false,
       showCalendarEvents: false,
       startCalendarOnMonday: false,
+      overlayAvailability: false,
+      showOverlayAvailabilityToggle: true,
       states: {
         SET_SPECIFIC_TIMES: "set_specific_times",
       },
@@ -279,6 +281,9 @@ const ScheduleOverlapStub = {
     },
     updateStartCalendarOnMonday(this: Record<string, boolean>, value: boolean) {
       this.startCalendarOnMonday = value
+    },
+    updateOverlayAvailability(this: Record<string, boolean>, value: boolean) {
+      this.overlayAvailability = value
     },
     getAllValidTimeRanges() {
       return []
@@ -2386,26 +2391,55 @@ describe("Event guest edit action", () => {
     const saveButton = wrapper.get(".desktop-editing-save-button")
     expect(cancelButton.text()).toContain("Cancel")
     expect(cancelButton.attributes("data-variant")).toBe("outlined")
-    expect(eventViewSource).toContain('class="tw-flex tw-justify-end"')
+    expect(cancelButton.classes()).toContain("desktop-editing-action-control")
+    expect(eventViewSource).toContain('class="tw-flex tw-w-full tw-gap-2"')
     expect(saveButton.text()).toContain("Save")
     expect(saveButton.classes()).toContain("desktop-editing-save-button")
+    expect(saveButton.classes()).toContain("desktop-editing-action-control")
     expect(saveButton.attributes("disabled")).toBeUndefined()
+    const moreOptions = wrapper.get("#desktop-editing-more-options")
+    expect(moreOptions.classes()).toContain("tw-flex-1")
+    expect(moreOptions.classes()).toContain("desktop-event-header-options__menu")
+    expect(moreOptions.get("event-options-stub").attributes("menubuttonlabel")).toBe(
+      "More options",
+    )
     expect(
-      wrapper
-        .get("#event-header-meta-row #desktop-editing-show-all-hours-toggle")
-        .classes(),
-    ).toContain("desktop-event-header-options__all-hours-switch")
+      moreOptions.get("event-options-stub").attributes("menuactivatorclass"),
+    ).toContain("desktop-event-header-control")
+    expect(moreOptions.get("event-options-stub").classes()).toContain("tw-w-full")
+    expect(eventViewSource).toContain(':include-hide-if-needed="false"')
+    const overlayAvailability = wrapper.get("#overlay-availabilities-toggle")
+    expect(overlayAvailability.classes()).toContain(
+      "desktop-editing-overlay-availability-toggle",
+    )
+    expect(overlayAvailability.classes()).toContain("tw-w-full")
     expect(
-      wrapper.get("#desktop-editing-show-all-hours-toggle").classes(),
-    ).toContain("desktop-editing-all-hours-switch")
+      wrapper.get("#desktop-editing-overlay-availability-slot").classes(),
+    ).toContain("tw-flex-1")
+    expect(eventViewSource).toContain("Overlay availability")
     expect(wrapper.get("#desktop-delete-availability-btn").classes()).toContain(
-      "tw-w-[10.5rem]",
+      "desktop-editing-delete-button",
     )
     expect(eventViewSource).toContain(
       "desktop-editing-delete-actions desktop-event-header-actions tw-flex tw-justify-end",
     )
     expect(eventViewSource).toContain(
-      ".desktop-editing-all-hours-switch :deep(.v-selection-control) {\n  justify-content: flex-end;",
+      ".desktop-editing-action-control {\n  flex: 1 1 0;\n  min-inline-size: 0;",
+    )
+    expect(eventViewSource).toContain(
+      ".desktop-editing-delete-button {\n  inline-size: 100%;",
+    )
+    expect(eventViewSource).toContain(
+      ".desktop-editing-overlay-availability-toggle :deep(.v-selection-control) {\n  align-items: center;\n  inline-size: 100%;\n  justify-content: center;\n  min-inline-size: 0;",
+    )
+    expect(eventViewSource).toContain(
+      ".desktop-editing-overlay-availability-toggle :deep(.v-input__control) {\n  inline-size: 100%;\n  min-inline-size: 0;",
+    )
+    expect(eventViewSource).toContain(
+      ".desktop-editing-overlay-availability-toggle :deep(.v-label) {\n  flex: 1 1 0;\n  line-height: 1.25;\n  min-inline-size: 0;\n  overflow-wrap: break-word;\n  white-space: normal;",
+    )
+    expect(eventViewSource).toContain(
+      'v-else-if="!isPhone && !isGroup && isEditing"\n                  class="desktop-event-header-actions"',
     )
     expect(wrapper.find("#event-description-stub").exists()).toBe(false)
   })

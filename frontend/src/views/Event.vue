@@ -415,16 +415,16 @@
                     </template>
                     <template v-else-if="isEditing">
                       <div class="tw-flex tw-justify-end">
-                        <div class="tw-flex tw-gap-2">
+                        <div class="tw-flex tw-w-full tw-gap-2">
                           <v-btn
                             variant="outlined"
-                            class="desktop-editing-cancel-button tw-w-20 tw-text-red"
+                            class="desktop-editing-action-control desktop-editing-cancel-button desktop-event-header-control tw-text-red"
                             @click="cancelEditing"
                           >
                             Cancel
                           </v-btn>
                           <v-btn
-                            class="desktop-editing-save-button tw-w-20 tw-text-white"
+                            class="desktop-editing-action-control desktop-editing-save-button desktop-event-header-control tw-text-white"
                             :class="'tw-bg-green'"
                             :disabled="respondentSaveDisabled"
                             @click="saveChanges"
@@ -532,29 +532,55 @@
                   </div>
                 </div>
                 <div
-                  v-else-if="
-                    !isPhone &&
-                    !isGroup &&
-                    isEditing &&
-                    !scheduleOverlapEvent.daysOnly
-                  "
+                  v-else-if="!isPhone && !isGroup && isEditing"
                   class="desktop-event-header-actions"
                 >
-                  <v-switch
-                    id="desktop-editing-show-all-hours-toggle"
-                    class="desktop-editing-all-hours-switch desktop-event-header-control schedule-overlap-compact-switch desktop-event-header-options__all-hours-switch tw-w-full"
-                    inset
-                    hide-details
-                    :model-value="scheduleOverlap?.showAllHours ?? false"
-                    @update:model-value="
-                      (val: boolean | null) =>
-                        scheduleOverlap?.updateShowAllHours(!!val)
-                    "
-                  >
-                    <template #label>
-                      <div class="tw-text-sm tw-text-black">Show all hours</div>
-                    </template>
-                  </v-switch>
+                  <div class="tw-flex tw-w-full tw-gap-2">
+                    <div
+                      v-if="scheduleOverlap?.showOverlayAvailabilityToggle"
+                      id="desktop-editing-overlay-availability-slot"
+                      class="tw-flex-1"
+                    >
+                      <v-switch
+                        id="overlay-availabilities-toggle"
+                        class="desktop-editing-overlay-availability-toggle desktop-event-header-control schedule-overlap-compact-switch tw-w-full"
+                        inset
+                        hide-details
+                        :model-value="scheduleOverlap?.overlayAvailability ?? false"
+                        @update:model-value="
+                          (value: boolean | null) =>
+                            scheduleOverlap?.updateOverlayAvailability(!!value)
+                        "
+                      >
+                        <template #label>
+                          <div class="tw-text-sm tw-text-black">
+                            Overlay availability
+                          </div>
+                        </template>
+                      </v-switch>
+                    </div>
+                    <div
+                      v-if="!scheduleOverlapEvent.daysOnly"
+                      id="desktop-editing-more-options"
+                      class="desktop-event-header-options__menu tw-flex-1"
+                    >
+                      <EventOptions
+                        class="tw-w-full"
+                        variant="menu"
+                        :event="scheduleOverlapEvent"
+                        :show-best-times="false"
+                        :hide-if-needed="desktopHideIfNeeded"
+                        :show-all-hours="scheduleOverlap?.showAllHours ?? false"
+                        :num-responses="numResponses"
+                        :include-show-best-times="false"
+                        :include-hide-if-needed="false"
+                        menu-button-label="More options"
+                        menu-activator-class="desktop-event-header-control desktop-event-header-options__menu-button tw-justify-between tw-w-full"
+                        @update:hide-if-needed="updateDesktopHideIfNeeded"
+                        @update:show-all-hours="updateDesktopShowAllHours"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -583,7 +609,7 @@
                     id="desktop-delete-availability-btn"
                     variant="outlined"
                     color="error"
-                    class="desktop-event-header-control tw-w-[10.5rem] tw-normal-case"
+                    class="desktop-editing-delete-button desktop-event-header-control tw-normal-case"
                     @click="deleteAvailabilityDialog = true"
                   >
                     Delete
@@ -2479,6 +2505,15 @@ watch(
   border-radius: var(--desktop-event-header-control-radius);
 }
 
+.desktop-editing-action-control {
+  flex: 1 1 0;
+  min-inline-size: 0;
+}
+
+.desktop-editing-delete-button {
+  inline-size: 100%;
+}
+
 .event-header-description {
   margin-top: 0 !important;
 }
@@ -2650,8 +2685,24 @@ watch(
   margin-top: 0;
 }
 
-.desktop-editing-all-hours-switch :deep(.v-selection-control) {
-  justify-content: flex-end;
+.desktop-editing-overlay-availability-toggle :deep(.v-selection-control) {
+  align-items: center;
+  inline-size: 100%;
+  justify-content: center;
+  min-inline-size: 0;
+}
+
+.desktop-editing-overlay-availability-toggle :deep(.v-input__control) {
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.desktop-editing-overlay-availability-toggle :deep(.v-label) {
+  flex: 1 1 0;
+  line-height: 1.25;
+  min-inline-size: 0;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 
 .desktop-event-header-options__menu-button {

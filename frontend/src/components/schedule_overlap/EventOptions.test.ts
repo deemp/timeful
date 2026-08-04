@@ -150,6 +150,35 @@ describe("EventOptions", () => {
     )
   })
 
+  it("can show only all-hours in the compact menu", () => {
+    const wrapper = shallowMount(EventOptions, {
+      props: {
+        event: baseEvent,
+        showBestTimes: false,
+        hideIfNeeded: false,
+        numResponses: 2,
+        showAllHours: false,
+        variant: "menu",
+        includeShowBestTimes: false,
+        includeHideIfNeeded: false,
+      },
+      global: {
+        stubs: {
+          "v-btn": VBtnStub,
+          "v-card": passThroughStub,
+          "v-card-text": passThroughStub,
+          "v-icon": true,
+          "v-menu": VMenuStub,
+          "v-switch": VSwitchLabelStub,
+        },
+      },
+    })
+
+    expect(wrapper.text()).toContain("Show all hours")
+    expect(wrapper.text()).not.toContain("Hide if needed times")
+    expect(wrapper.text()).not.toContain("Show best times")
+  })
+
   it("shows timed-event grid options with zero responses when show-all-hours is available", () => {
     const wrapper = shallowMount(EventOptions, {
       props: {

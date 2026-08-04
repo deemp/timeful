@@ -23,6 +23,8 @@ export interface ScheduleOverlapInstance {
   showAllHours: boolean
   showCalendarEvents: boolean
   startCalendarOnMonday: boolean
+  overlayAvailability: boolean
+  showOverlayAvailabilityToggle: boolean
   startEditing(): void
   stopEditing(): void
   updateShowBestTimes(value: boolean): void
@@ -30,6 +32,7 @@ export interface ScheduleOverlapInstance {
   updateShowAllHours(value: boolean): void
   updateShowCalendarEvents(value: boolean): void
   updateStartCalendarOnMonday(value: boolean): void
+  updateOverlayAvailability(value: boolean): void
   clearSelectedGuestOwnership(): void
   selectGuestOwnership(lookupKey?: string): void
   editOwnedGuestAvailability(lookupKey: string): void
