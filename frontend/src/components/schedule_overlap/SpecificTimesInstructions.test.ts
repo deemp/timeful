@@ -70,5 +70,10 @@ describe("SpecificTimesInstructions", () => {
         .find(".specific-times-instructions-swatch--disabled-padding")
         .classes(),
     ).toContain("tw-bg-gray")
+    expect(
+      wrapper
+        .find(".specific-times-instructions-swatch--disabled-padding")
+        .element.parentElement?.classList,
+    ).toContain("tw-items-start")
   })
 })

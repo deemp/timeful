@@ -18,7 +18,7 @@
         ></div>
         <span class="tw-text-sm">Selected for the event</span>
       </div>
-      <div class="tw-flex tw-items-center tw-gap-2">
+      <div class="tw-flex tw-items-start tw-gap-2">
         <div
           class="specific-times-instructions-swatch specific-times-instructions-swatch--disabled-padding tw-bg-gray"
         ></div>
