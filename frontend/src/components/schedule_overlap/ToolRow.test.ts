@@ -115,7 +115,7 @@ describe("ToolRow", () => {
       "compact && 'tool-row--compact tw-min-h-0 tw-justify-start'",
     )
     expect(toolRowSource).toContain(
-      "compact && 'tw-w-full tw-flex-col tw-items-start tw-justify-start tw-gap-0 tw-py-2'",
+      "compact && 'tw-w-full tw-flex-col tw-items-start tw-justify-start tw-gap-0 tw-pt-10'",
     )
     expect(toolRowSource).toContain(
       "compact && 'tw-w-full tw-flex-col tw-items-start tw-gap-3'",

@@ -40,13 +40,17 @@ test("event page without responses pairs each header row with one action column"
   const scheduleEventButton = page.getByRole("button", {
     name: /^Schedule event$/i,
   })
-  await expect(showAllHoursToggle).toBeVisible()
-  await expect(scheduleEventButton).toBeVisible()
+    await expect(showAllHoursToggle).toBeVisible()
+    await expect(scheduleEventButton).toBeVisible()
 
-  if (testInfo.project.name === "chromium-desktop") {
-    const title = page.locator(
-      "#event-header > .event-header-row:first-child > .tw-min-w-0.tw-flex-1 > div:first-child",
-    )
+    if (testInfo.project.name === "chromium-desktop") {
+      const timeFormatToggle = page.locator(".time-format-toggle")
+      const firstTimeGridRow = page.locator(
+        ".schedule-overlap-time-grid__body-row",
+      )
+      const title = page.locator(
+        "#event-header > .event-header-row:first-child > .tw-min-w-0.tw-flex-1 > div:first-child",
+      )
     const editEventButton = page.locator("#edit-event-btn")
     const addDescriptionButton = page.getByRole("button", {
       name: /^\+\s*add description$/i,
@@ -58,21 +62,27 @@ test("event page without responses pairs each header row with one action column"
       showAllHoursBox,
       addDescriptionBox,
       scheduleEventBox,
+      timeFormatToggleBox,
+      firstTimeGridRowBox,
     ] = await Promise.all([
-      title.boundingBox(),
-      addAvailabilityBtn.boundingBox(),
-      editEventButton.boundingBox(),
-      showAllHoursToggle.boundingBox(),
-      addDescriptionButton.boundingBox(),
-      scheduleEventButton.boundingBox(),
-    ])
+        title.boundingBox(),
+        addAvailabilityBtn.boundingBox(),
+        editEventButton.boundingBox(),
+        showAllHoursToggle.boundingBox(),
+        addDescriptionButton.boundingBox(),
+        scheduleEventButton.boundingBox(),
+        timeFormatToggle.boundingBox(),
+        firstTimeGridRow.boundingBox(),
+      ])
     if (
       titleBox === null ||
       addAvailabilityBox === null ||
       editEventBox === null ||
       showAllHoursBox === null ||
       addDescriptionBox === null ||
-      scheduleEventBox === null
+      scheduleEventBox === null ||
+      timeFormatToggleBox === null ||
+      firstTimeGridRowBox === null
     ) {
       throw new Error(
         "Expected each header-row detail and action to have boxes",
@@ -92,6 +102,7 @@ test("event page without responses pairs each header row with one action column"
       expect(Math.abs(actionBox.width - addAvailabilityBox.width)).toBeLessThanOrEqual(1)
       expect(Math.abs(actionBox.x - addAvailabilityBox.x)).toBeLessThanOrEqual(1)
     }
+    expect(Math.abs(timeFormatToggleBox.y - firstTimeGridRowBox.y)).toBeLessThanOrEqual(1)
 
     const allHoursContentCenter = await page.evaluate<number | null>(() => {
       const toggle = document.querySelector<HTMLElement>(
