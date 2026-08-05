@@ -1104,7 +1104,7 @@ describe("Event guest edit action", () => {
     )
   })
 
-  it("keeps no-response desktop inline options pinned to the second header column", async () => {
+  it("keeps no-response desktop controls in their matching flex rows", async () => {
     loaderEventState.value = {
       ...loaderEventState.value,
       responses: {},
@@ -1146,15 +1146,19 @@ describe("Event guest edit action", () => {
 
     await flushDeferredMount()
 
-    const actionClusterHtml = wrapper.get("#event-header-actions").html()
-    expect(actionClusterHtml).toContain("desktop-event-header-inline-options")
-    expect(actionClusterHtml).toContain(
-      "desktop-event-header-inline-options__item",
+    expect(wrapper.get("#event-header-actions").html()).toContain(
+      "desktop-event-header-single-column",
     )
+    expect(
+      wrapper.find("#event-header-meta-row #show-all-hours-toggle").exists(),
+    ).toBe(true)
+    expect(
+      wrapper.find("#event-header-actions #show-all-hours-toggle").exists(),
+    ).toBe(false)
     expect(eventViewSource).toContain(
-      ".desktop-event-header-inline-options__item",
+      ".desktop-event-header-single-column",
     )
-    expect(eventViewSource).toContain("grid-column: 2;")
+    expect(eventViewSource).toContain("flex: 0 0 calc((100% - 0.5rem) / 2);")
   })
 
   it("triggers add guest availability from the new secondary desktop action", async () => {

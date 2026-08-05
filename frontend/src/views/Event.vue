@@ -329,25 +329,9 @@
                         </div>
                       </template>
                       <template v-else>
-                        <div
-                          class="desktop-event-header-inline-options tw-grid tw-grid-cols-2 tw-gap-2"
-                        >
-                          <v-btn
-                            v-if="showSecondaryAddAvailabilityAction"
-                            id="desktop-secondary-availability-btn"
-                            variant="outlined"
-                            color="primary"
-                            class="desktop-event-header-control desktop-event-header-inline-options__item tw-w-full tw-whitespace-nowrap tw-px-3 tw-text-sm tw-text-green"
-                            :disabled="isScheduling"
-                            @click="triggerSecondaryAddAvailability"
-                          >
-                            <v-icon>mdi-plus</v-icon>
-                            <span class="tw-ml-1">{{
-                              secondaryAddAvailabilityButtonText
-                            }}</span>
-                          </v-btn>
+                        <div class="tw-flex tw-justify-end">
                           <div
-                            class="desktop-primary-availability-anchor desktop-event-header-inline-options__item tw-relative tw-min-w-0"
+                            class="desktop-event-header-single-column desktop-primary-availability-anchor tw-relative tw-min-w-0"
                           >
                             <v-btn
                               id="desktop-primary-availability-btn"
@@ -398,20 +382,6 @@
                               </v-card>
                             </v-menu>
                           </div>
-                          <v-switch
-                            id="show-all-hours-toggle"
-                            class="desktop-event-header-control desktop-event-header-inline-options__item schedule-overlap-compact-switch desktop-event-header-options__all-hours-switch tw-w-full"
-                            inset
-                            :model-value="desktopShowAllHours"
-                            hide-details
-                            @update:model-value="updateDesktopShowAllHours"
-                          >
-                            <template #label>
-                              <div class="tw-text-sm tw-text-black">
-                                Show all hours
-                              </div>
-                            </template>
-                          </v-switch>
                         </div>
                       </template>
                     </template>
@@ -535,6 +505,32 @@
                   </div>
                 </div>
                 <div
+                  v-else-if="
+                    !isPhone &&
+                    !isGroup &&
+                    !isEditing &&
+                    desktopShowInlineOptions
+                  "
+                  class="desktop-event-header-actions tw-flex tw-justify-end"
+                >
+                  <div class="desktop-event-header-single-column">
+                    <v-switch
+                      id="show-all-hours-toggle"
+                      class="desktop-event-header-control schedule-overlap-compact-switch desktop-event-header-options__all-hours-switch tw-w-full"
+                      inset
+                      :model-value="desktopShowAllHours"
+                      hide-details
+                      @update:model-value="updateDesktopShowAllHours"
+                    >
+                      <template #label>
+                        <div class="tw-text-sm tw-text-black">
+                          Show all hours
+                        </div>
+                      </template>
+                    </v-switch>
+                  </div>
+                </div>
+                <div
                   v-else-if="!isPhone && !isGroup && isEditing"
                   class="desktop-event-header-actions"
                 >
@@ -626,11 +622,11 @@
                     !isScheduling &&
                     showScheduleEventButton
                   "
-                  class="desktop-event-header-actions"
+                  class="desktop-event-header-actions tw-flex tw-justify-end"
                 >
                   <v-btn
                     variant="outlined"
-                    class="desktop-event-header-control tw-w-full tw-text-blue"
+                    class="desktop-event-header-control desktop-event-header-single-column tw-text-blue"
                     @click="scheduleEvent"
                   >
                     <v-icon small>mdi-calendar-check</v-icon>
@@ -2508,6 +2504,11 @@ watch(
   border-radius: var(--desktop-event-header-control-radius);
 }
 
+.desktop-event-header-single-column {
+  flex: 0 0 calc((100% - 0.5rem) / 2);
+  min-inline-size: 0;
+}
+
 .desktop-editing-action-control {
   flex: 1 1 0;
   min-inline-size: 0;
@@ -2618,10 +2619,6 @@ watch(
   min-width: 0;
 }
 
-.desktop-event-header-inline-options__item {
-  grid-column: 2;
-}
-
 .desktop-event-header-options__menu {
   min-width: 0;
 }
@@ -2667,10 +2664,17 @@ watch(
   height: 100%;
 }
 
-.desktop-event-header-options__all-hours-switch :deep(.v-input__control),
+.desktop-event-header-options__all-hours-switch :deep(.v-input__control) {
+  height: 100%;
+  min-height: var(--desktop-event-header-control-height);
+  inline-size: 100%;
+  justify-content: center;
+}
+
 .desktop-event-header-options__all-hours-switch :deep(.v-selection-control) {
   height: 100%;
   min-height: var(--desktop-event-header-control-height);
+  inline-size: fit-content;
 }
 
 .desktop-event-header-options__all-hours-switch :deep(.v-selection-control) {
@@ -2679,6 +2683,7 @@ watch(
 }
 
 .desktop-event-header-options__all-hours-switch :deep(.v-label) {
+  flex: 0 0 auto;
   padding-inline-start: 0;
   margin-inline-start: 0.35rem;
 }

@@ -8,7 +8,7 @@ import { Temporal } from "temporal-polyfill"
 
 test.describe.configure({ mode: "serial" })
 
-test("event page without responses shows Add availability and Show all hours directly, not wide Add availability and More options", async ({
+test("event page without responses pairs each header row with one action column", async ({
   page,
   request,
 }, testInfo) => {
@@ -36,35 +36,99 @@ test("event page without responses shows Add availability and Show all hours dir
   await expect(addAvailabilityBtn).toBeVisible()
   await expect(addAvailabilityBtn).toHaveText(/Add availability/i)
 
+  const showAllHoursToggle = page.locator("#show-all-hours-toggle")
+  const scheduleEventButton = page.getByRole("button", {
+    name: /^Schedule event$/i,
+  })
+  await expect(showAllHoursToggle).toBeVisible()
+  await expect(scheduleEventButton).toBeVisible()
+
   if (testInfo.project.name === "chromium-desktop") {
     const title = page.locator(
       "#event-header > .event-header-row:first-child > .tw-min-w-0.tw-flex-1 > div:first-child",
     )
-    const [titleBox, addAvailabilityBox] = await Promise.all([
+    const editEventButton = page.locator("#edit-event-btn")
+    const addDescriptionButton = page.getByRole("button", {
+      name: /^\+\s*add description$/i,
+    })
+    const [
+      titleBox,
+      addAvailabilityBox,
+      editEventBox,
+      showAllHoursBox,
+      addDescriptionBox,
+      scheduleEventBox,
+    ] = await Promise.all([
       title.boundingBox(),
       addAvailabilityBtn.boundingBox(),
+      editEventButton.boundingBox(),
+      showAllHoursToggle.boundingBox(),
+      addDescriptionButton.boundingBox(),
+      scheduleEventButton.boundingBox(),
     ])
-    if (titleBox === null || addAvailabilityBox === null) {
+    if (
+      titleBox === null ||
+      addAvailabilityBox === null ||
+      editEventBox === null ||
+      showAllHoursBox === null ||
+      addDescriptionBox === null ||
+      scheduleEventBox === null
+    ) {
       throw new Error(
-        "Expected the title and Add availability button to have boxes",
+        "Expected each header-row detail and action to have boxes",
       )
+    }
+    for (const [detailBox, actionBox] of [
+      [titleBox, addAvailabilityBox],
+      [editEventBox, showAllHoursBox],
+      [addDescriptionBox, scheduleEventBox],
+    ]) {
+      expect(
+        Math.abs(
+          detailBox.y + detailBox.height / 2 -
+            (actionBox.y + actionBox.height / 2),
+        ),
+      ).toBeLessThanOrEqual(1)
+      expect(Math.abs(actionBox.width - addAvailabilityBox.width)).toBeLessThanOrEqual(1)
+      expect(Math.abs(actionBox.x - addAvailabilityBox.x)).toBeLessThanOrEqual(1)
+    }
+
+    const allHoursContentCenter = await page.evaluate<number | null>(() => {
+      const toggle = document.querySelector<HTMLElement>(
+        "#show-all-hours-toggle",
+      )
+      const control = toggle?.querySelector<HTMLElement>(
+        ".v-selection-control",
+      )
+      const input = control?.querySelector<HTMLElement>(
+        ".v-selection-control__wrapper",
+      )
+      const label = control?.querySelector<HTMLElement>(".v-label")
+
+      if (!toggle || !input || !label) return null
+
+      const inputRect = input.getBoundingClientRect()
+      const labelRect = label.getBoundingClientRect()
+      return (
+        Math.min(inputRect.left, labelRect.left) +
+        Math.max(inputRect.right, labelRect.right)
+      ) / 2
+    })
+    expect(allHoursContentCenter).not.toBeNull()
+    if (allHoursContentCenter === null) {
+      throw new Error("Expected the Show all hours switch content")
     }
     expect(
       Math.abs(
-        titleBox.y + titleBox.height / 2 -
-          (addAvailabilityBox.y + addAvailabilityBox.height / 2),
+        allHoursContentCenter - (showAllHoursBox.x + showAllHoursBox.width / 2),
       ),
-    ).toBeLessThanOrEqual(1)
+    ).toBeLessThanOrEqual(2)
   }
 
   // Verify the parent wrapper does NOT have tw-col-span-2 (which makes it very wide)
   const parentWrapper = page.locator("#event-header-actions .desktop-primary-availability-anchor")
   const parentClass = await parentWrapper.getAttribute("class")
   expect(parentClass).not.toContain("tw-col-span-2")
-
-  // Verify "Show all hours" is directly visible
-  const showAllHoursToggle = page.locator("#show-all-hours-toggle")
-  await expect(showAllHoursToggle).toBeVisible()
 
   // Verify "More options" is NOT present
   const moreOptions = page.locator("#desktop-header-more-options")
