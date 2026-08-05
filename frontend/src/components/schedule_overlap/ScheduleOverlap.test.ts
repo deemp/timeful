@@ -154,7 +154,7 @@ describe("ScheduleOverlap", () => {
       "SCHEDULE_OVERLAP_COMPACT_DESKTOP_BREAKPOINT"
     )
     expect(scheduleOverlapSource).toContain(
-      'class="schedule-overlap-layout__grid-pane tw-flex tw-grow tw-pl-4"'
+      'class="schedule-overlap-layout__grid-pane tw-flex tw-grow tw-pl-2"'
     )
     expect(scheduleOverlapSource).toContain(
       "@media (min-width: 640px) and (max-width: 767px)"
@@ -785,7 +785,7 @@ describe("ScheduleOverlap", () => {
     expect(desktopWrapper.find(".overlay-stub").exists()).toBe(false)
     expect(desktopWrapper.find(".schedule-overlap-layout").classes()).toContain("tw-flex-row")
     expect(getSidebarViewModel(desktopWrapper).isPhone).toBe(false)
-    expect(getSidebarViewModel(desktopWrapper).rightSideWidth).toBe("clamp(10rem, 25vw, 13rem)")
+    expect(getSidebarViewModel(desktopWrapper).rightSideWidth).toBe("clamp(10rem, 28vw, 13rem)")
   })
 
   it("keeps the explicit guest edit target in the respondents panel view model", () => {

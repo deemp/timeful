@@ -1,6 +1,6 @@
 <template>
   <div
-    class="tw-px-4 tw-py-4"
+    class="tw-px-4 tw-py-4 tw-pr-4"
     :class="
       sidebar.isPhone
         ? ''
