@@ -625,8 +625,10 @@
                   class="desktop-event-header-actions tw-flex tw-justify-end"
                 >
                   <v-btn
+                    id="desktop-schedule-event-btn"
                     variant="outlined"
-                    class="desktop-event-header-control desktop-event-header-single-column tw-text-blue"
+                    class="desktop-event-header-control tw-text-blue"
+                    :class="desktopScheduleEventButtonClass"
                     @click="scheduleEvent"
                   >
                     <v-icon small>mdi-calendar-check</v-icon>
@@ -1449,6 +1451,11 @@ const showSecondaryAddAvailabilityAction = computed(() => {
 const showScheduleEventButton = computed(
   () =>
     !scheduleOverlapEvent.value.daysOnly && !isEditing.value && !isSignUp.value,
+)
+const desktopScheduleEventButtonClass = computed(() =>
+  numResponses.value > 0
+    ? "tw-w-full"
+    : "desktop-event-header-single-column",
 )
 const hasSavedTimefulSchedule = computed(() =>
   Boolean(loader.event.value?.scheduledEvent),

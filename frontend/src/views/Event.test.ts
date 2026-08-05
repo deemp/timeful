@@ -1149,6 +1149,9 @@ describe("Event guest edit action", () => {
     expect(wrapper.get("#event-header-actions").html()).toContain(
       "desktop-event-header-single-column",
     )
+    expect(wrapper.get("#desktop-schedule-event-btn").classes()).toContain(
+      "desktop-event-header-single-column",
+    )
     expect(
       wrapper.find("#event-header-meta-row #show-all-hours-toggle").exists(),
     ).toBe(true)
@@ -1159,6 +1162,50 @@ describe("Event guest edit action", () => {
       ".desktop-event-header-single-column",
     )
     expect(eventViewSource).toContain("flex: 0 0 calc((100% - 0.5rem) / 2);")
+  })
+
+  it("spans both desktop action columns when responses exist", async () => {
+    const wrapper = shallowMount(EventView, {
+      props: {
+        eventId: "dEeaF",
+      },
+      global: {
+        stubs: {
+          ScheduleOverlap: ScheduleOverlapStub,
+          EventOptions: true,
+          NewDialog: true,
+          GuestDialog: true,
+          SignUpForSlotDialog: true,
+          SignInNotSupportedDialog: true,
+          MarkAvailabilityDialog: true,
+          InvitationDialog: true,
+          HelpDialog: true,
+          EventDescription: true,
+          AsyncPubliftAd: true,
+          AccessDenied: true,
+          NotSignedIn: true,
+          RouterLink: true,
+          "v-btn": buttonSemanticStub,
+          "v-card": true,
+          "v-card-actions": true,
+          "v-card-text": true,
+          "v-card-title": true,
+          "v-chip": true,
+          "v-dialog": true,
+          "v-icon": true,
+          "v-spacer": true,
+          "v-switch": true,
+        },
+      },
+    })
+
+    await flushDeferredMount()
+
+    const scheduleEventButton = wrapper.get("#desktop-schedule-event-btn")
+    expect(scheduleEventButton.classes()).toContain("tw-w-full")
+    expect(scheduleEventButton.classes()).not.toContain(
+      "desktop-event-header-single-column",
+    )
   })
 
   it("triggers add guest availability from the new secondary desktop action", async () => {
