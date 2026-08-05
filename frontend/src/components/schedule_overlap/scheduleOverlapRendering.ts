@@ -915,7 +915,7 @@ export const formatTooltipContent = ({
   const startTimeStr = start.toLocaleString("en-US", timeFormat)
   const endTimeStr = end.toLocaleString("en-US", timeFormat)
 
-  return `${startDateStr} ${startTimeStr} to ${endTimeStr}`
+  return `${startTimeStr} to ${endTimeStr} \u00b7 ${startDateStr}`
 }
 
 export const getTimeBlockStyle = ({

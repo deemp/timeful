@@ -1691,6 +1691,6 @@ describe("useCalendarGrid", () => {
           timeType: timeTypes.HOUR24,
           isSpecificDates: true,
         }),
-    ).toBe("Fri, Aug 7, 2026 00:00 to 01:00")
+    ).toBe("00:00 to 01:00 \u00b7 Fri, Aug 7, 2026")
   })
 })

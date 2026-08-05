@@ -8,7 +8,7 @@
     <slot></slot>
     <div
       v-if="(isVisible || forceVisible) && content"
-      class="tw-pointer-events-none tw-fixed tw-z-50 tw-rounded-lg tw-bg-dark-gray tw-px-1.5 tw-py-1 tw-text-xs tw-text-white tw-shadow-lg tw-transition-opacity tw-duration-200"
+      class="tw-pointer-events-none tw-fixed tw-z-50 tw-rounded-lg tw-bg-dark-gray tw-px-1.5 tw-py-1 tw-text-xs tw-text-white tw-shadow-lg tw-transition-opacity tw-duration-200 tw-font-mono"
       :style="tooltipStyle"
     >
       {{ content }}

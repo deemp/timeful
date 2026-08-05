@@ -119,7 +119,7 @@ describe("scheduleOverlapRendering", () => {
       isSpecificDates: true,
     })
 
-    expect(tooltip).toBe("Sat, Jul 4, 2026 14:30 to 15:00")
+    expect(tooltip).toBe("14:30 to 15:00 \u00b7 Sat, Jul 4, 2026")
   })
 
   it("clips overlay fragments before visible grey rows that stay rendered", () => {

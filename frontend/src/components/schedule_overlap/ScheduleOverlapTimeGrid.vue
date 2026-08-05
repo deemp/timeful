@@ -26,7 +26,7 @@
           v-for="row in timedGrid.renderedRows"
           :id="row.kind === 'timeslot' ? `time-row-${row.baseRowIndex ?? 0}` : row.id"
           :key="row.id"
-            class="tw-relative tw-pr-1 tw-text-right tw-text-xs tw-font-light tw-uppercase sm:tw-pr-2"
+            class="tw-relative tw-pr-1 tw-text-right tw-text-xs tw-font-light tw-uppercase sm:tw-pr-2 tw-font-mono"
           :style="{ height: `${row.height}px` }"
         >
             <span
@@ -38,7 +38,7 @@
           </div>
           <div
             v-if="timedGrid.timeAxisEndText"
-            class="tw-relative tw-h-0 tw-pr-1 tw-text-right tw-text-xs tw-font-light tw-uppercase sm:tw-pr-2"
+            class="tw-relative tw-h-0 tw-pr-1 tw-text-right tw-text-xs tw-font-light tw-uppercase sm:tw-pr-2 tw-font-mono"
           >
             <span class="tw-absolute tw-right-1 tw-top-0 -tw-translate-y-1/2 sm:tw-right-2">
               {{ timedGrid.timeAxisEndText }}
@@ -112,7 +112,7 @@
                   <button
                     v-if="row.kind === 'collapsed'"
                     type="button"
-                    class="schedule-overlap-collapsed-row tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-px-4 tw-text-sm"
+                    class="schedule-overlap-collapsed-row tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-px-4 tw-text-sm tw-font-mono"
                     @pointerdown.stop
                     @click="timedGrid.actions.toggleCollapsedSpan(row.id)"
                   >
