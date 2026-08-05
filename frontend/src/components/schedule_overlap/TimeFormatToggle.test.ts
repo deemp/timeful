@@ -19,8 +19,11 @@ describe("TimeFormatToggle", () => {
     expect(wrapper.get(".time-format-toggle__indicator").attributes("style")).toContain(
       "width: calc(50% - 4px)",
     )
+    expect(wrapper.get(".time-format-toggle__indicator").classes()).toContain(
+      "tw-border-light-gray-stroke",
+    )
     expect(wrapper.get(".time-format-toggle__indicator").attributes("style")).toContain(
-      "border-color: transparent",
+      "background-color: transparent",
     )
     expect(wrapper.findAll(".time-format-toggle__option")[0].classes()).toContain(
       "tw-z-10",
