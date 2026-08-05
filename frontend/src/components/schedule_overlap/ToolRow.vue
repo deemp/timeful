@@ -20,7 +20,7 @@
           v-if="!toolRow.event.daysOnly"
           :class="[
             'tw-flex tw-items-center tw-gap-2',
-            compact && 'tw-w-full tw-flex-col tw-items-start tw-gap-0',
+            compact && 'tw-w-full tw-flex-col tw-items-start tw-gap-3',
           ]"
         >
             <div v-if="compact" class="tw-self-start">
@@ -70,6 +70,8 @@
                 : 'tw-order-first tw-w-full sm:tw-w-[unset]',
             ]"
             :compact="compact"
+            :field-variant="isPhone ? 'underlined' : 'solo'"
+            :compact-button="!isPhone"
             :label="compact ? '' : undefined"
             :model-value="toolRow.curTimezone"
             :modified="toolRow.timezoneModified"

@@ -118,7 +118,7 @@ describe("ToolRow", () => {
       "compact && 'tw-w-full tw-flex-col tw-items-start tw-justify-start tw-gap-0 tw-py-2'",
     )
     expect(toolRowSource).toContain(
-      "compact && 'tw-w-full tw-flex-col tw-items-start tw-gap-0'",
+      "compact && 'tw-w-full tw-flex-col tw-items-start tw-gap-3'",
     )
     expect(toolRowSource).toContain('v-if="compact" class="tw-self-start"')
     expect(toolRowSource).toContain("<TimeFormatToggle")
@@ -127,6 +127,10 @@ describe("ToolRow", () => {
       '@update:model-value="toolRow.actions.updateTimeType"',
     )
     expect(toolRowSource).toContain(":label=\"compact ? '' : undefined\"")
+    expect(toolRowSource).toContain(
+      ":field-variant=\"isPhone ? 'underlined' : 'solo'\"",
+    )
+    expect(toolRowSource).toContain(':compact-button="!isPhone"')
   })
 
   it("keeps the mobile timed options visible with zero responses", () => {

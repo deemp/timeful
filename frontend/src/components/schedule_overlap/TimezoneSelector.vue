@@ -1,7 +1,10 @@
 <template>
   <div
     id="timezone-select-container"
-    class="tw-flex tw-min-w-0 tw-items-center tw-text-[rgba(0,0,0,0.6)]"
+    :class="[
+      'tw-flex tw-min-w-0 tw-items-center tw-text-[rgba(0,0,0,0.6)]',
+      compact && 'tw-w-full',
+    ]"
   >
     <div v-if="label" :class="`tw-mr-2 ${labelColor}`">{{ label }}</div>
     <div
@@ -10,21 +13,44 @@
         compact && 'tw-flex-1',
       ]"
     >
+      <v-btn
+        v-if="modified && !compact"
+        icon
+        color="primary"
+        variant="text"
+        class="timezone-select__reset-button"
+        @mousedown.stop.prevent
+        @pointerdown.stop.prevent
+        @click.stop="emit('reset')"
+      >
+        <v-icon>mdi-refresh</v-icon>
+      </v-btn>
       <v-select
         id="timezone-select"
         :model-value="selectedTimezoneValue"
         :items="visibleTimezoneItems"
         data-testid="timezone-select-trigger"
-        class="compact-inline-select tw-z-20 -tw-mt-px tw-min-w-0 tw-text-sm tw-text-black"
-        :class="compact ? 'tw-w-full tw-flex-1' : 'tw-w-40 sm:tw-w-44 md:tw-w-64'"
+        :class="[
+          fieldVariant === 'solo'
+            ? 'timeful-solo-field'
+            : 'compact-inline-select tw-z-20 -tw-mt-px tw-min-w-0 tw-text-sm tw-text-black',
+          fieldVariant === 'solo' && compactButton && 'timezone-select--compact-button',
+          compact ? 'tw-w-full tw-flex-1' : 'tw-w-40 sm:tw-w-44 md:tw-w-64',
+        ]"
         color="#219653"
-        density="compact"
+        :density="
+          fieldVariant === 'solo' && compactButton
+            ? 'compact'
+            : fieldVariant === 'solo'
+              ? 'default'
+              : 'compact'
+        "
         item-color="green"
         hide-details
         item-title="title"
         item-value="value"
-        single-line
-        variant="underlined"
+        :single-line="fieldVariant !== 'solo'"
+        :variant="fieldVariant"
         @update:model-value="onChangeValue"
       >
         <template #item="{ item, props: itemProps }">
@@ -51,11 +77,11 @@
         </template>
       </v-select>
       <v-btn
-        v-if="modified"
+        v-if="modified && compact"
         icon
-        color="primary"
-        variant="text"
-        class="timezone-select__reset-button"
+        size="32"
+        variant="outlined"
+        class="timezone-select__reset-button timezone-select__reset-button--right"
         @mousedown.stop.prevent
         @pointerdown.stop.prevent
         @click.stop="emit('reset')"
@@ -89,6 +115,8 @@ const props = withDefaults(
     labelColor?: string
     referenceDate?: Temporal.ZonedDateTime | null
     compact?: boolean
+    fieldVariant?: "underlined" | "solo"
+    compactButton?: boolean
   }>(),
   {
     modified: false,
@@ -96,6 +124,8 @@ const props = withDefaults(
     labelColor: "tw-text-sm tw-text-black",
     referenceDate: null,
     compact: false,
+    fieldVariant: "underlined",
+    compactButton: false,
   }
 )
 
@@ -199,7 +229,41 @@ function onChangeValue(val: string | null) {
 </script>
 
 <style scoped>
-.compact-inline-select {
+.timezone-select--compact-button {
+  --v-field-padding-top: 0px;
+  --v-field-padding-bottom: 0px;
+}
+
+.timezone-select--compact-button :deep(.v-field) {
+  min-height: 32px !important;
+  height: 32px !important;
+  filter: none !important;
+  box-shadow: none !important;
+}
+
+.timezone-select--compact-button :deep(.v-field__input) {
+  align-items: center !important;
+  min-height: 32px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.timezone-select--compact-button :deep(.v-select__selection-text) {
+  color: rgb(0, 0, 0);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.timezone-select--compact-button :deep(.v-field__append-inner) {
+  align-self: center !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.compact-inline-select:not(.timeful-solo-field) {
   --v-input-control-height: 26px;
   --v-field-padding-top: 0px;
   --v-field-padding-bottom: 0px;
@@ -227,7 +291,7 @@ function onChangeValue(val: string | null) {
   min-width: 0 !important;
 }
 
-.compact-inline-select :deep(.v-field) {
+.compact-inline-select:not(.timeful-solo-field) :deep(.v-field) {
   background: transparent;
   border: 0;
   border-radius: 0;
@@ -238,7 +302,7 @@ function onChangeValue(val: string | null) {
   border-bottom-color: var(--timeful-grid-line-color);
 }
 
-.compact-inline-select :deep(.v-field__input) {
+.compact-inline-select:not(.timeful-solo-field) :deep(.v-field__input) {
   flex-wrap: nowrap !important;
   min-width: 0 !important;
   overflow: hidden !important;
@@ -256,7 +320,7 @@ function onChangeValue(val: string | null) {
   white-space: nowrap !important;
 }
 
-.compact-inline-select :deep(.v-field__append-inner) {
+.compact-inline-select:not(.timeful-solo-field) :deep(.v-field__append-inner) {
   align-items: center !important;
   align-self: center !important;
   display: flex !important;
@@ -289,7 +353,17 @@ function onChangeValue(val: string | null) {
 }
 
 .timezone-select__reset-button {
-  margin-inline-start: -2px;
+  margin-inline-end: -2px;
+}
+
+.timezone-select__reset-button--right {
+  border-color: #4f4f4f1f !important;
+  border-radius: 0.375rem;
+  color: rgb(0, 0, 0);
+  height: 32px;
+  margin-inline-end: 0;
+  min-width: 32px;
+  width: 32px;
 }
 
 .timezone-select__item {
