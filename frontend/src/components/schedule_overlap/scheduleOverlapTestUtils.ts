@@ -1,7 +1,7 @@
 import { shallowMount } from "@vue/test-utils"
 import { vi } from "vitest"
 import { Temporal } from "temporal-polyfill"
-import { eventTypes, UTC } from "@/constants"
+import { eventTypes, timeTypes, UTC } from "@/constants"
 import { states } from "@/composables/schedule_overlap/types"
 import { createLocalStorageMock } from "@/test/localStorage"
 import { ZdtMap } from "@/utils"
@@ -10,6 +10,7 @@ import type {
   ScheduleOverlapMobileOverlayViewModel,
   ScheduleOverlapRespondentsPanelViewModel,
   ScheduleOverlapSidebarViewModel,
+  ScheduleOverlapToolRowViewModel,
 } from "./scheduleOverlapViewModelContracts"
 
 export type ScheduleOverlapWrapper = ReturnType<
@@ -114,6 +115,41 @@ export const buildRespondentsPanelViewModel =
     addingAvailabilityAsGuest: false,
   })
 
+export const buildScheduleOverlapToolRowViewModel =
+  (): ScheduleOverlapToolRowViewModel => ({
+    event: buildScheduleOverlapProps().event,
+    state: states.HEATMAP,
+    states,
+    actions: {
+      updateCurTimezone: vi.fn(),
+      resetCurTimezone: vi.fn(),
+      updateTimeType: vi.fn(),
+      updateMobileNumDays: vi.fn(),
+      updateShowBestTimes: vi.fn(),
+      updateHideIfNeeded: vi.fn(),
+      updateShowAllHours: vi.fn(),
+      updateStartCalendarOnMonday: vi.fn(),
+      updateWeekOffset: vi.fn(),
+      scheduleEvent: vi.fn(),
+      cancelScheduleEvent: vi.fn(),
+      confirmScheduleEvent: vi.fn(),
+    },
+    curTimezone: buildRespondentsPanelViewModel().timezone,
+    timezoneModified: false,
+    startCalendarOnMonday: false,
+    showBestTimes: false,
+    hideIfNeeded: false,
+    showAllHours: false,
+    isWeekly: false,
+    calendarPermissionGranted: false,
+    weekOffset: 0,
+    timezoneReferenceDate: zdt("2026-01-01T12:00:00Z"),
+    numResponses: 0,
+    mobileNumDays: 3,
+    allowScheduleEvent: true,
+    timeType: timeTypes.HOUR12,
+  })
+
 export const buildScheduleOverlapSidebarViewModel =
   (): ScheduleOverlapSidebarViewModel => ({
     event: buildScheduleOverlapProps().event,
@@ -150,6 +186,7 @@ export const buildScheduleOverlapSidebarViewModel =
     deleteAvailabilityDialog: false,
     showAds: false,
     rightSideWidth: "320px",
+    toolRow: buildScheduleOverlapToolRowViewModel(),
     respondentsPanel: buildRespondentsPanelViewModel(),
   })
 

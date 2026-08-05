@@ -1,7 +1,8 @@
 import { computed, ref, watch } from "vue"
 import type { ComputedRef, Ref } from "vue"
 import type { Temporal } from "temporal-polyfill"
-import type { AvailabilityType } from "@/constants"
+import { timeTypes, type AvailabilityType } from "@/constants"
+import { timeNumToTimeText } from "@/utils"
 import type { useAvailabilityData } from "@/composables/schedule_overlap/useAvailabilityData"
 import type { useCalendarGrid } from "@/composables/schedule_overlap/useCalendarGrid"
 import type { useDragPaint } from "@/composables/schedule_overlap/useDragPaint"
@@ -26,6 +27,7 @@ import {
   buildCollapsedPageSegments,
   buildPageSlots,
   buildRenderedTimeGridRows,
+  formatAbsoluteMinutes,
   getPageGreyFlags,
   getTimeAxisEndText,
 } from "./scheduleOverlapGridRows"
@@ -196,6 +198,12 @@ export function useTimedGridPresentation(opts: UseTimedGridPresentationOptions) 
       ? opts.grid.splitTimes.value[0][baseRowIndex]
       : opts.grid.splitTimes.value[1][baseRowIndex - firstSplitLength]
   }
+  const formatTime = (absoluteMinutes: number) =>
+    opts.grid.timeType.value === timeTypes.HOUR12
+      ? timeNumToTimeText(
+          ((absoluteMinutes % (24 * 60)) + 24 * 60) % (24 * 60) / 60
+        )
+      : formatAbsoluteMinutes(absoluteMinutes)
   const renderedRows = computed(() =>
     buildRenderedTimeGridRows({
       pageSlots: pageSlots.value,
@@ -204,6 +212,7 @@ export function useTimedGridPresentation(opts: UseTimedGridPresentationOptions) 
       timeslotHeight: opts.grid.timeslotHeight.value,
       visibleDayCount: opts.grid.days.value.length,
       getTimeItem: getBaseRowTimeItem,
+      formatTime,
       getCell: (baseRowIndex, dayIndex) => {
         const cellIndex = dayIndex * opts.grid.times.value.length + baseRowIndex
         return {
@@ -214,7 +223,9 @@ export function useTimedGridPresentation(opts: UseTimedGridPresentationOptions) 
       },
     })
   )
-  const timeAxisEndText = computed(() => getTimeAxisEndText(pageSlots.value))
+  const timeAxisEndText = computed(() =>
+    getTimeAxisEndText(pageSlots.value, formatTime)
+  )
   const scheduledEventStyles = computed(() => {
     const scheduledEvent =
       opts.dragging.value && opts.dragStart.value && opts.dragCur.value

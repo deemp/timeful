@@ -320,6 +320,7 @@ export function useScheduleOverlapViewModels(
     deleteAvailabilityDialog: opts.deleteAvailabilityDialog.value,
     showAds: opts.showAds.value,
     rightSideWidth: opts.rightSideWidth.value,
+    toolRow: toolRowViewModel.value,
     respondentsPanel: respondentsPanel.value,
   }))
 

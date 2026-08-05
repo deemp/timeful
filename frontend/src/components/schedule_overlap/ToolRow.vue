@@ -1,55 +1,84 @@
 <template>
   <div>
     <div
-      class="tw-flex tw-min-h-[5rem] tw-flex-1 tw-items-center tw-justify-center tw-text-sm sm:tw-mt-0 sm:tw-justify-between"
+      :class="[
+        'tw-flex tw-min-h-[5rem] tw-flex-1 tw-items-center tw-justify-center tw-text-sm sm:tw-mt-0 sm:tw-justify-between',
+        compact && 'tool-row--compact tw-min-h-0 tw-justify-start',
+      ]"
     >
       <div
-        :class="
+        :class="[
+          'tw-flex tw-flex-1 tw-flex-wrap tw-gap-x-4 tw-gap-y-2 tw-py-4 sm:tw-justify-start sm:tw-gap-x-4',
           toolRow.state === toolRow.states.EDIT_AVAILABILITY
             ? 'tw-justify-center'
-            : 'tw-justify-between'
-        "
-        class="tw-flex tw-flex-1 tw-flex-wrap tw-gap-x-4 tw-gap-y-2 tw-py-4 sm:tw-justify-start sm:tw-gap-x-4"
+            : 'tw-justify-between',
+          compact && 'tw-w-full tw-flex-col tw-items-start tw-justify-start tw-gap-0 tw-py-2',
+        ]"
       >
         <!-- Select timezone -->
-        <div v-if="!toolRow.event.daysOnly" class="tw-flex tw-items-center tw-gap-2">
+        <div
+          v-if="!toolRow.event.daysOnly"
+          :class="[
+            'tw-flex tw-items-center tw-gap-2',
+            compact && 'tw-w-full tw-flex-col tw-items-start tw-gap-0',
+          ]"
+        >
+            <div v-if="compact" class="tw-self-start">
+              <TimeFormatToggle
+                :model-value="toolRow.timeType"
+                @update:model-value="toolRow.actions.updateTimeType"
+              />
+            </div>
+            <div v-else class="tw-contents">
+              <v-select
+                :model-value="toolRow.timeType"
+                :items="timeTypeOptions"
+              item-title="label"
+              item-value="value"
+              class="tool-row-inline-select tw-z-20 -tw-mt-px tw-w-16 tw-text-sm"
+              color="primary"
+              density="compact"
+              hide-details
+              variant="underlined"
+              @update:model-value="
+                (value) => value && toolRow.actions.updateTimeType(value)
+              "
+            >
+              <template #item="{ item, props: itemProps }">
+                <div
+                  v-bind="stripGeneratedTitle(itemProps)"
+                  class="tool-row-inline-select__item"
+                  :class="{
+                    'tool-row-inline-select__item--active':
+                      item.raw.value === toolRow.timeType,
+                  }"
+                >
+                  {{ item.raw.label }}
+                </div>
+              </template>
+              <template #selection="{ item }">
+                <div class="tool-row-inline-select__selection-text">
+                  {{ item.raw.label }}
+                </div>
+              </template>
+            </v-select>
+          </div>
           <TimezoneSelector
-            class="tw-w-full sm:tw-w-[unset]"
+            :class="[
+              compact
+                ? 'tw-w-full'
+                : 'tw-order-first tw-w-full sm:tw-w-[unset]',
+            ]"
+            :compact="compact"
+            :label="compact ? '' : undefined"
             :model-value="toolRow.curTimezone"
             :modified="toolRow.timezoneModified"
             :reference-date="toolRow.timezoneReferenceDate"
-            @update:model-value="(val) => toolRow.actions.updateCurTimezone(val)"
+            @update:model-value="
+              (val) => toolRow.actions.updateCurTimezone(val)
+            "
             @reset="toolRow.actions.resetCurTimezone()"
           />
-          <v-select
-            :model-value="toolRow.timeType"
-            :items="timeTypeOptions"
-            item-title="label"
-            item-value="value"
-            class="tool-row-inline-select tool-row-inline-select--compact tw-z-20 -tw-mt-px tw-w-16 tw-text-sm"
-            color="primary"
-            density="compact"
-            hide-details
-            variant="underlined"
-            @update:model-value="(value) => value && toolRow.actions.updateTimeType(value)"
-          >
-            <template #item="{ item, props: itemProps }">
-              <div
-                v-bind="stripGeneratedTitle(itemProps)"
-                class="tool-row-inline-select__item"
-                :class="{
-                  'tool-row-inline-select__item--active': item.raw.value === toolRow.timeType,
-                }"
-              >
-                {{ item.raw.label }}
-              </div>
-            </template>
-            <template #selection="{ item }">
-              <div class="tool-row-inline-select__selection-text">
-                {{ item.raw.label }}
-              </div>
-            </template>
-          </v-select>
         </div>
         <div
           v-if="isPhone && !toolRow.event.daysOnly"
@@ -67,7 +96,9 @@
             hide-details
             variant="underlined"
             @update:model-value="
-              (value) => typeof value === 'number' && toolRow.actions.updateMobileNumDays(value)
+              (value) =>
+                typeof value === 'number' &&
+                toolRow.actions.updateMobileNumDays(value)
             "
           >
             <template #item="{ item, props: itemProps }">
@@ -102,9 +133,15 @@
             :show-all-hours="toolRow.showAllHours"
             :start-calendar-on-monday="toolRow.startCalendarOnMonday"
             :num-responses="toolRow.numResponses"
-            @update:show-best-times="(val) => toolRow.actions.updateShowBestTimes(val)"
-            @update:hide-if-needed="(val) => toolRow.actions.updateHideIfNeeded(val)"
-            @update:show-all-hours="(val) => toolRow.actions.updateShowAllHours(val)"
+            @update:show-best-times="
+              (val) => toolRow.actions.updateShowBestTimes(val)
+            "
+            @update:hide-if-needed="
+              (val) => toolRow.actions.updateHideIfNeeded(val)
+            "
+            @update:show-all-hours="
+              (val) => toolRow.actions.updateShowAllHours(val)
+            "
             @update:start-calendar-on-monday="
               (val) => toolRow.actions.updateStartCalendarOnMonday(val)
             "
@@ -124,7 +161,9 @@
               :week-offset="toolRow.weekOffset"
               :event="toolRow.event"
               :start-on-monday="toolRow.event.startOnMonday"
-              @update:week-offset="(val) => toolRow.actions.updateWeekOffset(val)"
+              @update:week-offset="
+                (val) => toolRow.actions.updateWeekOffset(val)
+              "
             />
           </div>
         </template>
@@ -154,11 +193,13 @@ import { useDisplayHelpers } from "@/utils/useDisplayHelpers"
 import TimezoneSelector from "./TimezoneSelector.vue"
 import GCalWeekSelector from "./GCalWeekSelector.vue"
 import EventOptions from "./EventOptions.vue"
+import TimeFormatToggle from "./TimeFormatToggle.vue"
 import { timeTypes } from "@/constants"
 import type { ScheduleOverlapToolRowViewModel } from "./scheduleOverlapViewModelContracts"
 
 defineProps<{
   toolRow: ScheduleOverlapToolRowViewModel
+  compact?: boolean
 }>()
 
 const { isPhone } = useDisplayHelpers()
@@ -173,7 +214,7 @@ const timeTypeOptions = [
 ]
 
 function stripGeneratedTitle(
-  itemProps: Record<string, unknown>
+  itemProps: Record<string, unknown>,
 ): Record<string, unknown> {
   const { title: _title, ...rest } = itemProps
   return rest
@@ -187,12 +228,9 @@ function stripGeneratedTitle(
   padding-bottom: 0 !important;
 }
 
-.tool-row-inline-select :deep(.v-field--variant-underlined .v-field__outline::before) {
+.tool-row-inline-select
+  :deep(.v-field--variant-underlined .v-field__outline::before) {
   border-bottom-color: var(--timeful-grid-line-color);
-}
-
-.tool-row-inline-select--compact :deep(.v-field__append-inner) {
-  padding-inline-start: 4px !important;
 }
 
 .tool-row-inline-select__item,
@@ -212,4 +250,5 @@ function stripGeneratedTitle(
   background-color: var(--timeful-selection-bg);
   color: var(--timeful-selection-fg);
 }
+
 </style>

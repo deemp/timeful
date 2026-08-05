@@ -3,14 +3,20 @@
     id="timezone-select-container"
     class="tw-flex tw-min-w-0 tw-items-center tw-text-[rgba(0,0,0,0.6)]"
   >
-    <div :class="`tw-mr-2 ${labelColor}`">{{ label }}</div>
-    <div class="timezone-select__field-row tw-flex tw-min-w-0 tw-items-center">
+    <div v-if="label" :class="`tw-mr-2 ${labelColor}`">{{ label }}</div>
+    <div
+      :class="[
+        'timezone-select__field-row tw-flex tw-min-w-0 tw-items-center',
+        compact && 'tw-flex-1',
+      ]"
+    >
       <v-select
         id="timezone-select"
         :model-value="selectedTimezoneValue"
         :items="visibleTimezoneItems"
         data-testid="timezone-select-trigger"
-        class="compact-inline-select tw-z-20 -tw-mt-px tw-w-40 sm:tw-w-44 md:tw-w-64 tw-min-w-0 tw-text-sm tw-text-black"
+        class="compact-inline-select tw-z-20 -tw-mt-px tw-min-w-0 tw-text-sm tw-text-black"
+        :class="compact ? 'tw-w-full tw-flex-1' : 'tw-w-40 sm:tw-w-44 md:tw-w-64'"
         color="#219653"
         density="compact"
         item-color="green"
@@ -40,7 +46,7 @@
           <div
             class="timezone-select__selection-text v-select__selection v-select__selection--comma"
           >
-            {{ formatTimezoneSelectItemLabel(item.raw) }}
+            {{ selectedTimezoneLabel(item.raw) }}
           </div>
         </template>
       </v-select>
@@ -82,12 +88,14 @@ const props = withDefaults(
     label?: string
     labelColor?: string
     referenceDate?: Temporal.ZonedDateTime | null
+    compact?: boolean
   }>(),
   {
     modified: false,
     label: "Shown in",
     labelColor: "tw-text-sm tw-text-black",
     referenceDate: null,
+    compact: false,
   }
 )
 
@@ -115,6 +123,12 @@ function getTimezoneFromSelectItem(item: TimezoneSelectItem | Timezone): Timezon
 
 function formatTimezoneSelectItemLabel(item: TimezoneSelectItem | Timezone): string {
   return formatTimezoneTitle(getTimezoneFromSelectItem(item))
+}
+
+function selectedTimezoneLabel(item: TimezoneSelectItem | Timezone): string {
+  return props.compact
+    ? getTimezoneFromSelectItem(item).gmtString
+    : formatTimezoneSelectItemLabel(item)
 }
 
 function toTimezoneSelectItem(timezone: Timezone): TimezoneSelectItem {

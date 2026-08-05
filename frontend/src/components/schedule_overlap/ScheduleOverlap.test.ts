@@ -172,7 +172,7 @@ describe("ScheduleOverlap", () => {
 
   it("stretches timed and days-only grid columns across the compact desktop width helper", () => {
     expect(scheduleOverlapTimeGridSource).toContain(
-      'class="schedule-overlap-time-grid__content tw-grow"'
+      'class="schedule-overlap-time-grid__content tw-grow tw-min-w-0"'
     )
     expect(scheduleOverlapTimeGridSource).toContain(
       "schedule-overlap-time-grid__day-column"
@@ -414,7 +414,7 @@ describe("ScheduleOverlap", () => {
     expect(
       timedGrid.renderedRows.filter((row) => row.kind === "collapsed")
     ).toEqual([
-      expect.objectContaining({ startLabel: "04:00", endLabel: "00:00" }),
+      expect.objectContaining({ startLabel: "4 am", endLabel: "12 am" }),
     ])
   })
 
@@ -1335,24 +1335,24 @@ describe("ScheduleOverlap", () => {
     const initialTimeslotRows = timedGrid.renderedRows.filter((row) => row.kind === "timeslot")
     expect(timedGrid.renderedRows.some((row) => row.kind === "collapsed")).toBe(false)
     expect(initialTimeslotRows.length).toBe(timedGrid.splitTimes.flat().length)
-    expect(initialTimeslotRows[0]?.timeText).toBe("09:00")
+    expect(initialTimeslotRows[0]?.timeText).toBe("9 am")
     expect(
       initialTimeslotRows
         .map((row) => row.timeText)
         .filter((label): label is string => Boolean(label)),
     ).toEqual([
-      "09:00",
-      "10:00",
-      "11:00",
-      "12:00",
-      "13:00",
-      "14:00",
-      "15:00",
-      "16:00",
-      "17:00",
-      "18:00",
-      "19:00",
-      "20:00",
+      "9 am",
+      "10 am",
+      "11 am",
+      "12 pm",
+      "1 pm",
+      "2 pm",
+      "3 pm",
+      "4 pm",
+      "5 pm",
+      "6 pm",
+      "7 pm",
+      "8 pm",
     ])
 
     vm.updateShowAllHours(true)
@@ -1548,8 +1548,8 @@ describe("ScheduleOverlap", () => {
     expect(getTimedGridPresentation(wrapper).renderedRows.filter((row) => row.kind === "collapsed")).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          startLabel: "10:00",
-          endLabel: "16:00",
+          startLabel: "10 am",
+          endLabel: "4 pm",
         }),
       ])
     )
@@ -1618,7 +1618,7 @@ describe("ScheduleOverlap", () => {
     expect(vm.state).toBe(states.SCHEDULE_EVENT)
     expect(getTimedGridPresentation(wrapper).renderedRows.filter((row) => row.kind === "collapsed")).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ startLabel: "10:00", endLabel: "16:00" }),
+        expect.objectContaining({ startLabel: "10 am", endLabel: "4 pm" }),
       ])
     )
   })
@@ -1661,8 +1661,8 @@ describe("ScheduleOverlap", () => {
     const timedGrid = getTimedGridPresentation(wrapper)
     expect(timedGrid.renderedRows.some((row) => row.kind === "collapsed")).toBe(false)
     const timeslotRows = timedGrid.renderedRows.filter((row) => row.kind === "timeslot")
-    expect(timeslotRows[0]?.timeText).toBe("14:00")
-    expect(timeslotRows.at(-1)?.timeText).toBe("17:00")
+    expect(timeslotRows[0]?.timeText).toBe("2 pm")
+    expect(timeslotRows.at(-1)?.timeText).toBe("5 pm")
   })
 
   it("does not add full-day filler rows around a saved specific-times window", () => {
@@ -1698,7 +1698,7 @@ describe("ScheduleOverlap", () => {
     const timeslotRows = timedGrid.renderedRows.filter((row) => row.kind === "timeslot")
 
     expect(timedGrid.renderedRows.some((row) => row.kind === "filler")).toBe(false)
-    expect(timeslotRows[0]?.timeText).toBe("14:00")
+    expect(timeslotRows[0]?.timeText).toBe("2 pm")
     expect(timeslotRows.at(-1)?.timeText).toBeUndefined()
   })
 
@@ -1776,8 +1776,8 @@ describe("ScheduleOverlap", () => {
     expect(collapsedRows).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          startLabel: "11:00",
-          endLabel: "18:00",
+          startLabel: "11 am",
+          endLabel: "6 pm",
         }),
       ])
     )
@@ -1817,9 +1817,9 @@ describe("ScheduleOverlap", () => {
       .filter((label): label is string => Boolean(label))
 
     expect(timedGrid.renderedRows.some((row) => row.kind === "split-gap")).toBe(false)
-    expect(timedGrid.renderedRows[0]?.timeText).toBe("00:00")
-    expect(hourLabels).toContain("23:00")
-    expect(hourLabels.filter((label) => label === "02:00")).toHaveLength(1)
+    expect(timedGrid.renderedRows[0]?.timeText).toBe("12 am")
+    expect(hourLabels).toContain("11 pm")
+    expect(hourLabels.filter((label) => label === "2 am")).toHaveLength(1)
 
     for (let col = 0; col < timedGrid.days.length; col += 1) {
       const headerDate = timedGrid.days[col]?.dateObject.withTimeZone("+03:30").toPlainDate().toString()
@@ -1862,11 +1862,11 @@ describe("ScheduleOverlap", () => {
 
     expect(timedGrid.renderedRows.some((row) => row.kind === "split-gap")).toBe(false)
     expect(timedGrid.splitTimes[1]).toEqual([])
-    expect(hourLabels.slice(0, 4)).toEqual(["00:00", "01:00", "02:00", "03:00"])
-    expect(hourLabels.at(-1)).toBe("23:00")
-    expect(timedGrid.timeAxisEndText).toBe("00:00")
-    expect(hourLabels.filter((label) => label === "00:00")).toHaveLength(1)
-    expect(hourLabels.filter((label) => label === "01:00")).toHaveLength(1)
+    expect(hourLabels.slice(0, 4)).toEqual(["12 am", "1 am", "2 am", "3 am"])
+    expect(hourLabels.at(-1)).toBe("11 pm")
+    expect(timedGrid.timeAxisEndText).toBe("12 am")
+    expect(hourLabels.filter((label) => label === "12 am")).toHaveLength(1)
+    expect(hourLabels.filter((label) => label === "1 am")).toHaveLength(1)
     expect(
       new Set(
         timedGrid.splitTimes[0]
@@ -1907,9 +1907,9 @@ describe("ScheduleOverlap", () => {
 
     expect(timedGrid.renderedRows.some((row) => row.kind === "split-gap")).toBe(false)
     expect(timedGrid.splitTimes[1]).toEqual([])
-    expect(hourLabels.filter((label) => label === "00:00")).toHaveLength(1)
-    expect(hourLabels.filter((label) => label === "01:00")).toHaveLength(1)
-    expect(hourLabels.filter((label) => label === "02:00")).toHaveLength(1)
+    expect(hourLabels.filter((label) => label === "12 am")).toHaveLength(1)
+    expect(hourLabels.filter((label) => label === "1 am")).toHaveLength(1)
+    expect(hourLabels.filter((label) => label === "2 am")).toHaveLength(1)
     expect(
       new Set(
         timedGrid.splitTimes[0]

@@ -47,7 +47,7 @@
       </div>
   </div>
 
-  <div class="schedule-overlap-time-grid__content tw-grow">
+  <div class="schedule-overlap-time-grid__content tw-grow tw-min-w-0">
       <div
         class="schedule-overlap-time-grid__scroller tw-relative tw-flex tw-flex-col"
         @scroll="timedGrid.actions.calendarScroll"
@@ -317,10 +317,6 @@
         </div>
       </v-expand-transition>
 
-      <ToolRow
-        v-if="!timedGrid.isPhone && !timedGrid.calendarOnly"
-        :tool-row="timedGrid.toolRow"
-      />
   </div>
 
   <div
@@ -350,7 +346,6 @@ import {
 import type { ScheduleOverlapTimeGridViewModel } from "./scheduleOverlapViewModelContracts"
 import CalendarEventBlock from "./CalendarEventBlock.vue"
 import SignUpCalendarBlock from "@/components/sign_up_form/SignUpCalendarBlock.vue"
-import ToolRow from "./ToolRow.vue"
 import ZigZag from "./ZigZag.vue"
 
 defineOptions({

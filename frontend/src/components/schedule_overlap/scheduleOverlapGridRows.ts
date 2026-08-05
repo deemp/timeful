@@ -144,6 +144,7 @@ export function buildRenderedTimeGridRows({
   visibleDayCount,
   getTimeItem,
   getCell,
+  formatTime,
 }: {
   pageSlots: PageSlot[]
   collapsedPageSegments: CollapsedPageSegment[]
@@ -152,6 +153,7 @@ export function buildRenderedTimeGridRows({
   visibleDayCount: number
   getTimeItem: (baseRowIndex: number) => TimeItem
   getCell: (baseRowIndex: number, dayIndex: number) => RenderedTimeGridRowCell
+  formatTime: (absoluteMinutes: number) => string
 }): RenderedTimeGridRow[] {
   const rows: RenderedTimeGridRow[] = []
   const collapsedSegmentByStartIndex = new Map<number, CollapsedPageSegment>()
@@ -170,9 +172,9 @@ export function buildRenderedTimeGridRows({
         kind: "collapsed",
         height: COLLAPSED_HOURS_ROW_HEIGHT,
         rowTop,
-        timeText: formatAbsoluteMinutes(collapsedSegment.startMinutes),
-        startLabel: formatAbsoluteMinutes(collapsedSegment.startMinutes),
-        endLabel: formatAbsoluteMinutes(collapsedSegment.endMinutes),
+        timeText: formatTime(collapsedSegment.startMinutes),
+        startLabel: formatTime(collapsedSegment.startMinutes),
+        endLabel: formatTime(collapsedSegment.endMinutes),
       })
       rowTop += COLLAPSED_HOURS_ROW_HEIGHT
       slotIndex = collapsedSegment.hiddenEndIndex - 1
@@ -192,7 +194,7 @@ export function buildRenderedTimeGridRows({
       timeText:
         (timeItem.text?.match(/ [+-]\d{2}:\d{2}$/) ? timeItem.text : undefined) ??
         (typeof timeItem.absoluteMinutes === "number" && timeItem.absoluteMinutes % 60 === 0
-          ? formatAbsoluteMinutes(timeItem.absoluteMinutes)
+          ? formatTime(timeItem.absoluteMinutes)
           : undefined),
       baseRowIndex,
       cells: Array.from({ length: visibleDayCount }, (_, dayIndex) =>
@@ -205,9 +207,12 @@ export function buildRenderedTimeGridRows({
   return rows
 }
 
-export function getTimeAxisEndText(pageSlots: PageSlot[]): string | undefined {
+export function getTimeAxisEndText(
+  pageSlots: PageSlot[],
+  formatTime: (absoluteMinutes: number) => string
+): string | undefined {
   const endMinutes = pageSlots.at(-1)?.endMinutes
   return typeof endMinutes === "number" && endMinutes % 60 === 0
-    ? formatAbsoluteMinutes(endMinutes)
+    ? formatTime(endMinutes)
     : undefined
 }

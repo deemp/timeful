@@ -264,7 +264,9 @@ describe("TimezoneSelector", () => {
   })
 
   it("renders the reset action as a sibling next to the underlined select", () => {
-    expect(timezoneSelectorSource).toContain('class="timezone-select__field-row tw-flex tw-min-w-0 tw-items-center"')
+    expect(timezoneSelectorSource).toContain(
+      "'timezone-select__field-row tw-flex tw-min-w-0 tw-items-center'",
+    )
     expect(timezoneSelectorSource).toContain('class="timezone-select__reset-button"')
     expect(timezoneSelectorSource).toContain('v-if="modified"')
     expect(timezoneSelectorSource).toContain("@mousedown.stop.prevent")
@@ -306,12 +308,43 @@ describe("TimezoneSelector", () => {
 
   it("allows the timezone select and its selection text to shrink for ellipsis", () => {
     expect(timezoneSelectorSource).toContain('class="tw-flex tw-min-w-0 tw-items-center tw-text-[rgba(0,0,0,0.6)]"')
-    expect(timezoneSelectorSource).toContain('class="compact-inline-select tw-z-20 -tw-mt-px tw-w-40 sm:tw-w-44 md:tw-w-64 tw-min-w-0')
+    expect(timezoneSelectorSource).toContain('class="compact-inline-select tw-z-20 -tw-mt-px tw-min-w-0 tw-text-sm tw-text-black"')
+    expect(timezoneSelectorSource).toContain(
+      ":class=\"compact ? 'tw-w-full tw-flex-1' : 'tw-w-40 sm:tw-w-44 md:tw-w-64'\"",
+    )
+    expect(timezoneSelectorSource).toContain("compact && 'tw-flex-1'")
     expect(timezoneSelectorSource).toContain(
       ".compact-inline-select :deep(.v-field__input) {\n  flex-wrap: nowrap !important;\n  min-width: 0 !important;"
     )
     expect(timezoneSelectorSource).toContain(
       ".compact-inline-select :deep(.v-select__selection) {\n  display: block !important;"
+    )
+  })
+
+  it("shortens the compact selected timezone to its GMT offset", () => {
+    const wrapper = shallowMount(TimezoneSelector, {
+      props: {
+        compact: true,
+        modelValue: {
+          value: "America/New_York",
+          label: "Eastern Time",
+          gmtString: "(GMT-5:00)",
+          offset: Temporal.Duration.from({ hours: -5 }),
+        },
+      },
+      global: {
+        stubs: {
+          "v-btn": true,
+          "v-icon": true,
+          "v-list-item": true,
+          "v-list-item-title": true,
+          "v-select": RenderingVSelectStub,
+        },
+      },
+    })
+
+    expect(wrapper.get(".timezone-select__selection-text").text()).toMatch(
+      /^\(GMT-\d+:\d+\)$/
     )
   })
 

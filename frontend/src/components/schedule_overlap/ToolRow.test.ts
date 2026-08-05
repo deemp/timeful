@@ -45,7 +45,9 @@ const baseToolRow = {
     name: "Planning",
     type: eventTypes.SPECIFIC_DATES,
     dates: [Temporal.PlainDate.from("2026-01-01")],
-    timeSeed: Temporal.Instant.from("2026-01-01T12:00:00Z").toZonedDateTimeISO(UTC),
+    timeSeed: Temporal.Instant.from("2026-01-01T12:00:00Z").toZonedDateTimeISO(
+      UTC,
+    ),
     duration: Temporal.Duration.from({ hours: 1 }),
     daysOnly: false,
   },
@@ -79,7 +81,9 @@ const baseToolRow = {
   isWeekly: false,
   calendarPermissionGranted: false,
   weekOffset: 0,
-  timezoneReferenceDate: Temporal.Instant.from("2026-01-01T12:00:00Z").toZonedDateTimeISO(UTC),
+  timezoneReferenceDate: Temporal.Instant.from(
+    "2026-01-01T12:00:00Z",
+  ).toZonedDateTimeISO(UTC),
   numResponses: 2,
   mobileNumDays: 3,
   allowScheduleEvent: true,
@@ -87,18 +91,42 @@ const baseToolRow = {
 }
 
 describe("ToolRow", () => {
-  it("uses explicit Vuetify 3 select semantics for the time type control", () => {
+  it("uses explicit Vuetify 3 select semantics for the non-compact time type control", () => {
     expect(toolRowSource).toContain(':model-value="toolRow.timeType"')
     expect(toolRowSource).toContain('item-title="label"')
     expect(toolRowSource).toContain('item-value="value"')
     expect(toolRowSource).toContain('color="primary"')
     expect(toolRowSource).toContain('density="compact"')
     expect(toolRowSource).toContain('variant="underlined"')
-    expect(toolRowSource).toContain('class="tool-row-inline-select tool-row-inline-select--compact')
-    expect(toolRowSource).toContain("@update:model-value=\"(value) => value && toolRow.actions.updateTimeType(value)\"")
-    expect(toolRowSource).toContain('class="tool-row-inline-select__selection-text"')
-    expect(toolRowSource).toContain("'tool-row-inline-select__item--active': item.raw.value === toolRow.timeType")
-    expect(toolRowSource).toContain(".tool-row-inline-select__item--active {\n  background-color: var(--timeful-selection-bg);\n  color: var(--timeful-selection-fg);\n}")
+    expect(toolRowSource).toContain('class="tool-row-inline-select tw-z-20')
+    expect(toolRowSource).toContain("-tw-mt-px tw-w-16 tw-text-sm")
+    expect(toolRowSource).toContain("toolRow.actions.updateTimeType(value)")
+    expect(toolRowSource).toContain(
+      'class="tool-row-inline-select__selection-text"',
+    )
+    expect(toolRowSource).toContain("item.raw.value === toolRow.timeType")
+    expect(toolRowSource).toContain(
+      ".tool-row-inline-select__item--active {\n  background-color: var(--timeful-selection-bg);\n  color: var(--timeful-selection-fg);\n}",
+    )
+  })
+
+  it("places a compact time-format switch above the timezone selector", () => {
+    expect(toolRowSource).toContain(
+      "compact && 'tool-row--compact tw-min-h-0 tw-justify-start'",
+    )
+    expect(toolRowSource).toContain(
+      "compact && 'tw-w-full tw-flex-col tw-items-start tw-justify-start tw-gap-0 tw-py-2'",
+    )
+    expect(toolRowSource).toContain(
+      "compact && 'tw-w-full tw-flex-col tw-items-start tw-gap-0'",
+    )
+    expect(toolRowSource).toContain('v-if="compact" class="tw-self-start"')
+    expect(toolRowSource).toContain("<TimeFormatToggle")
+    expect(toolRowSource).toContain(':model-value="toolRow.timeType"')
+    expect(toolRowSource).toContain(
+      '@update:model-value="toolRow.actions.updateTimeType"',
+    )
+    expect(toolRowSource).toContain(":label=\"compact ? '' : undefined\"")
   })
 
   it("keeps the mobile timed options visible with zero responses", () => {

@@ -15,6 +15,11 @@ const times = (start: number, count: number, increment = 60): TimeItem[] =>
     absoluteMinutes: start + index * increment,
   }))
 
+const formatTime = (absoluteMinutes: number) =>
+  `${String(Math.floor(absoluteMinutes / 60)).padStart(2, "0")}:${String(
+    absoluteMinutes % 60
+  ).padStart(2, "0")}`
+
 describe("scheduleOverlapGridRows", () => {
   it("keeps split time rows in stable base-row order", () => {
     const slots = buildPageSlots([times(1320, 2), times(0, 2)], 60)
@@ -75,11 +80,43 @@ describe("scheduleOverlapGridRows", () => {
         timeslotHeight: 60,
         visibleDayCount: 1,
         getTimeItem: (index) => times(9 * 60, 5)[index],
+        formatTime,
         getCell: () => ({ class: "", style: {}, von: {} }),
       })
 
     expect(buildRows(new Set()).map((row) => row.kind)).toEqual(["timeslot", "collapsed", "timeslot"])
     expect(buildRows(new Set([segment.id])).map((row) => row.baseRowIndex)).toEqual([0, 1, 2, 3, 4])
-    expect(getTimeAxisEndText(slots)).toBe("14:00")
+    expect(getTimeAxisEndText(slots, formatTime)).toBe("14:00")
+  })
+
+  it("uses the selected time format for regular, collapsed, and end-axis labels", () => {
+    const slots = buildPageSlots([times(12 * 60, 5), []], 60)
+    const [segment] = buildCollapsedPageSegments({
+      canCollapseTimes: true,
+      pageSlots: slots,
+      pageGreyFlags: [false, true, true, true, false],
+      timeslotMinutes: 60,
+    })
+    const formatTwelveHour = (absoluteMinutes: number) =>
+      `${String((Math.floor(absoluteMinutes / 60) + 11) % 12 + 1)} ${
+        absoluteMinutes < 12 * 60 ? "am" : "pm"
+      }`
+    const rows = buildRenderedTimeGridRows({
+      pageSlots: slots,
+      collapsedPageSegments: [segment],
+      expandedCollapsedSpanIds: new Set(),
+      timeslotHeight: 60,
+      visibleDayCount: 1,
+      getTimeItem: (index) => ({
+        ...times(12 * 60, 5)[index],
+        text: index === 0 ? "12 pm" : index === 4 ? "4 pm" : undefined,
+      }),
+      formatTime: formatTwelveHour,
+      getCell: () => ({ class: "", style: {}, von: {} }),
+    })
+
+    expect(rows.map((row) => row.timeText)).toEqual(["12 pm", "1 pm", "4 pm"])
+    expect(rows[1]).toMatchObject({ startLabel: "1 pm", endLabel: "4 pm" })
+    expect(getTimeAxisEndText(slots, formatTwelveHour)).toBe("5 pm")
   })
 })

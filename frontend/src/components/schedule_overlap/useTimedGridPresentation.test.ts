@@ -4,7 +4,7 @@ import { computed, defineComponent, ref } from "vue"
 import { mount } from "@vue/test-utils"
 import { describe, expect, it } from "vitest"
 import { Temporal } from "temporal-polyfill"
-import { availabilityTypes, eventTypes, UTC } from "@/constants"
+import { availabilityTypes, eventTypes, timeTypes, type TimeType, UTC } from "@/constants"
 import {
   states,
   type ScheduleOverlapEvent,
@@ -23,6 +23,7 @@ const mountPresentation = () => {
     [time(9), time(10), time(11), time(12), time(13)],
     [],
   ])
+  const timeType = ref<TimeType>(timeTypes.HOUR24)
   const times = computed(() => splitTimes.value.flat())
   let presentation!: ReturnType<typeof useTimedGridPresentation>
 
@@ -54,6 +55,7 @@ const mountPresentation = () => {
         getTimeslotVon: () => ({}),
         grid: {
           splitTimes,
+          timeType,
           timeslotDuration: ref(Temporal.Duration.from({ hours: 1 })),
           days: ref([{}]),
           times,
@@ -70,7 +72,7 @@ const mountPresentation = () => {
   })
 
   const wrapper = mount(Harness)
-  return { presentation, showAllHours, wrapper }
+  return { presentation, showAllHours, timeType, wrapper }
 }
 
 describe("useTimedGridPresentation", () => {
@@ -110,6 +112,18 @@ describe("useTimedGridPresentation", () => {
     expect(presentation.renderedRows.value).toEqual([
       expect.objectContaining({ id: "collapsed-540-840", kind: "collapsed" }),
     ])
+    wrapper.unmount()
+  })
+
+  it("updates all grid labels when the time format changes", () => {
+    const { presentation, timeType, wrapper } = mountPresentation()
+
+    timeType.value = timeTypes.HOUR12
+
+    expect(presentation.renderedRows.value).toEqual([
+      expect.objectContaining({ startLabel: "9 am", endLabel: "2 pm" }),
+    ])
+    expect(presentation.timeAxisEndText.value).toBe("2 pm")
     wrapper.unmount()
   })
 })

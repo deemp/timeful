@@ -86,16 +86,11 @@
       </div>
     </v-expand-transition>
 
-    <ToolRow
-      v-if="!daysOnlyGrid.isPhone && !daysOnlyGrid.calendarOnly"
-      :tool-row="daysOnlyGrid.toolRow"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
 import type { ScheduleOverlapDaysOnlyGridViewModel } from "./scheduleOverlapViewModelContracts"
-import ToolRow from "./ToolRow.vue"
 import ZigZag from "./ZigZag.vue"
 
 defineOptions({

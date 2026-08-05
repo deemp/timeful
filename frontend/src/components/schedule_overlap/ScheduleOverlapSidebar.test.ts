@@ -24,7 +24,11 @@ describe("ScheduleOverlapSidebar", () => {
       name: "SignUpBlocksList",
       setup(
         _: unknown,
-        { expose }: { expose: ExposeFn<{ scrollToSignUpBlock: typeof scrollToSignUpBlock }> }
+        {
+          expose,
+        }: {
+          expose: ExposeFn<{ scrollToSignUpBlock: typeof scrollToSignUpBlock }>
+        },
       ) {
         expose({ scrollToSignUpBlock })
         return () => null
@@ -65,7 +69,8 @@ describe("ScheduleOverlapSidebar", () => {
       },
     })
 
-    const vm = wrapper.vm as ComponentPublicInstance & ScheduleOverlapSidebarExposed
+    const vm = wrapper.vm as ComponentPublicInstance &
+      ScheduleOverlapSidebarExposed
 
     expect(vm.optionsSectionEl).toBeInstanceOf(HTMLElement)
   })
@@ -85,7 +90,9 @@ describe("ScheduleOverlapSidebar", () => {
             name: "ScheduleOverlapRespondentsPanel",
             setup(
               _: unknown,
-              { expose }: { expose: ExposeFn<ScheduleOverlapRespondentsPanelExposed> }
+              {
+                expose,
+              }: { expose: ExposeFn<ScheduleOverlapRespondentsPanelExposed> },
             ) {
               const panelEl = ref<HTMLElement | null>(null)
               expose({
@@ -93,7 +100,8 @@ describe("ScheduleOverlapSidebar", () => {
                   return panelEl.value
                 },
               })
-              return () => h("div", { ref: panelEl, class: "respondents-panel-stub" })
+              return () =>
+                h("div", { ref: panelEl, class: "respondents-panel-stub" })
             },
           },
         },
@@ -102,7 +110,8 @@ describe("ScheduleOverlapSidebar", () => {
 
     await nextTick()
 
-    const vm = wrapper.vm as ComponentPublicInstance & ScheduleOverlapSidebarExposed
+    const vm = wrapper.vm as ComponentPublicInstance &
+      ScheduleOverlapSidebarExposed
 
     expect(vm.respondentsPanelEl).toBeInstanceOf(HTMLElement)
     expect(vm.respondentsPanelEl?.className).toContain("respondents-panel-stub")
@@ -126,9 +135,13 @@ describe("ScheduleOverlapSidebar", () => {
       },
     })
 
-    expect(wrapper.text()).toContain("Unavailable, change in Add/Edit availability")
+    expect(wrapper.text()).toContain(
+      "Unavailable, change in Add/Edit availability",
+    )
     expect(wrapper.text()).not.toContain("Disabled, change in Edit event")
-    expect(wrapper.text()).toContain("Disabled, outside the event dates in the event timezone")
+    expect(wrapper.text()).toContain(
+      "Disabled, outside the event dates in the event timezone",
+    )
   })
 
   it("shows edit-event guidance for saved specific-times events", () => {
@@ -152,7 +165,9 @@ describe("ScheduleOverlapSidebar", () => {
       },
     })
 
-    expect(wrapper.text()).toContain("Unavailable, change in Add/Edit availability")
+    expect(wrapper.text()).toContain(
+      "Unavailable, change in Add/Edit availability",
+    )
     expect(wrapper.text()).toContain("Disabled, change in Edit event")
   })
 
@@ -223,7 +238,7 @@ describe("ScheduleOverlapSidebar", () => {
     expect(wrapper.find(".async-publift-ad-stub").exists()).toBe(false)
   })
 
-  it("aligns the desktop respondents panel heading with the top of the grid body", () => {
+  it("places the desktop control block above the respondents panel", () => {
     const wrapper = mount(ScheduleOverlapSidebar, {
       props: {
         sidebar: {
@@ -240,8 +255,48 @@ describe("ScheduleOverlapSidebar", () => {
     })
 
     expect(wrapper.classes()).toContain("tw-sticky")
-    expect(wrapper.classes()).toContain("tw-pt-11")
-    expect(wrapper.classes()).not.toContain("tw-pt-14")
+    expect(wrapper.classes()).not.toContain("tw-pt-11")
+    expect(wrapper.find(".schedule-overlap-sidebar__tool-row").exists()).toBe(
+      true,
+    )
+    expect(wrapper.html()).toContain("tw-pt-4")
+  })
+
+  it("places compact timezone and format controls before desktop responses", () => {
+    const wrapper = mount(ScheduleOverlapSidebar, {
+      props: {
+        sidebar: {
+          ...buildScheduleOverlapSidebarViewModel(),
+          state: states.HEATMAP,
+          isPhone: false,
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+          ToolRow: {
+            name: "ToolRow",
+            props: ["compact"],
+            template: "<div class='tool-row-stub' />",
+          },
+          ScheduleOverlapRespondentsPanel: {
+            name: "ScheduleOverlapRespondentsPanel",
+            template: "<div class='respondents-panel-stub' />",
+          },
+        },
+      },
+    })
+
+    const toolRow = wrapper.get(".schedule-overlap-sidebar__tool-row")
+    const respondentsPanel = wrapper.get(".respondents-panel-stub")
+
+    expect(toolRow.getComponent({ name: "ToolRow" }).props("compact")).toBe(
+      true,
+    )
+    expect(
+      toolRow.element.compareDocumentPosition(respondentsPanel.element) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
   })
 
   it("keeps the hovered respondents state aligned with the grid body", () => {
@@ -261,7 +316,7 @@ describe("ScheduleOverlapSidebar", () => {
     })
 
     expect(wrapper.classes()).toContain("tw-sticky")
-    expect(wrapper.classes()).toContain("tw-pt-11")
+    expect(wrapper.classes()).not.toContain("tw-pt-11")
     expect(wrapper.classes()).not.toContain("tw-pt-14")
   })
 
@@ -282,6 +337,7 @@ describe("ScheduleOverlapSidebar", () => {
     })
 
     expect(wrapper.classes()).toContain("tw-sticky")
-    expect(wrapper.classes()).toContain("tw-pt-14")
+    expect(wrapper.classes()).not.toContain("tw-pt-14")
+    expect(wrapper.html()).toContain("tw-pt-14")
   })
 })
