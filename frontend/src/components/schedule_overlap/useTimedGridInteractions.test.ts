@@ -4,6 +4,7 @@ import { computed, defineComponent, nextTick, ref } from "vue"
 import { mount } from "@vue/test-utils"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { useTimedGridInteractions } from "./useTimedGridInteractions"
+import { joinTooltipSegments } from "./scheduleOverlapRendering"
 
 const mountedWrappers: ReturnType<typeof mount>[] = []
 
@@ -18,7 +19,7 @@ const mountInteractions = (phone = false) => {
   const dragging = ref(false)
   const dragCur = ref<{ row: number; col: number } | null>(null)
   const timeslotSelected = ref(false)
-  const tooltipContent = ref("")
+  const tooltipContent = ref<{ text: string; mono: boolean }[]>([])
   const showAvailability = vi.fn()
   const highlightAvailability = vi.fn()
   const startDrag = vi.fn(() => {
@@ -47,7 +48,7 @@ const mountInteractions = (phone = false) => {
         showAvailability,
         shouldHighlightAvailability: () => true,
         highlightAvailability,
-        getTooltipContent: (row, col) => `slot-${String(row)}-${String(col)}`,
+        getTooltipContent: (row, col) => [{ text: `slot-${String(row)}-${String(col)}`, mono: false }],
       })
       return () => null
     },
@@ -118,13 +119,13 @@ describe("useTimedGridInteractions", () => {
       y: 100,
       placement: "below",
     })
-    expect(tooltipContent.value).toBe("slot-1-0")
+    expect(joinTooltipSegments(tooltipContent.value)).toBe("slot-1-0")
 
     document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }))
 
     expect(interactions.selectedTooltipSlot.value).toBeNull()
     expect(interactions.tooltipPosition.value).toBeNull()
-    expect(tooltipContent.value).toBe("")
+    expect(tooltipContent.value).toEqual([])
   })
 
   it("uses cursor coordinates on desktop and clears them on cell leave", () => {
@@ -135,7 +136,7 @@ describe("useTimedGridInteractions", () => {
 
     interactions.getTimeslotVon(1, 0).mouseleave()
     expect(interactions.tooltipPosition.value).toBeNull()
-    expect(tooltipContent.value).toBe("")
+    expect(tooltipContent.value).toEqual([])
   })
 
   it("selects a mobile anchor from a compatibility mouse target", () => {
@@ -204,7 +205,7 @@ describe("useTimedGridInteractions", () => {
     await nextTick()
 
     expect(interactions.selectedTooltipSlot.value).toEqual({ row: 1, col: 0 })
-    expect(tooltipContent.value).toBe("slot-1-0")
+    expect(joinTooltipSegments(tooltipContent.value)).toBe("slot-1-0")
     expect(interactions.tooltipPosition.value).toEqual({
       x: 100,
       y: 140,

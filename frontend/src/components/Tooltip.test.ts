@@ -4,6 +4,9 @@ import { mount } from "@vue/test-utils"
 import { describe, expect, it } from "vitest"
 import Tooltip from "./Tooltip.vue"
 import tooltipSource from "./Tooltip.vue?raw"
+import type { TooltipSegment } from "./schedule_overlap/scheduleOverlapRendering"
+
+const segments = (text: string): TooltipSegment[] => [{ text, mono: false }]
 
 describe("Tooltip", () => {
   it("uses declarative pointer listeners instead of manual DOM wiring", () => {
@@ -17,7 +20,7 @@ describe("Tooltip", () => {
   it("shows new content immediately and positions it through the tooltip state helper", async () => {
     const wrapper = mount(Tooltip, {
       props: {
-        content: "",
+        content: [],
       },
       slots: {
         default: "<button>Trigger</button>",
@@ -29,7 +32,7 @@ describe("Tooltip", () => {
     await trigger.trigger("mouseenter")
     expect(wrapper.text()).not.toContain("Hello")
 
-    await wrapper.setProps({ content: "Hello" })
+    await wrapper.setProps({ content: segments("Hello") })
     await wrapper.vm.$nextTick()
 
     expect(wrapper.text()).toContain("Hello")
@@ -48,7 +51,7 @@ describe("Tooltip", () => {
   it("keeps an overridden position when the pointer moves", async () => {
     const wrapper = mount(Tooltip, {
       props: {
-        content: "Hello",
+        content: segments("Hello"),
       },
       slots: {
         default: "<button>Trigger</button>",
@@ -68,7 +71,7 @@ describe("Tooltip", () => {
   it("places edge-anchored overrides outside their anchor with a gap", async () => {
     const wrapper = mount(Tooltip, {
       props: {
-        content: "Hello",
+        content: segments("Hello"),
         positionOverride: { x: 40, y: 200, placement: "above" },
       },
       slots: {
@@ -92,7 +95,7 @@ describe("Tooltip", () => {
   it("renders immediately when visibility is explicitly forced", async () => {
     const wrapper = mount(Tooltip, {
       props: {
-        content: "Hello",
+        content: segments("Hello"),
         forceVisible: true,
       },
       slots: {
@@ -103,5 +106,31 @@ describe("Tooltip", () => {
     await wrapper.vm.$nextTick()
 
     expect(wrapper.find(".tw-fixed").exists()).toBe(true)
+  })
+
+  it("renders the time on the mono font stack but not the date", () => {
+    const wrapper = mount(Tooltip, {
+      props: {
+        content: [
+          { text: "04:30", mono: true },
+          { text: " to ", mono: false },
+          { text: "04:45", mono: true },
+          { text: " \u00b7 ", mono: false },
+          { text: "Fri, Aug 7, 2026", mono: false },
+        ],
+        forceVisible: true,
+      },
+      slots: {
+        default: "<button>Trigger</button>",
+      },
+    })
+
+    const tooltip = wrapper.get(".tw-fixed")
+    expect(tooltip.classes()).not.toContain("tw-font-mono")
+
+    const monoSpans = tooltip.findAll("span.tw-font-mono")
+    expect(monoSpans.map(span => span.text()).join(" ")).toBe("04:30 04:45")
+    expect(tooltip.text()).toContain("Fri, Aug 7, 2026")
+    expect(monoSpans.map(span => span.text())).not.toContain("Fri, Aug 7, 2026")
   })
 })

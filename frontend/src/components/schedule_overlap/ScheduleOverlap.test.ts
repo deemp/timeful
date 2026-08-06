@@ -1244,7 +1244,7 @@ describe("ScheduleOverlap", () => {
     const vm = wrapper.vm as unknown as {
       curTimezone: typeof utcTimezone
       timeType: (typeof timeTypes)[keyof typeof timeTypes]
-      tooltipContent: string
+      tooltipContent: ReturnType<typeof formatTooltipContent>
       getDisplayDateFromRowCol: (row: number, col: number) => Temporal.ZonedDateTime | null
       getTimeslotVon: (row: number, col: number) => Record<string, () => void>
     }
@@ -1258,7 +1258,7 @@ describe("ScheduleOverlap", () => {
       throw new Error("Expected a tooltip date for the grey specific-time gap")
     }
 
-    expect(vm.tooltipContent).toBe(
+    expect(vm.tooltipContent).toEqual(
       formatTooltipContent({
         date: tooltipDate,
         curTimezone: vm.curTimezone,

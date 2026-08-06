@@ -17,6 +17,7 @@ import {
   getSignUpBlockStyle,
   getTimeGridTimeslotClassStyle,
   getTimeBlockStyle,
+  joinTooltipSegments,
 } from "./scheduleOverlapRendering"
 
 const zdt = (iso: string) => Temporal.Instant.from(iso).toZonedDateTimeISO(UTC)
@@ -119,7 +120,16 @@ describe("scheduleOverlapRendering", () => {
       isSpecificDates: true,
     })
 
-    expect(tooltip).toBe("14:30 to 15:00 \u00b7 Sat, Jul 4, 2026")
+    expect(joinTooltipSegments(tooltip)).toBe("14:30 to 15:00 \u00b7 Sat, Jul 4, 2026")
+    expect(tooltip.filter(segment => segment.mono).map(segment => segment.text)).toEqual([
+      "14:30",
+      "15:00",
+    ])
+    expect(tooltip.filter(segment => !segment.mono).map(segment => segment.text)).toEqual([
+      " to ",
+      " \u00b7 ",
+      "Sat, Jul 4, 2026",
+    ])
   })
 
   it("clips overlay fragments before visible grey rows that stay rendered", () => {

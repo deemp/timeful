@@ -7,11 +7,14 @@
   >
     <slot></slot>
     <div
-      v-if="(isVisible || forceVisible) && content"
-      class="tw-pointer-events-none tw-fixed tw-z-50 tw-rounded-lg tw-bg-dark-gray tw-px-1.5 tw-py-1 tw-text-xs tw-text-white tw-shadow-lg tw-transition-opacity tw-duration-200 tw-font-mono"
+      v-if="(isVisible || forceVisible) && content.length > 0"
+      class="tw-pointer-events-none tw-fixed tw-z-50 tw-rounded-lg tw-bg-dark-gray tw-px-1.5 tw-py-1 tw-text-xs tw-text-white tw-shadow-lg tw-transition-opacity tw-duration-200"
       :style="tooltipStyle"
     >
-      {{ content }}
+      <template v-for="segment in content" :key="segment.text">
+        <span v-if="segment.mono" class="tw-font-mono">{{ segment.text }}</span>
+        <template v-else>{{ segment.text }}</template>
+      </template>
     </div>
   </div>
 </template>
@@ -19,12 +22,13 @@
 <script setup lang="ts">
 import { computed, toRef, watch } from "vue"
 import { useTooltipState, TOOLTIP_Y_OFFSET_PX } from "@/composables/useTooltipState"
+import type { TooltipSegment } from "@/components/schedule_overlap/scheduleOverlapRendering"
 
 defineOptions({ name: "AppTooltip" })
 
 const props = withDefaults(
   defineProps<{
-    content?: string
+    content?: TooltipSegment[]
     positionOverride?: {
       x: number
       y: number
@@ -32,7 +36,7 @@ const props = withDefaults(
     } | null
     forceVisible?: boolean
   }>(),
-  { content: "", positionOverride: null, forceVisible: false }
+  { content: () => [], positionOverride: null, forceVisible: false }
 )
 
 const { handleMouseEnter, handleMouseLeave, handleMouseMove, isVisible, style, position } =

@@ -6,7 +6,7 @@ import { createLocalStorageMock } from "@/test/localStorage"
 import { buildSpecificTimesCreateDraft } from "@/composables/event/specificTimesEditDraft"
 import { buildEventEditorSchedule } from "@/composables/event/eventEditorSchedule"
 import { normalizeActiveSlots } from "@/utils/timedEventSlots"
-import { formatTooltipContent } from "@/components/schedule_overlap/scheduleOverlapRendering"
+import { formatTooltipContent, joinTooltipSegments } from "@/components/schedule_overlap/scheduleOverlapRendering"
 import { states, type ScheduleOverlapEvent } from "./types"
 import { useCalendarGrid } from "./useCalendarGrid"
 
@@ -1684,13 +1684,15 @@ describe("useCalendarGrid", () => {
     expect(tooltipSlot?.toInstant().toString()).toBe("2026-08-06T12:00:00Z")
     expect(
       tooltipSlot &&
-        formatTooltipContent({
-          date: tooltipSlot,
-          curTimezone,
-          timeslotDuration: durations.ONE_HOUR,
-          timeType: timeTypes.HOUR24,
-          isSpecificDates: true,
-        }),
+        joinTooltipSegments(
+          formatTooltipContent({
+            date: tooltipSlot,
+            curTimezone,
+            timeslotDuration: durations.ONE_HOUR,
+            timeType: timeTypes.HOUR24,
+            isSpecificDates: true,
+          })
+        ),
     ).toBe("00:00 to 01:00 \u00b7 Fri, Aug 7, 2026")
   })
 })

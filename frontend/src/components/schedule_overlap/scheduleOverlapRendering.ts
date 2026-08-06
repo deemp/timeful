@@ -886,6 +886,14 @@ export const buildRenderedTimeBlockFragments = ({
   return fragments
 }
 
+export interface TooltipSegment {
+  text: string
+  mono: boolean
+}
+
+export const joinTooltipSegments = (segments: TooltipSegment[]): string =>
+  segments.map(segment => segment.text).join("")
+
 export const formatTooltipContent = ({
   date,
   curTimezone,
@@ -898,7 +906,7 @@ export const formatTooltipContent = ({
   timeslotDuration: Temporal.Duration
   timeType: TimeType
   isSpecificDates: boolean
-}): string => {
+}): TooltipSegment[] => {
   const start = getDateInTimezone(date, curTimezone)
   const end = start.add(timeslotDuration)
 
@@ -915,7 +923,13 @@ export const formatTooltipContent = ({
   const startTimeStr = start.toLocaleString("en-US", timeFormat)
   const endTimeStr = end.toLocaleString("en-US", timeFormat)
 
-  return `${startTimeStr} to ${endTimeStr} \u00b7 ${startDateStr}`
+  return [
+    { text: startTimeStr, mono: true },
+    { text: " to ", mono: false },
+    { text: endTimeStr, mono: true },
+    { text: " \u00b7 ", mono: false },
+    { text: startDateStr, mono: false },
+  ]
 }
 
 export const getTimeBlockStyle = ({

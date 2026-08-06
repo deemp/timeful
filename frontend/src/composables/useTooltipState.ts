@@ -1,4 +1,5 @@
 import { computed, ref, watch, type ComputedRef, type Ref } from "vue"
+import type { TooltipSegment } from "@/components/schedule_overlap/scheduleOverlapRendering"
 
 export const TOOLTIP_Y_OFFSET_PX = 28
 
@@ -16,14 +17,14 @@ export interface TooltipState {
   style: ComputedRef<Record<string, string>>
 }
 
-export const useTooltipState = (content: Ref<string>): TooltipState => {
+export const useTooltipState = (content: Ref<TooltipSegment[]>): TooltipState => {
   const position = ref<TooltipPosition>({ x: 0, y: 0 })
   const isVisible = ref(false)
 
   watch(
     content,
     newContent => {
-      isVisible.value = Boolean(newContent)
+      isVisible.value = newContent.length > 0
     },
     { immediate: true }
   )
@@ -38,7 +39,7 @@ export const useTooltipState = (content: Ref<string>): TooltipState => {
       }
     },
     handleMouseEnter: () => {
-      if (content.value) {
+      if (content.value.length > 0) {
         isVisible.value = true
       }
     },

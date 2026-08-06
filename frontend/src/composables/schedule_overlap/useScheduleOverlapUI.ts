@@ -18,6 +18,7 @@ import {
   type RowCol,
   type ScheduleOverlapState,
 } from "./types"
+import type { TooltipSegment } from "@/components/schedule_overlap/scheduleOverlapRendering"
 
 export interface UseScheduleOverlapUIOptions {
   isPhone: Ref<boolean>
@@ -112,7 +113,7 @@ export function useScheduleOverlapUI(opts: UseScheduleOverlapUIOptions) {
   const editGuestNameDialog = ref(false)
   const newGuestName = ref("")
 
-  const tooltipContent = ref("")
+  const tooltipContent = ref<TooltipSegment[]>([])
   const optionsVisible = ref(false)
   const scrolledToRespondents = ref(false)
   const delayedShowStickyRespondents = ref(false)

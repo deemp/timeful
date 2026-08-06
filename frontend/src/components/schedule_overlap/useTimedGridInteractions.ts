@@ -7,6 +7,7 @@ import {
   type Ref,
 } from "vue"
 import type { RowCol } from "@/composables/schedule_overlap/types"
+import type { TooltipSegment } from "./scheduleOverlapRendering"
 
 export interface TooltipPositionOverride {
   x: number
@@ -21,14 +22,14 @@ interface UseTimedGridInteractionsOptions {
   dragging: Ref<boolean>
   dragCur: Ref<RowCol | null>
   timeslotSelected: Ref<boolean>
-  tooltipContent: Ref<string>
+  tooltipContent: Ref<TooltipSegment[]>
   startDrag: (event: PointerEvent | MouseEvent) => void
   moveDrag: (event: PointerEvent | MouseEvent) => void
   endDrag: (event?: PointerEvent | MouseEvent) => void
   showAvailability: (row: number, col: number) => void
   shouldHighlightAvailability: () => boolean
   highlightAvailability: () => void
-  getTooltipContent: (row: number, col: number) => string | undefined
+  getTooltipContent: (row: number, col: number) => TooltipSegment[] | undefined
   document?: Document
 }
 
@@ -39,7 +40,7 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
   const visibleTooltipContent = computed(() =>
     !opts.isPhone.value || selectedTooltipSlot.value
       ? opts.tooltipContent.value
-      : ""
+      : []
   )
 
   const setTooltipForRowCol = (row: number, col: number) => {
@@ -120,7 +121,7 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
     }
     selectedTooltipSlot.value = null
     tooltipPosition.value = null
-    opts.tooltipContent.value = ""
+    opts.tooltipContent.value = []
   }
 
   const repositionMobileTooltip = () => {
@@ -194,7 +195,7 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
       mouseleave: () => {
         if (opts.isPhone.value && selectedTooltipSlot.value) return
         tooltipPosition.value = null
-        opts.tooltipContent.value = ""
+        opts.tooltipContent.value = []
       },
     }
   }
