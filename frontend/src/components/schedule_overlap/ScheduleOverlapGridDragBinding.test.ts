@@ -552,6 +552,75 @@ describe("ScheduleOverlap grid drag bindings", () => {
     expect(actions.toggleCollapsedSpan).toHaveBeenCalledWith("collapsed-660-900")
   })
 
+  it("applies the mono font class directly to the time-row label text", () => {
+    const { timedGrid } = createNonConsecutiveTimeGridViewModel()
+    timedGrid.renderedRows = [
+      {
+        id: "time-4",
+        kind: "timeslot",
+        height: 60,
+        rowTop: 0,
+        timeText: "03:00",
+        baseRowIndex: 4,
+        cells: [
+          { class: "day-0", style: {}, von: {} },
+          { class: "day-1", style: {}, von: {} },
+        ],
+      },
+    ]
+
+    const wrapper = mount(ScheduleOverlapTimeGrid, {
+      props: { timedGrid },
+      global,
+    })
+
+    const row = wrapper.get("#time-row-4")
+    const labelText = row.get("span")
+
+    expect(labelText.classes()).toContain("tw-font-mono")
+  })
+
+  it("applies the mono font class directly to the end-of-axis label text", () => {
+    const { timedGrid } = createNonConsecutiveTimeGridViewModel()
+    timedGrid.timeAxisEndText = "17:00"
+
+    const wrapper = mount(ScheduleOverlapTimeGrid, {
+      props: { timedGrid },
+      global,
+    })
+
+    const endLabelText = wrapper
+      .findAll("span")
+      .find((span) => span.text() === "17:00")
+
+    expect(endLabelText).toBeDefined()
+    expect(endLabelText?.classes()).toContain("tw-font-mono")
+  })
+
+  it("applies the mono font class directly to the collapsed-row label text", () => {
+    const { timedGrid } = createNonConsecutiveTimeGridViewModel()
+    timedGrid.state = states.HEATMAP
+    timedGrid.renderedRows = [
+      {
+        id: "collapsed-660-900",
+        kind: "collapsed",
+        height: 44,
+        rowTop: 0,
+        startLabel: "11:00",
+        endLabel: "15:00",
+      },
+    ]
+
+    const wrapper = mount(ScheduleOverlapTimeGrid, {
+      props: { timedGrid },
+      global,
+    })
+
+    const collapsedRowLabel = wrapper.get(".schedule-overlap-collapsed-row span")
+
+    expect(collapsedRowLabel.classes()).toContain("tw-font-mono")
+  })
+
   it("emits stable row and column dataset coordinates on timed-grid timeslot cells", () => {
     const { timedGrid } = createNonConsecutiveTimeGridViewModel()
     timedGrid.renderedRows = [

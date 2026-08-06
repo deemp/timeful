@@ -12,6 +12,19 @@ module.exports = {
       fontSize: {
         xs: ["0.813rem", "1rem"],
       },
+      fontFamily: {
+        mono: [
+          '"Roboto Mono"',
+          "ui-monospace",
+          "SFMono-Regular",
+          "Menlo",
+          "Monaco",
+          "Consolas",
+          "Liberation Mono",
+          "Courier New",
+          "monospace",
+        ],
+      },
     },
     colors: {
       transparent: "transparent",

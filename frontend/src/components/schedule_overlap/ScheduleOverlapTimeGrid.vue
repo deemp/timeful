@@ -26,21 +26,21 @@
           v-for="row in timedGrid.renderedRows"
           :id="row.kind === 'timeslot' ? `time-row-${row.baseRowIndex ?? 0}` : row.id"
           :key="row.id"
-            class="tw-relative tw-pr-1 tw-text-right tw-text-xs tw-font-light tw-uppercase sm:tw-pr-2 tw-font-mono"
+            class="tw-relative tw-pr-1 tw-text-right tw-text-xs tw-uppercase sm:tw-pr-2"
           :style="{ height: `${row.height}px` }"
         >
             <span
               v-if="row.timeText"
-              class="tw-absolute tw-right-1 tw-top-0 -tw-translate-y-1/2 sm:tw-right-2"
+              class="tw-absolute tw-right-1 tw-top-0 -tw-translate-y-1/2 sm:tw-right-2 tw-font-mono"
             >
               {{ row.timeText }}
             </span>
           </div>
           <div
             v-if="timedGrid.timeAxisEndText"
-            class="tw-relative tw-h-0 tw-pr-1 tw-text-right tw-text-xs tw-font-light tw-uppercase sm:tw-pr-2 tw-font-mono"
+            class="tw-relative tw-h-0 tw-pr-1 tw-text-right tw-text-xs tw-uppercase sm:tw-pr-2"
           >
-            <span class="tw-absolute tw-right-1 tw-top-0 -tw-translate-y-1/2 sm:tw-right-2">
+            <span class="tw-absolute tw-right-1 tw-top-0 -tw-translate-y-1/2 sm:tw-right-2 tw-font-mono">
               {{ timedGrid.timeAxisEndText }}
             </span>
           </div>
@@ -112,11 +112,11 @@
                   <button
                     v-if="row.kind === 'collapsed'"
                     type="button"
-                    class="schedule-overlap-collapsed-row tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-px-4 tw-text-sm tw-font-mono"
+                    class="schedule-overlap-collapsed-row tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-px-4 tw-text-sm"
                     @pointerdown.stop
                     @click="timedGrid.actions.toggleCollapsedSpan(row.id)"
                   >
-                    <span>{{ row.startLabel }}-{{ row.endLabel }}</span>
+                    <span class="tw-font-mono">{{ row.startLabel }}-{{ row.endLabel }}</span>
                     <v-icon size="18">mdi-chevron-down</v-icon>
                   </button>
                   <template v-else>
