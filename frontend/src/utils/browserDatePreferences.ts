@@ -83,13 +83,13 @@ export const getTimeOptions = (): {
 
   const times: { text: string; time: number; value: number }[] = []
   if (prefers12h) {
-    times.push({ text: "12 am", time: 0, value: 0 })
+    times.push({ text: "12 AM", time: 0, value: 0 })
     for (let h = 1; h < 12; ++h) {
-      times.push({ text: `${String(h)} am`, time: h, value: h })
+      times.push({ text: `${String(h)} AM`, time: h, value: h })
     }
     for (let h = 0; h < 12; ++h) {
       times.push({
-        text: `${String(h === 0 ? 12 : h)} pm`,
+        text: `${String(h === 0 ? 12 : h)} PM`,
         time: h + 12,
         value: h + 12,
       })

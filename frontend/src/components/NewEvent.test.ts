@@ -392,8 +392,8 @@ describe("NewEvent", () => {
     expect(selects[0]?.props("variant")).toBe("solo")
     expect(selects[0]?.props("items")).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ text: "9 am", value: 9 }),
-        expect.objectContaining({ text: "5 pm", value: 17 }),
+        expect.objectContaining({ text: "9 AM", value: 9 }),
+        expect.objectContaining({ text: "5 PM", value: 17 }),
       ])
     )
     expect(selects[1]?.props("itemTitle")).toBe("text")

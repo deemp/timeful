@@ -99,7 +99,7 @@ describe("scheduleOverlapGridRows", () => {
     })
     const formatTwelveHour = (absoluteMinutes: number) =>
       `${String((Math.floor(absoluteMinutes / 60) + 11) % 12 + 1)} ${
-        absoluteMinutes < 12 * 60 ? "am" : "pm"
+        absoluteMinutes < 12 * 60 ? "AM" : "PM"
       }`
     const rows = buildRenderedTimeGridRows({
       pageSlots: slots,
@@ -109,14 +109,14 @@ describe("scheduleOverlapGridRows", () => {
       visibleDayCount: 1,
       getTimeItem: (index) => ({
         ...times(12 * 60, 5)[index],
-        text: index === 0 ? "12 pm" : index === 4 ? "4 pm" : undefined,
+        text: index === 0 ? "12 PM" : index === 4 ? "4 PM" : undefined,
       }),
       formatTime: formatTwelveHour,
       getCell: () => ({ class: "", style: {}, von: {} }),
     })
 
-    expect(rows.map((row) => row.timeText)).toEqual(["12 pm", "1 pm", "4 pm"])
-    expect(rows[1]).toMatchObject({ startLabel: "1 pm", endLabel: "4 pm" })
-    expect(getTimeAxisEndText(slots, formatTwelveHour)).toBe("5 pm")
+    expect(rows.map((row) => row.timeText)).toEqual(["12 PM", "1 PM", "4 PM"])
+    expect(rows[1]).toMatchObject({ startLabel: "1 PM", endLabel: "4 PM" })
+    expect(getTimeAxisEndText(slots, formatTwelveHour)).toBe("5 PM")
   })
 })

@@ -71,8 +71,8 @@ describe("browserDatePreferences", () => {
     expect(userPrefers12h()).toBe(true)
 
     const options = getTimeOptions()
-    expect(options[0]).toEqual({ text: "12 am", time: 0, value: 0 })
-    expect(options[12]).toEqual({ text: "12 pm", time: 12, value: 12 })
+    expect(options[0]).toEqual({ text: "12 AM", time: 0, value: 0 })
+    expect(options[12]).toEqual({ text: "12 PM", time: 12, value: 12 })
     expect(options[24]).toEqual({ text: "12 AM", time: 0, value: 24 })
   })
 

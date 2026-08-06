@@ -127,7 +127,7 @@ export const getDateRangeStringForEvent = (
   return ""
 }
 
-/** Converts a timeNum (e.g. 13) to a timeText (e.g. "1 pm"). */
+/** Converts a timeNum (e.g. 13) to a timeText (e.g. "1 PM"). */
 export const timeNumToTimeText = (timeNum: number, hour12 = true): string => {
   const hours = Math.floor(timeNum)
   const minutesDecimal = timeNum - hours
@@ -137,10 +137,10 @@ export const timeNumToTimeText = (timeNum: number, hour12 = true): string => {
       : ""
 
   if (hour12) {
-    if (timeNum >= 0 && timeNum < 1) return `12${minutesString} am`
-    if (timeNum < 12) return `${String(hours)}${minutesString} am`
-    if (timeNum >= 12 && timeNum < 13) return `12${minutesString} pm`
-    return `${String(hours - 12)}${minutesString} pm`
+    if (timeNum >= 0 && timeNum < 1) return `12${minutesString} AM`
+    if (timeNum < 12) return `${String(hours)}${minutesString} AM`
+    if (timeNum >= 12 && timeNum < 13) return `12${minutesString} PM`
+    return `${String(hours - 12)}${minutesString} PM`
   }
 
   return `${String(hours)}${minutesString.length > 0 ? minutesString : ":00"}`

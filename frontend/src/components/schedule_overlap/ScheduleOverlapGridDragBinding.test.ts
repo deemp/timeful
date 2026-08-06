@@ -52,8 +52,8 @@ function createTimeGridViewModel() {
     calendarOnly: false,
     hasPrevPage: false,
     hasNextPage: false,
-    splitTimes: [[{ hoursOffset: Temporal.Duration.from({ hours: 9 }), text: "9am", id: "time-9" }], []],
-    times: [{ hoursOffset: Temporal.Duration.from({ hours: 9 }), text: "9am", id: "time-9" }],
+    splitTimes: [[{ hoursOffset: Temporal.Duration.from({ hours: 9 }), text: "9AM", id: "time-9" }], []],
+    times: [{ hoursOffset: Temporal.Duration.from({ hours: 9 }), text: "9AM", id: "time-9" }],
     renderedRows: [],
     timeslotHeight: 60,
     days: [{
@@ -522,7 +522,7 @@ describe("ScheduleOverlap grid drag bindings", () => {
         kind: "timeslot",
         height: 60,
         rowTop: 44,
-        timeText: "3 pm",
+        timeText: "3 PM",
         baseRowIndex: 24,
         cells: [
           { class: "day-0", style: {}, von: {} },

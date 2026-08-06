@@ -220,8 +220,8 @@ describe("useCalendarGrid", () => {
     })
 
     expect(grid.splitTimes.value[0]).toHaveLength(33)
-    expect(grid.splitTimes.value[0][0]?.text).toBe("9 am")
-    expect(grid.splitTimes.value[0][32]?.text).toBe("5 pm")
+    expect(grid.splitTimes.value[0][0]?.text).toBe("9 AM")
+    expect(grid.splitTimes.value[0][32]?.text).toBe("5 PM")
     expect(grid.splitTimes.value[0][32]?.absoluteMinutes).toBe(17 * 60)
   })
 
@@ -322,7 +322,7 @@ describe("useCalendarGrid", () => {
     ).toEqual(["2026-05-29", "2026-05-30"])
     expect(
       grid.splitTimes.value[0].map((time) => time.text).filter(Boolean),
-    ).toEqual(["2 am", "3 am", "4 am", "5 am"])
+    ).toEqual(["2 AM", "3 AM", "4 AM", "5 AM"])
 
     for (const dayIndex of [0, 1]) {
       expect(
@@ -498,7 +498,7 @@ describe("useCalendarGrid", () => {
     expect(grid.splitTimes.value[1]).toEqual([])
     expect(
       grid.splitTimes.value[0].map((time) => time.text).filter(Boolean),
-    ).toEqual(["2 am", "3 am", "4 am", "5 am"])
+    ).toEqual(["2 AM", "3 AM", "4 AM", "5 AM"])
     expect(
       grid.splitTimes.value[0].map((time) => time.displayedMinutes),
     ).toEqual([
@@ -574,8 +574,8 @@ describe("useCalendarGrid", () => {
 
     expect(grid.splitTimes.value[1]).toEqual([])
     expect(grid.splitTimes.value[0]).toHaveLength(32)
-    expect(grid.splitTimes.value[0][0]?.text).toBe("9 am")
-    expect(grid.splitTimes.value[0][28]?.text).toBe("4 pm")
+    expect(grid.splitTimes.value[0][0]?.text).toBe("9 AM")
+    expect(grid.splitTimes.value[0][28]?.text).toBe("4 PM")
     expect(grid.splitTimes.value[0][31]?.absoluteMinutes).toBe(16 * 60 + 45)
     expect(grid.getDateFromRowCol(31, 0)?.toInstant().toString()).toBe(
       "2026-06-11T16:45:00Z",
@@ -1168,7 +1168,7 @@ describe("useCalendarGrid", () => {
 
     expect(grid.splitTimes.value[0]).not.toHaveLength(0)
     expect(grid.splitTimes.value[1]).toEqual([])
-    expect(grid.splitTimes.value[0][0]?.text).toBe("12 am")
+    expect(grid.splitTimes.value[0][0]?.text).toBe("12 AM")
     expect(grid.splitTimes.value[0][0]?.absoluteMinutes).toBe(0)
     expect(grid.splitTimes.value[0].at(-1)?.absoluteMinutes).toBe(
       23 * 60 + 30,
@@ -1264,8 +1264,8 @@ describe("useCalendarGrid", () => {
       .map((time) => time.displayedMinutes)
       .filter((minutes): minutes is number => typeof minutes === "number")
 
-    expect(displayedLabels.filter((label) => label === "12 am")).toHaveLength(1)
-    expect(displayedLabels.filter((label) => label === "1 am")).toHaveLength(1)
+    expect(displayedLabels.filter((label) => label === "12 AM")).toHaveLength(1)
+    expect(displayedLabels.filter((label) => label === "1 AM")).toHaveLength(1)
     expect(new Set(displayedMinutes).size).toBe(displayedMinutes.length)
     expect(grid.splitTimes.value[0][0]?.displayedMinutes).toBe(0)
     expect(
@@ -1318,9 +1318,9 @@ describe("useCalendarGrid", () => {
       .map((time) => time.text)
       .filter((label): label is string => Boolean(label))
 
-    expect(displayedLabels.filter((label) => label === "12 am")).toHaveLength(1)
-    expect(displayedLabels.filter((label) => label === "1 am")).toHaveLength(1)
-    expect(displayedLabels.filter((label) => label === "2 am")).toHaveLength(1)
+    expect(displayedLabels.filter((label) => label === "12 AM")).toHaveLength(1)
+    expect(displayedLabels.filter((label) => label === "1 AM")).toHaveLength(1)
+    expect(displayedLabels.filter((label) => label === "2 AM")).toHaveLength(1)
 
     const displayedMinutes = grid.splitTimes.value[0]
       .map((time) => time.displayedMinutes)

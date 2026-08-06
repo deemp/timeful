@@ -127,9 +127,10 @@ describe("dateFormatting", () => {
   })
 
   it("formats time numbers for display and transport", () => {
-    expect(timeNumToTimeText(0)).toBe("12 am")
-    expect(timeNumToTimeText(13.5)).toBe("1:30 pm")
+    expect(timeNumToTimeText(0)).toBe("12 AM")
+    expect(timeNumToTimeText(13.5)).toBe("1:30 PM")
     expect(timeNumToTimeText(13.5, false)).toBe("13:30")
+    expect(timeNumToTimeText(9)).toBe("9 AM")
     expect(timeNumToTimeString(9.5)).toBe("09:30:00")
   })
 

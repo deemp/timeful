@@ -143,13 +143,13 @@ test("reprojects a canonical timed event with the same slot window after reload"
   ])
   expect(
     ((await page.locator("#time-row-0").textContent()) ?? "").replace(/\s+/g, " ").trim()
-  ).toBe("12 am")
+  ).toBe("12 AM")
   expect(
     ((await page.locator("#time-row-36").textContent()) ?? "").replace(/\s+/g, " ").trim()
-  ).toBe("9 am")
+  ).toBe("9 AM")
   expect(
     ((await page.locator("#time-row-64").textContent()) ?? "").replace(/\s+/g, " ").trim()
-  ).toBe("4 pm")
+  ).toBe("4 PM")
 
   expect((await readGridCellState(page, 0, 0)).className).toContain("tw-bg-gray")
   expect((await readGridCellState(page, 36, 0)).className).toContain("tw-bg-white")

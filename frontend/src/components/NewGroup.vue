@@ -295,10 +295,10 @@ const getDayOfWeekButtonClass = (dayIndex: number) => ({
 })
 const times = computed(() => {
   const t: { text: string; value: number }[] = []
-  for (let h = 1; h < 12; ++h) t.push({ text: `${String(h)} am`, value: h })
+  for (let h = 1; h < 12; ++h) t.push({ text: `${String(h)} AM`, value: h })
   for (let h = 0; h < 12; ++h)
-    t.push({ text: `${String(h == 0 ? 12 : h)} pm`, value: h + 12 })
-  t.push({ text: "12 am", value: 0 })
+    t.push({ text: `${String(h == 0 ? 12 : h)} PM`, value: h + 12 })
+  t.push({ text: "12 AM", value: 0 })
   return t
 })
 const otherEventAttendees = computed(() =>

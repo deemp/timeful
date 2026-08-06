@@ -121,9 +121,9 @@ describe("useTimedGridPresentation", () => {
     timeType.value = timeTypes.HOUR12
 
     expect(presentation.renderedRows.value).toEqual([
-      expect.objectContaining({ startLabel: "9 am", endLabel: "2 pm" }),
+      expect.objectContaining({ startLabel: "9 AM", endLabel: "2 PM" }),
     ])
-    expect(presentation.timeAxisEndText.value).toBe("2 pm")
+    expect(presentation.timeAxisEndText.value).toBe("2 PM")
     wrapper.unmount()
   })
 })
