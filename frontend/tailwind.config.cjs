@@ -14,7 +14,7 @@ module.exports = {
       },
       fontFamily: {
         mono: [
-          '"Roboto Mono"',
+          '"Chivo Mono"',
           "ui-monospace",
           "SFMono-Regular",
           "Menlo",
