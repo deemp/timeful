@@ -374,6 +374,7 @@ Semi-structured TODO list
   - when I hover or click in a grid, show the square for the status of a person at the corresponding timeslot (available, if needed, unavailable, etc.) instead of a profile image;
   - when I hover or click outside of the grid, replace the status square with a profile icon like it's now
 - [x] Add "Disabled, collapsed" legend item
+- [x] dashed outline in the legend bullet for Disabled, collapsed
 
 ## SHOULD - Done
 

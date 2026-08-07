@@ -26,7 +26,8 @@ export const respondentSlotStatusClassMap: Record<
   "if-needed": "tw-bg-yellow",
   unavailable: "tw-bg-[#F9CCCC]",
   "disabled-inactive": "tw-bg-light-gray-stroke",
-  "disabled-collapsed": "tw-bg-[var(--timeful-collapsed-hours-bg)]",
+  "disabled-collapsed":
+    "tw-bg-[var(--timeful-collapsed-hours-bg)] respondent-status--collapsed",
   "disabled-out-of-range": "tw-bg-gray",
 }
 

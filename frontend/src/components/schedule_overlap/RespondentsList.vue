@@ -575,4 +575,8 @@ async function copyEmailToClipboard(email: string | undefined) {
   opacity: 0;
   visibility: hidden;
 }
+
+.respondent-status--collapsed {
+  border: var(--timeful-grid-line-width) dashed var(--timeful-grid-line-color);
+}
 </style>

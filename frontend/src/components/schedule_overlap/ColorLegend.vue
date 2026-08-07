@@ -40,7 +40,7 @@
     <div v-if="canCollapseHours" class="tw-flex tw-items-start">
       <div class="color-legend__indicator-slot">
         <div
-          class="tw-h-4 tw-w-4 tw-rounded tw-border tw-border-gray tw-bg-[var(--timeful-collapsed-hours-bg)]"
+          class="tw-h-4 tw-w-4 tw-rounded tw-bg-[var(--timeful-collapsed-hours-bg)] color-legend-indicator--collapsed"
         ></div>
       </div>
       <span class="tw-text-sm">Disabled, collapsed</span>
@@ -90,5 +90,9 @@ const showResponsePalette = computed(
   margin-left: 0.25rem;
   align-items: center;
   justify-content: center;
+}
+
+.color-legend-indicator--collapsed {
+  border: var(--timeful-grid-line-width) dashed var(--timeful-grid-line-color);
 }
 </style>

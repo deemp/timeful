@@ -125,7 +125,7 @@ describe("useRespondentsListState respondentSlotStatus", () => {
       "tw-bg-light-gray-stroke"
     )
     expect(respondentStatusClass("disabled-collapsed")).toBe(
-      "tw-bg-[var(--timeful-collapsed-hours-bg)]"
+      "tw-bg-[var(--timeful-collapsed-hours-bg)] respondent-status--collapsed"
     )
     expect(respondentStatusClass("disabled-out-of-range")).toBe("tw-bg-gray")
     expect(respondentStatusClass(null)).toBe("")

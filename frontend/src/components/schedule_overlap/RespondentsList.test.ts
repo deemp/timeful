@@ -266,6 +266,7 @@ describe("RespondentsList", () => {
     expect(statusSquare.classes()).toContain(
       "tw-bg-[var(--timeful-collapsed-hours-bg)]"
     )
+    expect(statusSquare.classes()).toContain("respondent-status--collapsed")
     expect(wrapper.findComponent({ name: "UserAvatarContent" }).exists()).toBe(false)
   })
 

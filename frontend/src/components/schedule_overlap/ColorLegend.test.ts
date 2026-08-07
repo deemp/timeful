@@ -98,6 +98,7 @@ describe("ColorLegend", () => {
 
     expect(wrapper.text()).toContain("Disabled, collapsed")
     expect(wrapper.html()).toContain("tw-bg-[var(--timeful-collapsed-hours-bg)]")
+    expect(wrapper.find(".color-legend-indicator--collapsed").exists()).toBe(true)
   })
 
   it("keeps range-event legends free of the edit-event item", () => {
