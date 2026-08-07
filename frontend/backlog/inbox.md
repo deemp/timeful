@@ -379,6 +379,7 @@ Semi-structured TODO list
 - [x] The display time format doesn't inherit from the event time format
   - The display format is a personal setting. It's stored globally. When the user sets the format for one event, all other events use the same format.
 - [x] On desktop, in the new event form and on the new event page, when I scroll the time zone menu, the width is always 520 and doesn't change based on the content length.
+- [x] Schedule event on Google Calendar should happen in the display timezone
 
 ## SHOULD - Done
 
