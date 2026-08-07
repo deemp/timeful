@@ -30,6 +30,7 @@ interface UseTimedGridInteractionsOptions {
   shouldHighlightAvailability: () => boolean
   highlightAvailability: () => void
   getTooltipContent: (row: number, col: number) => TooltipSegment[] | undefined
+  isSelectableSlot?: (row: number, col: number) => boolean
   document?: Document
 }
 
@@ -168,10 +169,15 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
 
   const getTimeslotVon = (row: number, col: number): Record<string, () => void> => {
     if (!opts.interactable.value) return {}
+    const isSelectableSlot = opts.isSelectableSlot ?? (() => true)
     return {
       click: () => {
         opts.showAvailability(row, col)
-        if (opts.isPhone.value && !opts.daysOnly.value) {
+        if (
+          opts.isPhone.value &&
+          !opts.daysOnly.value &&
+          isSelectableSlot(row, col)
+        ) {
           selectedTooltipSlot.value = { row, col }
           setTooltipPositionForSelectedSlot()
           setTooltipForRowCol(row, col)
@@ -183,6 +189,11 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
       mouseover: () => {
         if (!opts.timeslotSelected.value) {
           opts.showAvailability(row, col)
+          if (!isSelectableSlot(row, col)) {
+            tooltipPosition.value = null
+            opts.tooltipContent.value = []
+            return
+          }
           if (!opts.daysOnly.value) {
             if (opts.isPhone.value) {
               selectedTooltipSlot.value = { row, col }

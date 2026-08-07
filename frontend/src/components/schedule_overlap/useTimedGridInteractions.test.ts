@@ -14,7 +14,12 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-const mountInteractions = (phone = false) => {
+const mountInteractions = (
+  phone = false,
+  options?: {
+    isSelectableSlot?: (row: number, col: number) => boolean
+  }
+) => {
   const isPhone = ref(phone)
   const dragging = ref(false)
   const dragCur = ref<{ row: number; col: number } | null>(null)
@@ -48,6 +53,7 @@ const mountInteractions = (phone = false) => {
         showAvailability,
         shouldHighlightAvailability: () => true,
         highlightAvailability,
+        isSelectableSlot: options?.isSelectableSlot ?? (() => true),
         getTooltipContent: (row, col) => [{ text: `slot-${String(row)}-${String(col)}`, mono: false }],
       })
       return () => null
@@ -220,5 +226,44 @@ describe("useTimedGridInteractions", () => {
       y: 100,
       placement: "below",
     })
+  })
+
+  it("does not set or anchor a tooltip on a non-selectable cell", () => {
+    appendSlot(1, 0)
+    const isSelectableSlot = vi.fn(
+      (row: number, col: number) => !(row === 1 && col === 0)
+    )
+    const { interactions, tooltipContent } = mountInteractions(false, {
+      isSelectableSlot,
+    })
+
+    interactions.getTimeslotVon(1, 0).mouseover()
+
+    expect(isSelectableSlot).toHaveBeenCalledWith(1, 0)
+    expect(tooltipContent.value).toEqual([])
+    expect(interactions.tooltipPosition.value).toBeNull()
+
+    const { interactions: phoneInteractions } = mountInteractions(true, {
+      isSelectableSlot,
+    })
+    phoneInteractions.getTimeslotVon(1, 0).click()
+
+    expect(phoneInteractions.selectedTooltipSlot.value).toBeNull()
+    expect(phoneInteractions.tooltipPosition.value).toBeNull()
+  })
+
+  it("clears a stale hover tooltip when moving onto a non-selectable cell", () => {
+    appendSlot(1, 0)
+    const { interactions, tooltipContent } = mountInteractions(false, {
+      isSelectableSlot: (row, col) => !(row === 1 && col === 0),
+    })
+
+    interactions.getTimeslotVon(0, 0).mouseover()
+    expect(joinTooltipSegments(tooltipContent.value)).toBe("slot-0-0")
+
+    interactions.getTimeslotVon(1, 0).mouseover()
+
+    expect(tooltipContent.value).toEqual([])
+    expect(interactions.tooltipPosition.value).toBeNull()
   })
 })

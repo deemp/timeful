@@ -4,7 +4,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { nextTick, ref } from "vue"
 import { mount } from "@vue/test-utils"
 import { Temporal } from "temporal-polyfill"
-import type { timeTypes } from "@/constants"
 import type * as UtilsModule from "@/utils"
 import {
   buildScheduleOverlapProps,
@@ -19,7 +18,7 @@ import {
   states,
   type ScheduleOverlapEvent,
 } from "@/composables/schedule_overlap/types"
-import { formatTooltipContent } from "./scheduleOverlapRendering"
+import type { formatTooltipContent } from "./scheduleOverlapRendering"
 import { ZdtMap } from "@/utils"
 import ScheduleOverlap from "./ScheduleOverlap.vue"
 import Tooltip from "../Tooltip.vue"
@@ -1221,7 +1220,7 @@ describe("ScheduleOverlap", () => {
     expect(vm.curTimeslot).toEqual({ row: 1, col: 0 })
   })
 
-  it("shows tooltip text for grey specific-time gaps after save", async () => {
+  it("keeps hover cursor and tooltip off inactive grey specific-time gaps", async () => {
     const wrapper = mountScheduleOverlap({
       props: {
         event: {
@@ -1242,31 +1241,28 @@ describe("ScheduleOverlap", () => {
     })
 
     const vm = wrapper.vm as unknown as {
-      curTimezone: typeof utcTimezone
-      timeType: (typeof timeTypes)[keyof typeof timeTypes]
+      curTimeslot: { row: number; col: number }
       tooltipContent: ReturnType<typeof formatTooltipContent>
-      getDisplayDateFromRowCol: (row: number, col: number) => Temporal.ZonedDateTime | null
       getTimeslotVon: (row: number, col: number) => Record<string, () => void>
     }
 
     vm.getTimeslotVon(1, 0).mouseover()
     await nextTick()
-    const tooltipDate = vm.getDisplayDateFromRowCol(1, 0)
 
-    expect(tooltipDate).not.toBeNull()
-    if (tooltipDate == null) {
-      throw new Error("Expected a tooltip date for the grey specific-time gap")
-    }
+    expect(vm.curTimeslot).toEqual({ row: -1, col: -1 })
+    expect(vm.tooltipContent).toEqual([])
 
-    expect(vm.tooltipContent).toEqual(
-      formatTooltipContent({
-        date: tooltipDate,
-        curTimezone: vm.curTimezone,
-        timeslotDuration: Temporal.Duration.from({ hours: 1 }),
-        timeType: vm.timeType,
-        isSpecificDates: true,
-      })
-    )
+    vm.getTimeslotVon(0, 0).mouseover()
+    await nextTick()
+
+    expect(vm.curTimeslot).toEqual({ row: 0, col: 0 })
+    expect(vm.tooltipContent).not.toEqual([])
+
+    vm.getTimeslotVon(1, 0).mouseover()
+    await nextTick()
+
+    expect(vm.curTimeslot).toEqual({ row: 0, col: 0 })
+    expect(vm.tooltipContent).toEqual([])
   })
 
   it("keeps a fully active saved specific-times window expanded", async () => {

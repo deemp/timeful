@@ -659,6 +659,7 @@ const timedGridInteractions = useTimedGridInteractions({
         })
       : undefined
   },
+  isSelectableSlot: (row, col) => Boolean(getDateFromRowCol(row, col)),
 })
 const {
   selectedTooltipSlot,

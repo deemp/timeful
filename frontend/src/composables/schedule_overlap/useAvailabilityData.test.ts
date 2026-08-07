@@ -286,4 +286,19 @@ describe("useAvailabilityData respondent saves", () => {
     expect(availabilityData.availability.value.size).toBe(1)
     expect(availabilityData.ifNeeded.value.size).toBe(0)
   })
+
+  it("does not move the read-only cursor onto inactive or disabled cells", () => {
+    const availabilityData = makeAvailabilityData({ state: states.BEST_TIMES })
+    const initial = { row: -1, col: -1 }
+
+    expect(availabilityData.curTimeslot.value).toEqual(initial)
+
+    availabilityData.showAvailability(1, 0)
+
+    expect(availabilityData.curTimeslot.value).toEqual(initial)
+
+    availabilityData.showAvailability(0, 0)
+
+    expect(availabilityData.curTimeslot.value).toEqual({ row: 0, col: 0 })
+  })
 })

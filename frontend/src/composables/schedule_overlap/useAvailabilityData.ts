@@ -701,9 +701,9 @@ export function useAvailabilityData(opts: UseAvailabilityDataOptions) {
       curTimeslot.value = { row, col }
       return
     }
-    curTimeslot.value = { row, col }
     const date = opts.getDateFromRowCol(row, col)
     if (!date) return
+    curTimeslot.value = { row, col }
     const available =
       zdtMapGet(responsesFormatted.value, date) ?? new Set()
     for (const respondent of respondents.value) {
