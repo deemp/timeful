@@ -69,7 +69,6 @@ Semi-structured TODO list
     specific times editor should show these dates even if there are no enabled slots at these dates.
 - [ ] Make a demo screenshot of <http://127.0.0.1:4173/e/6df78>
 - [ ] At <http://127.0.0.1:4173/e/6df78>, when I hover over Maya Patel, I see if needed (yellow) for jun 20, 13:45-14:30 but it's available (green) when I edit her availability.
-- [ ] When scrolling shown in timezones, the drop-down list gets narrow or wide depending on the width of the content.
 - [ ] On the specific times page <http://127.0.0.1:4173/e/Eb67A>, when I switch timezone from +5 to +6, the left-most upper-most enabled slot should become disabled
 - [ ] On the specific times page <http://127.0.0.1:4173/e/Eb67A>, when I switch timezone from +5 to +4 and on june 14, 0-4 are selected, jun 13 should appear
 - [ ] make the feedback link configurable via .env and point to issues in my repo
@@ -379,6 +378,7 @@ Semi-structured TODO list
 - [x] The event time format should have a separate state from the display time format on the event page
 - [x] The display time format doesn't inherit from the event time format
   - The display format is a personal setting. It's stored globally. When the user sets the format for one event, all other events use the same format.
+- [x] On desktop, in the new event form and on the new event page, when I scroll the time zone menu, the width is always 520 and doesn't change based on the content length.
 
 ## SHOULD - Done
 

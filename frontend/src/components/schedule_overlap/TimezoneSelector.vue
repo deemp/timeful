@@ -36,7 +36,9 @@
             : 'compact-inline-select tw-z-20 -tw-mt-px tw-min-w-0 tw-text-sm tw-text-black',
           fieldVariant === 'solo' && compactButton && 'timezone-select--compact-button',
           compact ? 'tw-w-full tw-flex-1' : 'tw-w-40 sm:tw-w-44 md:tw-w-64',
+          compact && 'timezone-select--compact',
         ]"
+        :menu-props="{ width: 520 }"
         color="#219653"
         :density="
           fieldVariant === 'solo' && compactButton
@@ -261,6 +263,12 @@ function onChangeValue(val: string | null) {
   align-self: center !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
+}
+
+.timezone-select--compact,
+.timezone-select--compact :deep(.v-field) {
+  width: max-content;
+  max-width: 100%;
 }
 
 .compact-inline-select:not(.timeful-solo-field) {

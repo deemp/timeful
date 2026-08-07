@@ -1072,11 +1072,6 @@ defineExpose({
   transition: background-color 0.25s ease-in-out;
 }
 
-/* Make timezone select element the same width as content */
-#timezone-select {
-  width: 5px;
-}
-
 .schedule-overlap-layout__grid-pane {
   min-width: 0;
 }
