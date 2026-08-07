@@ -274,31 +274,6 @@ export async function dismissConsent(page: Page): Promise<void> {
   })
 }
 
-function toMembershipSeed(day: string, timeZone: string, localStartTime: string): string {
-  return Temporal.PlainDate
-    .from(day)
-    .toZonedDateTime({
-      timeZone,
-      plainTime: Temporal.PlainTime.from(localStartTime),
-    })
-    .withTimeZone("UTC")
-    .toInstant()
-    .toString()
-}
-
-function getDurationHours(startTimeLocal: string, endTimeLocal: string): number {
-  const start = Temporal.PlainTime.from(startTimeLocal)
-  const end = Temporal.PlainTime.from(endTimeLocal)
-  const startMinutes = (start.hour * 60) + start.minute
-  const endMinutes = (end.hour * 60) + end.minute
-  const diffMinutes =
-    endMinutes > startMinutes
-      ? endMinutes - startMinutes
-      : (24 * 60) - startMinutes + endMinutes
-
-  return diffMinutes / 60
-}
-
 function buildSeedPayload(input: CanonicalTimedSeedInput) {
   const activeSlots = unique(input.activeSlots ?? input.enabledSlots)
   const enabledSlots = unique(input.enabledSlots)
@@ -306,16 +281,7 @@ function buildSeedPayload(input: CanonicalTimedSeedInput) {
   return {
     name: input.name,
     description: input.description,
-    duration: getDurationHours(
-      input.slotGeneration.startTimeLocal,
-      input.slotGeneration.endTimeLocal
-    ),
-    dates: input.timedRecurrence.selectedDays.map((day) =>
-      toMembershipSeed(day, input.eventTimezone, input.slotGeneration.startTimeLocal)
-    ),
     type: input.type,
-    hasSpecificTimes: input.hasSpecificTimes ?? true,
-    times: activeSlots,
     enabledSlots,
     activeSlots,
     eventTimezone: input.eventTimezone,
@@ -327,8 +293,6 @@ function buildSeedPayload(input: CanonicalTimedSeedInput) {
     remindees: [],
     sendEmailAfterXResponses: -1,
     collectEmails: false,
-    startOnMonday: input.timedRecurrence.startOnMonday,
-    timeIncrement: input.slotGeneration.timeIncrementMinutes,
     creatorPosthogId: `playwright-${input.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
   }
 }

@@ -175,7 +175,6 @@ Semi-structured TODO list
   - Currently, when I click a grey slot, then scroll down, then return back, the tooltip disappears.
     When I click a grey slot, it reappears
 - [ ] On mobile, when I click a disabled timeslot, the selection should disappear
-- [ ] On mobile, buttons with arrows for switching pages when there are several days, buttons should be the same size
 - [ ] On desktop, given I'm on the event page, when I hover or click inside the grid outside active cells, the highlight at the last timeslot and any tooltip should not be visible
 
 ## SHOULD
@@ -367,6 +366,7 @@ Semi-structured TODO list
   - and the selection at the highlight at the last hovered timeslot must be cleared
 - [x] Given the selected dates are non-consecutive and make the grid split into sub-grids (e.g. Aug 6 and 9), when I click (desktop, mobile) or hover (desktop) in the space between sub-grids, the highlight and tooltip at the last selected timeslot must be cleared like when clicking or hovering inactive timeslots
 - [x] On desktop, given I'm on the event page, when I hover an active timeslot or hover outside the grid and then hover over an inactive slot, then the Responses sidebar should show (0/N) and all responses crossed-out and the status square should have the corresponding color (light-grey for enabled, inactive etc.)
+- [x] On mobile, buttons with arrows for switching pages when there are several days, buttons should be the same size
 
 ## SHOULD - Done
 
