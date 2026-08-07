@@ -893,4 +893,93 @@ describe("useEventScheduling", () => {
     expect(scheduling.curScheduledEvent.value).toBeNull()
     expect(state.value).toBe(states.HEATMAP)
   })
+
+  it("activates the schedule button for a saved schedule before any drag and confirms it as-is", async () => {
+    const state = ref(states.HEATMAP)
+    const event = ref<ScheduleOverlapEvent>({
+      _id: "evt-6b",
+      shortId: "resched123",
+      name: "Reschedule planning",
+      type: eventTypes.SPECIFIC_DATES,
+      daysOnly: false,
+      scheduledEvent: {
+        startDate: zdt("2026-06-01T09:00:00Z"),
+        endDate: zdt("2026-06-01T10:00:00Z"),
+      },
+    })
+    const refreshEvent = vi.fn().mockResolvedValue(undefined)
+    const scheduling = useEventScheduling({
+      event,
+      weekOffset: ref(0),
+      curTimezone: ref({ value: UTC, offset: durations.ZERO, label: "UTC", gmtString: "GMT" }),
+      state,
+      defaultState: computed(() => states.HEATMAP),
+      splitTimes: computed(() => [[{ hoursOffset: durations.ZERO, text: "slot" }, { hoursOffset: durations.ONE_HOUR, text: "slot" }], []]),
+      timeslotDuration: computed(() => durations.ONE_HOUR),
+      timeslotHeight: computed(() => 16),
+      timezoneOffset: computed(() => durations.ZERO),
+      isWeekly: computed(() => false),
+      isGroup: computed(() => false),
+      isSpecificTimes: computed(() => false),
+      numDisplayedDays: computed(() => 1),
+      getDateFromRowCol: (row) => zdt(`2026-06-01T${row === 0 ? "09" : "10"}:00:00Z`),
+      dragging: ref(false),
+      dragStart: ref(null),
+      dragCur: ref(null),
+      tempTimes: shallowRef(new ZdtSet()),
+      respondents: computed(() => []),
+      getMinMaxHoursFromTimes: vi.fn(),
+      refreshEvent,
+    })
+
+    scheduling.scheduleEvent()
+    expect(state.value).toBe(states.SCHEDULE_EVENT)
+    expect(scheduling.allowScheduleEvent.value).toBe(true)
+    await scheduling.confirmScheduleEvent("timeful")
+
+    expect(saveTimefulScheduleMock).toHaveBeenCalledWith("resched123", {
+      startDate: zdt("2026-06-01T09:00:00Z"),
+      endDate: zdt("2026-06-01T10:00:00Z"),
+    })
+    expect(refreshEvent).toHaveBeenCalledOnce()
+    expect(scheduling.curScheduledEvent.value).toBeNull()
+    expect(state.value).toBe(states.HEATMAP)
+  })
+
+  it("keeps the schedule button inactive when there is neither a drag selection nor a saved schedule", () => {
+    const state = ref(states.HEATMAP)
+    const event = ref<ScheduleOverlapEvent>({
+      _id: "evt-6c",
+      shortId: "noresched123",
+      name: "No schedule",
+      type: eventTypes.SPECIFIC_DATES,
+      daysOnly: false,
+    })
+    const scheduling = useEventScheduling({
+      event,
+      weekOffset: ref(0),
+      curTimezone: ref({ value: UTC, offset: durations.ZERO, label: "UTC", gmtString: "GMT" }),
+      state,
+      defaultState: computed(() => states.HEATMAP),
+      splitTimes: computed(() => [[{ hoursOffset: durations.ZERO, text: "slot" }], []]),
+      timeslotDuration: computed(() => durations.ONE_HOUR),
+      timeslotHeight: computed(() => 16),
+      timezoneOffset: computed(() => durations.ZERO),
+      isWeekly: computed(() => false),
+      isGroup: computed(() => false),
+      isSpecificTimes: computed(() => false),
+      getDateFromRowCol: () => null,
+      dragging: ref(false),
+      dragStart: ref(null),
+      dragCur: ref(null),
+      tempTimes: shallowRef(new ZdtSet()),
+      respondents: computed(() => []),
+      getMinMaxHoursFromTimes: vi.fn(),
+    })
+
+    scheduling.scheduleEvent()
+
+    expect(state.value).toBe(states.SCHEDULE_EVENT)
+    expect(scheduling.allowScheduleEvent.value).toBe(false)
+  })
 })

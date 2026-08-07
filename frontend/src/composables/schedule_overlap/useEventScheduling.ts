@@ -103,7 +103,6 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
       .join(", ")
   }
 
-  const allowScheduleEvent = computed(() => Boolean(curScheduledEvent.value))
   const savedScheduledEvent = computed<ScheduledEvent | null>(() => {
     const saved = opts.event.value.scheduledEvent
     if (!saved?.startDate || !saved.endDate) return null
@@ -123,6 +122,10 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
     }
     return null
   })
+
+  const allowScheduleEvent = computed(
+    () => Boolean(curScheduledEvent.value ?? savedScheduledEvent.value)
+  )
 
   const scheduledEventStyle = computed<Record<string, string>>(() => {
     const style: Record<string, string> = {}
@@ -181,8 +184,9 @@ export function useEventScheduling(opts: UseEventSchedulingOptions) {
   }
 
   const getSelectedScheduleRange = () => {
-    if (!curScheduledEvent.value) return
-    const { col, row, numRows } = curScheduledEvent.value
+    const scheduledEvent = curScheduledEvent.value ?? savedScheduledEvent.value
+    if (!scheduledEvent) return
+    const { col, row, numRows } = scheduledEvent
     let startDate = opts.getDateFromRowCol(row, col)
     if (!startDate) return
     const lastSlot = opts.getDateFromRowCol(row + numRows - 1, col)
