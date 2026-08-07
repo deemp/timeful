@@ -371,6 +371,7 @@ Semi-structured TODO list
 - [x] On mobile, buttons with arrows for switching pages when there are several days, buttons should be the same size
 - [x] On mobile, when I click a disabled timeslot, the selection should disappear
 - [x] On desktop, given I'm on the event page, when I hover or click inside the grid outside active cells, the highlight at the last timeslot and any tooltip should not be visible
+- [x] Create a glossary and oblige agents to read it in AGENTS.md
 
 ## SHOULD - Done
 
