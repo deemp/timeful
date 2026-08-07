@@ -361,6 +361,10 @@ Semi-structured TODO list
 - [x] Don't show the cursor and tooltip in enabled, inactive or disabled cells
 - [x] On mobile, given I'm on the event page and a timeslot is selected and the tooltip is visible, when I click the responses offcanvas, the selected timeslot and its tooltip must not disappear
 - [x] On mobile, make the grid labels fit on the screen
+- [x] Given I'm on desktop and on the event page, when I hover over collapsed hours,
+  - the responses should show 0/N (behave similarly to disabled cells)
+  - and mark everyone unavailable
+  - and the selection at the highlight at the last hovered timeslot must be cleared
 
 ## SHOULD - Done
 

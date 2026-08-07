@@ -44,6 +44,7 @@ function createTimeGridViewModel() {
     closeHint: vi.fn(),
     signUpForBlock: vi.fn(),
     toggleCollapsedSpan: vi.fn(),
+    markCollapsedRowInactive: vi.fn(),
   }
 
   const timedGrid: ScheduleOverlapTimeGridViewModel = {
@@ -550,6 +551,31 @@ describe("ScheduleOverlap grid drag bindings", () => {
     await collapsedRows[0].trigger("click")
 
     expect(actions.toggleCollapsedSpan).toHaveBeenCalledWith("collapsed-660-900")
+  })
+
+  it("marks the collapsed-hours row inactive on hover", async () => {
+    const { timedGrid, actions } = createNonConsecutiveTimeGridViewModel()
+    timedGrid.state = states.HEATMAP
+    timedGrid.renderedRows = [
+      {
+        id: "collapsed-660-900",
+        kind: "collapsed",
+        height: 44,
+        rowTop: 0,
+        startLabel: "11:00",
+        endLabel: "15:00",
+      },
+    ]
+
+    const wrapper = mount(ScheduleOverlapTimeGrid, {
+      props: { timedGrid },
+      global,
+    })
+
+    const collapsedRow = wrapper.get("button.schedule-overlap-collapsed-row")
+    await collapsedRow.trigger("mouseenter")
+
+    expect(actions.markCollapsedRowInactive).toHaveBeenCalled()
   })
 
   it("applies the mono font class directly to the time-row label text", () => {

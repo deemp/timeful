@@ -665,12 +665,14 @@ const timedGridInteractions = useTimedGridInteractions({
   },
   isSelectableSlot: (row, col) => Boolean(getDateFromRowCol(row, col)),
   clearSelectedSlot: () => { avail.resetCurTimeslot() },
+  markCurTimeslotInactive: () => { avail.markCurTimeslotInactive() },
 })
 const {
   selectedTooltipSlot,
   tooltipPosition,
   visibleTooltipContent,
   getTimeslotVon,
+  markCollapsedRowInactive,
   startTimedGridDrag,
   moveTimedGridDrag,
   endTimedGridDrag,
@@ -897,6 +899,7 @@ const timedGridActions = computed<ScheduleOverlapTimeGridActions>(() => ({
     handleSignUpBlockClick(block, emitSignUpForBlock)
   },
   toggleCollapsedSpan,
+  markCollapsedRowInactive,
 }))
 
 const {

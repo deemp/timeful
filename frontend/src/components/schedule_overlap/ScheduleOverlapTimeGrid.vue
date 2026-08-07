@@ -114,6 +114,7 @@
                     type="button"
                     class="schedule-overlap-collapsed-row tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-px-4 tw-text-sm"
                     @pointerdown.stop
+                    @mouseenter="timedGrid.actions.markCollapsedRowInactive()"
                     @click="timedGrid.actions.toggleCollapsedSpan(row.id)"
                   >
                     <span class="tw-font-mono">{{ row.startLabel }}-{{ row.endLabel }}</span>

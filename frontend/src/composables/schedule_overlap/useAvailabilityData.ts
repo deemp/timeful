@@ -696,6 +696,18 @@ export function useAvailabilityData(opts: UseAvailabilityDataOptions) {
     return maxLocal
   }
 
+  const markCurTimeslotInactive = () => {
+    if (opts.state.value === states.EDIT_AVAILABILITY) {
+      return
+    }
+    curTimeslotInactive.value = true
+    for (const respondent of respondents.value) {
+      if (respondent._id) {
+        curTimeslotAvailability.value[respondent._id] = false
+      }
+    }
+  }
+
   const showAvailability = (row: number, col: number) => {
     if (opts.state.value === states.EDIT_AVAILABILITY) {
       // Don't show availability when editing
@@ -705,12 +717,7 @@ export function useAvailabilityData(opts: UseAvailabilityDataOptions) {
     }
     const date = opts.getDateFromRowCol(row, col)
     if (!date) {
-      curTimeslotInactive.value = true
-      for (const respondent of respondents.value) {
-        if (respondent._id) {
-          curTimeslotAvailability.value[respondent._id] = false
-        }
-      }
+      markCurTimeslotInactive()
       return
     }
     curTimeslotInactive.value = false
@@ -961,6 +968,7 @@ export function useAvailabilityData(opts: UseAvailabilityDataOptions) {
     getManualAvailabilityDow,
     getFetchedManualAvailabilityDow,
     curRespondentsMaxFor,
+    markCurTimeslotInactive,
     showAvailability,
     submitAvailability,
     deleteAvailability,

@@ -32,6 +32,7 @@ interface UseTimedGridInteractionsOptions {
   getTooltipContent: (row: number, col: number) => TooltipSegment[] | undefined
   isSelectableSlot?: (row: number, col: number) => boolean
   clearSelectedSlot?: () => void
+  markCurTimeslotInactive?: () => void
   document?: Document
 }
 
@@ -224,6 +225,16 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
     }
   }
 
+  const markCollapsedRowInactive = () => {
+    if (!opts.interactable.value) return
+    if (opts.timeslotSelected.value) return
+    if (opts.isPhone.value) return
+    opts.markCurTimeslotInactive?.()
+    opts.clearSelectedSlot?.()
+    tooltipPosition.value = null
+    opts.tooltipContent.value = []
+  }
+
   onMounted(() => {
     documentRef.addEventListener("click", dismissMobileTooltipOnOutsideGridClick, true)
     documentRef.defaultView?.addEventListener(
@@ -247,6 +258,7 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
     tooltipPosition,
     visibleTooltipContent,
     getTimeslotVon,
+    markCollapsedRowInactive,
     startTimedGridDrag,
     moveTimedGridDrag,
     endTimedGridDrag,

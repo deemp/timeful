@@ -19,6 +19,8 @@ const mountInteractions = (
   options?: {
     isSelectableSlot?: (row: number, col: number) => boolean
     clearSelectedSlot?: () => void
+    markCurTimeslotInactive?: () => void
+    interactable?: boolean
   }
 ) => {
   const isPhone = ref(phone)
@@ -43,7 +45,7 @@ const mountInteractions = (
       interactions = useTimedGridInteractions({
         isPhone: computed(() => isPhone.value),
         daysOnly: computed(() => false),
-        interactable: computed(() => true),
+        interactable: computed(() => options?.interactable ?? true),
         dragging,
         dragCur,
         timeslotSelected,
@@ -56,6 +58,7 @@ const mountInteractions = (
         highlightAvailability,
         isSelectableSlot: options?.isSelectableSlot ?? (() => true),
         clearSelectedSlot: options?.clearSelectedSlot,
+        markCurTimeslotInactive: options?.markCurTimeslotInactive,
         getTooltipContent: (row, col) => [{ text: `slot-${String(row)}-${String(col)}`, mono: false }],
       })
       return () => null
@@ -68,6 +71,7 @@ const mountInteractions = (
     isPhone,
     dragging,
     dragCur,
+    timeslotSelected,
     tooltipContent,
     showAvailability,
     highlightAvailability,
@@ -313,5 +317,67 @@ describe("useTimedGridInteractions", () => {
     expect(interactions.tooltipPosition.value).toBeNull()
     expect(tooltipContent.value).toEqual([])
     expect(clearSelectedSlot).toHaveBeenCalledTimes(1)
+  })
+
+  it("marks the collapsed row inactive, clears the selection and tooltip on hover", () => {
+    const clearSelectedSlot = vi.fn()
+    const markCurTimeslotInactive = vi.fn()
+    const { interactions, tooltipContent } = mountInteractions(false, {
+      clearSelectedSlot,
+      markCurTimeslotInactive,
+    })
+
+    tooltipContent.value = [{ text: "stale", mono: false }]
+    interactions.tooltipPosition.value = { x: 10, y: 20 }
+    interactions.markCollapsedRowInactive()
+
+    expect(markCurTimeslotInactive).toHaveBeenCalledTimes(1)
+    expect(clearSelectedSlot).toHaveBeenCalledTimes(1)
+    expect(interactions.tooltipPosition.value).toBeNull()
+    expect(tooltipContent.value).toEqual([])
+  })
+
+  it("does not mark the collapsed row inactive on mobile", () => {
+    const clearSelectedSlot = vi.fn()
+    const markCurTimeslotInactive = vi.fn()
+    const { interactions } = mountInteractions(true, {
+      clearSelectedSlot,
+      markCurTimeslotInactive,
+    })
+
+    interactions.markCollapsedRowInactive()
+
+    expect(markCurTimeslotInactive).not.toHaveBeenCalled()
+    expect(clearSelectedSlot).not.toHaveBeenCalled()
+  })
+
+  it("does not mark the collapsed row inactive while a respondent is selected", () => {
+    const clearSelectedSlot = vi.fn()
+    const markCurTimeslotInactive = vi.fn()
+    const { interactions, timeslotSelected } = mountInteractions(false, {
+      clearSelectedSlot,
+      markCurTimeslotInactive,
+    })
+
+    timeslotSelected.value = true
+    interactions.markCollapsedRowInactive()
+
+    expect(markCurTimeslotInactive).not.toHaveBeenCalled()
+    expect(clearSelectedSlot).not.toHaveBeenCalled()
+  })
+
+  it("does not mark the collapsed row inactive when the grid is not interactable", () => {
+    const clearSelectedSlot = vi.fn()
+    const markCurTimeslotInactive = vi.fn()
+    const { interactions } = mountInteractions(false, {
+      clearSelectedSlot,
+      markCurTimeslotInactive,
+      interactable: false,
+    })
+
+    interactions.markCollapsedRowInactive()
+
+    expect(markCurTimeslotInactive).not.toHaveBeenCalled()
+    expect(clearSelectedSlot).not.toHaveBeenCalled()
   })
 })

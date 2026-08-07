@@ -330,6 +330,46 @@ describe("useAvailabilityData respondent saves", () => {
     })
   })
 
+  it("marks every respondent unavailable when markCurTimeslotInactive is called", () => {
+    const availabilityData = makeAvailabilityData({
+      state: states.BEST_TIMES,
+      eventResponses: {
+        "user-1": {
+          user: { _id: "user-1" },
+          availability: [],
+          ifNeeded: [],
+        },
+        "user-2": {
+          user: { _id: "user-2" },
+          availability: [],
+          ifNeeded: [],
+        },
+      },
+      fetchedResponses: {
+        "user-1": { availability: [day], ifNeeded: [] },
+        "user-2": { availability: [day], ifNeeded: [] },
+      },
+    })
+
+    availabilityData.getResponsesFormatted()
+    availabilityData.showAvailability(0, 0)
+
+    expect(availabilityData.curTimeslotInactive.value).toBe(false)
+    expect(availabilityData.curTimeslotAvailability.value).toEqual({
+      "user-1": true,
+      "user-2": true,
+    })
+
+    availabilityData.markCurTimeslotInactive()
+
+    expect(availabilityData.curTimeslotInactive.value).toBe(true)
+    expect(availabilityData.curTimeslot.value).toEqual({ row: 0, col: 0 })
+    expect(availabilityData.curTimeslotAvailability.value).toEqual({
+      "user-1": false,
+      "user-2": false,
+    })
+  })
+
   it("returns to per-respondent availability when hovering a valid cell after an inactive one", () => {
     const availabilityData = makeAvailabilityData({
       state: states.BEST_TIMES,
