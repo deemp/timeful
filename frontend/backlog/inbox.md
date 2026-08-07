@@ -167,6 +167,17 @@ Semi-structured TODO list
       - data quality and consistency
       - robustness against malformed input
       - maintainability of one canonical contract
+- [ ] Add format 12h/24h - in the event creation form
+- [ ] Make the format in the event form independent of the local format on the event page
+- [ ] "If necessary" - don't show in the legend, color the "if necessary" text that appears on hover
+- [ ] On mobile, make the grid labels fit on the screen
+- [ ] Use TypeScript 7 to speed up type checking and tests (?)
+- [ ] On mobile, make tooltip durable - after scrolling the page, it should appear near the selected timeslot
+  - Currently, when I click a grey slot, then scroll down, then return back, the tooltip disappears.
+    When I click a grey slot, it reappears
+- [ ] On mobile, when I click a disabled timeslot, the selection should disappear
+- [ ] On mobile, buttons with arrows for switching pages when there are several days, buttons should be the same size
+- [ ] On desktop, given I'm on the event page, when I hover or click inside the grid outside active cells, the highlight at the last timeslot and any tooltip should not be visible
 
 ## SHOULD
 
@@ -343,6 +354,13 @@ Semi-structured TODO list
     If there's several events selected, need to warn that exactly one event is required to schedule on Google Calendar
 - [x] On desktop, the width of buttons when adding availability should be the same as on the event page
 - [x] On desktop, when rescheduling event, add availability, edit availability, edit event should be disabled
+- [x] On desktop, Shown in and timezone should be above Responses and scroll with it so that when all timeslots are shown
+     and one selects a timeslot and see the tooltip with the time, they can see which timezone that time belongs to
+- [x] Use monospace font for times
+  - [x] in the grid
+  - [x] in the tooltip
+- [x] Don't show the cursor and tooltip in enabled, inactive or disabled cells
+- [x] On mobile, given I'm on the event page and a timeslot is selected and the tooltip is visible, when I click the responses offcanvas, the selected timeslot and its tooltip must not disappear
 
 
 ## SHOULD - Done
