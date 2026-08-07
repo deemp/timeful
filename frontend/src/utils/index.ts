@@ -88,7 +88,12 @@ export {
   timezoneObservesDST,
   toZDT,
 } from "./timezoneDateRules"
-export { getLocale, getTimeOptions, userPrefers12h } from "./browserDatePreferences"
+export {
+  buildTimeOptions,
+  getLocale,
+  getTimeOptions,
+} from "./browserDatePreferences"
+export type { TimeFormatOption } from "./browserDatePreferences"
 export type { DOWSlot, DOWValidationResult } from "./dateValidation"
 export { validateDOWPayload } from "./dateValidation"
 export type { TimeBlock } from "./scheduleDateRules"

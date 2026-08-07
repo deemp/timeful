@@ -146,6 +146,12 @@ describe("NewGroup", () => {
     expect(newGroupSource).not.toContain("<v-btn-toggle\n              v-model=\"selectedDaysOfWeek\"\n              multiple\n              solo")
   })
 
+  it("renders an event time format switch above the time range dropdowns", () => {
+    expect(newGroupSource).toContain(">Time range</div>")
+    expect(newGroupSource).toContain(':model-value="eventTimeType"')
+    expect(newGroupSource).toContain('@update:model-value="updateEventTimeType"')
+  })
+
   it("prefers the explicit event time seed over membership dates when editing a group", () => {
     vi.stubGlobal(
       "localStorage",

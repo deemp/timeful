@@ -3,7 +3,7 @@
 import { computed, nextTick, ref } from "vue"
 import { mount } from "@vue/test-utils"
 import { describe, expect, it, vi } from "vitest"
-import { dateOptions, durations } from "@/constants"
+import { dateOptions, durations, timeTypes } from "@/constants"
 import { createLocalStorageMock } from "@/test/localStorage"
 import type { Event } from "@/types"
 import type { EventDraft } from "./types"
@@ -288,5 +288,39 @@ describe("useEventEditorState", () => {
       "2026-01-10",
     ])
     expect(state.timezone.value.value).toBe("UTC")
+  })
+
+  it("defaults the event time format to 24-hour and drives the range options", async () => {
+    vi.stubGlobal("localStorage", createLocalStorageMock())
+
+    const event = ref<Event | undefined>(undefined)
+    const edit = ref(false)
+    const contactsPayload = ref<EventDraft | undefined>(undefined)
+    const formRef = ref<{ resetValidation: () => void } | null>(null)
+    let state!: EventEditorState
+
+    mount({
+      setup() {
+        state = useEventEditorState({
+          event: computed(() => event.value),
+          edit: computed(() => edit.value),
+          contactsPayload: computed(() => contactsPayload.value),
+          formRef,
+        })
+
+        return () => null
+      },
+    })
+
+    expect(state.eventTimeType.value).toBe(timeTypes.HOUR24)
+    expect(state.times.value[0].text).toBe("00:00")
+    expect(state.times.value[24].text).toBe("24:00")
+
+    state.updateEventTimeType(timeTypes.HOUR12)
+    await nextTick()
+
+    expect(state.eventTimeType.value).toBe(timeTypes.HOUR12)
+    expect(state.times.value[0].text).toBe("12 AM")
+    expect(state.times.value[24].text).toBe("12 AM")
   })
 })

@@ -49,6 +49,12 @@
               <div class="tw-mb-2 tw-text-lg tw-text-black">
                 What times might work?
               </div>
+              <div class="tw-mb-2 tw-flex tw-items-center">
+                <TimeFormatToggle
+                  :model-value="eventTimeType"
+                  @update:model-value="updateEventTimeType"
+                />
+              </div>
               <div class="time-range-row tw-mb-6 tw-flex tw-justify-center tw-space-x-2">
                 <v-select
                   :model-value="startTime"
@@ -276,6 +282,7 @@ import {
   useEventEditorState,
   type EventEditorFormRef,
 } from "@/composables/event/useEventEditorState"
+import TimeFormatToggle from "./schedule_overlap/TimeFormatToggle.vue"
 
 interface FormRef extends EventEditorFormRef {
   validate: () => Promise<{ valid: boolean }> | boolean
@@ -366,8 +373,10 @@ const {
   dayOfWeekButtons,
   times,
   minCalendarDate,
+  eventTimeType,
   setTimezone,
   resetTimezone,
+  updateEventTimeType,
   getDayOfWeekButtonClass,
   reset,
   resetToEventData,

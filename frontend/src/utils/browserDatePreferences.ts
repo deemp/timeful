@@ -1,5 +1,11 @@
 import { timeTypes } from "@/constants"
 
+export interface TimeFormatOption {
+  text: string
+  time: number
+  value: number
+}
+
 type StorageWithTimeType = Storage & { timeType?: unknown }
 
 const DEFAULT_LOCALE = "en-US"
@@ -25,6 +31,11 @@ const getStoredTimeType = (storage: Storage | undefined): string | undefined => 
   const storedValue = storage.getItem("timeType")
   return storedValue ?? undefined
 }
+
+const prefers12hFromStored = (
+  value: string | undefined,
+  fallback: boolean
+): boolean => (value == undefined ? fallback : value === timeTypes.HOUR12)
 
 const normalizeLocaleCandidate = (candidate: unknown): string | undefined => {
   if (typeof candidate !== "string") {
@@ -63,25 +74,8 @@ export const getLocale = (): string => {
   )
 }
 
-export const userPrefers12h = (): boolean => {
-  return (
-    Intl.DateTimeFormat(getLocale(), { hour: "numeric" }).resolvedOptions()
-      .hour12 ?? true
-  )
-}
-
-export const getTimeOptions = (): {
-  text: string
-  time: number
-  value: number
-}[] => {
-  const storedTimeType = getStoredTimeType(getStorage())
-  const prefers12h =
-    storedTimeType == undefined
-      ? userPrefers12h()
-      : storedTimeType === timeTypes.HOUR12
-
-  const times: { text: string; time: number; value: number }[] = []
+export const buildTimeOptions = (prefers12h: boolean): TimeFormatOption[] => {
+  const times: TimeFormatOption[] = []
   if (prefers12h) {
     times.push({ text: "12 AM", time: 0, value: 0 })
     for (let h = 1; h < 12; ++h) {
@@ -104,3 +98,6 @@ export const getTimeOptions = (): {
   times.push({ text: "24:00", time: 0, value: 24 })
   return times
 }
+
+export const getTimeOptions = (): TimeFormatOption[] =>
+  buildTimeOptions(prefers12hFromStored(getStoredTimeType(getStorage()), false))

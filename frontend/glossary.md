@@ -53,6 +53,23 @@ Picked-Date Slot Model](./adr/012-frontend-timed-event-instant-slot-model.md).
   continue using date-only semantics.
   ([ADR-012 Decision](./adr/012-frontend-timed-event-instant-slot-model.md#decision))
 
+## Time format terms
+
+- `event time format`: the 12/24-hour format used to render times inside event
+  editor forms (the `What times might work?` / `Time range` dropdowns and the
+  start/end time fields). It persists independently of the display time format
+  under `eventTimeType` and defaults to 24-hour; changing it while creating an
+  event saves the new preference.
+  ([browser date preferences](../frontend/src/utils/browserDatePreferences.ts),
+  [event editor state](../frontend/src/composables/event/useEventEditorState.ts))
+
+- `display time format`: the format used to render times in the event-page
+  schedule grid and tooltips, controlled by the event-page `12h/24h` switch and
+  persisted under `timeType`. It defaults to 24-hour and only affects event-page
+  rendering, not the event editor forms.
+  ([browser date preferences](../frontend/src/utils/browserDatePreferences.ts),
+  [calendar grid](../frontend/src/composables/schedule_overlap/useCalendarGrid.ts))
+
 ## Timed-grid rendering terms
 
 - `enabled inactive slot`: an enabled slot that is not active. It remains

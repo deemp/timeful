@@ -309,7 +309,7 @@ export const buildScheduleOverlapMobileOverlayViewModel =
   })
 
 export const installScheduleOverlapTestGlobals = () => {
-  vi.stubGlobal("localStorage", createLocalStorageMock())
+  vi.stubGlobal("localStorage", createLocalStorageMock({ timeType: timeTypes.HOUR12 }))
   vi.stubGlobal(
     "fetch",
     vi.fn(() =>

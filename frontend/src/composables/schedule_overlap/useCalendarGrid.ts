@@ -15,7 +15,6 @@ import {
   prefersStartOnMonday,
   timeNumToTimeText,
   utcTimeToLocalTime,
-  userPrefers12h,
   ZdtMap,
   ZdtSet,
   zdtSetHas,
@@ -79,8 +78,7 @@ export function useCalendarGrid(opts: UseCalendarGridOptions) {
     Temporal.Duration.from({ minutes: Math.round(minutes) })
 
   const timeType = ref<TimeType>(
-    (localStorage.getItem("timeType") as TimeType | null) ??
-      (userPrefers12h() ? timeTypes.HOUR12 : timeTypes.HOUR24),
+    (localStorage.getItem("timeType") as TimeType | null) ?? timeTypes.HOUR24,
   )
   watch(timeType, (val) => {
     localStorage.timeType = val

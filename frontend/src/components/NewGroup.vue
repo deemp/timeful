@@ -43,6 +43,12 @@
 
         <div>
           <div class="tw-mb-2 tw-text-lg tw-text-black">Time range</div>
+          <div class="tw-mb-2 tw-flex tw-items-center">
+            <TimeFormatToggle
+              :model-value="eventTimeType"
+              @update:model-value="updateEventTimeType"
+            />
+          </div>
           <div class="tw-flex tw-items-baseline tw-justify-center tw-space-x-2">
             <v-select
               v-model="startTime"
@@ -170,10 +176,12 @@ import {
   getDateWithTimezone,
 } from "@/utils"
 import { useMainStore } from "@/stores/main"
-import { dateOptions, eventTypes, authTypes, durations, hoursPlainTime } from "@/constants"
+import { dateOptions, eventTypes, authTypes, durations, hoursPlainTime, timeTypes, type TimeType } from "@/constants"
+import { buildTimeOptions } from "@/utils"
 import { posthog } from "@/plugins/posthog"
 import EditorDialogHeader from "./EditorDialogHeader.vue"
 import TimezoneSelector from "./schedule_overlap/TimezoneSelector.vue"
+import TimeFormatToggle from "./schedule_overlap/TimeFormatToggle.vue"
 import EmailInput from "./event/EmailInput.vue"
 import type { Event } from "@/types"
 import { Temporal } from "temporal-polyfill"
@@ -293,14 +301,18 @@ const getDayOfWeekButtonClass = (dayIndex: number) => ({
   "editor-dow-button": true,
   "editor-dow-button--selected": selectedDaysOfWeek.value.includes(dayIndex),
 })
-const times = computed(() => {
-  const t: { text: string; value: number }[] = []
-  for (let h = 1; h < 12; ++h) t.push({ text: `${String(h)} AM`, value: h })
-  for (let h = 0; h < 12; ++h)
-    t.push({ text: `${String(h == 0 ? 12 : h)} PM`, value: h + 12 })
-  t.push({ text: "12 AM", value: 0 })
-  return t
+const times = computed(() =>
+  buildTimeOptions(eventTimeType.value === timeTypes.HOUR12),
+)
+const eventTimeType = ref<TimeType>(
+  (localStorage.getItem("eventTimeType") as TimeType | null) ?? timeTypes.HOUR24,
+)
+watch(eventTimeType, (val) => {
+  localStorage.eventTimeType = val
 })
+const updateEventTimeType = (value: string) => {
+  eventTimeType.value = value as TimeType
+}
 const otherEventAttendees = computed(() =>
   props.event?.attendees
     ? props.event.attendees

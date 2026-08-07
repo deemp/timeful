@@ -375,6 +375,8 @@ Semi-structured TODO list
   - when I hover or click outside of the grid, replace the status square with a profile icon like it's now
 - [x] Add "Disabled, collapsed" legend item
 - [x] dashed outline in the legend bullet for Disabled, collapsed
+- [x] In the new event form, the event time format should be persisted in the localstorage
+- [x] The event time format should have a separate state from the display time format on the event page
 
 ## SHOULD - Done
 

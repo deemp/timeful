@@ -67,7 +67,6 @@ interface TimeOption {
   time: number
   [key: string]: unknown
 }
-
 const props = withDefaults(
   defineProps<{
     workingHours: WorkingHoursOptions
@@ -80,7 +79,7 @@ const emit = defineEmits<{
   "update:workingHours": [value: WorkingHoursOptions]
 }>()
 
-const times = computed(() => getTimeOptions() as TimeOption[])
+const times = computed(() => getTimeOptions())
 
 const updateWorkingHours = (
   key: "enabled" | "startTime" | "endTime",

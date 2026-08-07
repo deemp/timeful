@@ -184,6 +184,10 @@ describe("useCalendarGrid", () => {
   })
 
   it("renders saved specific-time windows from the selected instants instead of a broader duration", () => {
+    vi.stubGlobal(
+      "localStorage",
+      createLocalStorageMock({ timeType: timeTypes.HOUR12 })
+    )
     const event = ref<ScheduleOverlapEvent>({
       _id: "evt-4",
       shortId: "grid-specific-window",
@@ -268,6 +272,10 @@ describe("useCalendarGrid", () => {
   })
 
   it("derives saved specific-time day columns from event times in the viewer timezone", () => {
+    vi.stubGlobal(
+      "localStorage",
+      createLocalStorageMock({ timeType: timeTypes.HOUR12 })
+    )
     const event = ref<ScheduleOverlapEvent>({
       _id: "evt-5b",
       shortId: "grid-specific-belgrade-days",
@@ -424,6 +432,10 @@ describe("useCalendarGrid", () => {
   })
 
   it("uses saved specific-time instants instead of stale duration metadata for the visible window", () => {
+    vi.stubGlobal(
+      "localStorage",
+      createLocalStorageMock({ timeType: timeTypes.HOUR12 })
+    )
     const event = ref<ScheduleOverlapEvent>({
       _id: "evt-5c",
       shortId: "grid-specific-window-from-times",
@@ -508,6 +520,10 @@ describe("useCalendarGrid", () => {
   })
 
   it("uses canonical slot generation instead of stale duration metadata for non-specific timed windows", () => {
+    vi.stubGlobal(
+      "localStorage",
+      createLocalStorageMock({ timeType: timeTypes.HOUR12 })
+    )
     const event = ref<ScheduleOverlapEvent>({
       _id: "evt-5cc",
       shortId: "grid-canonical-window-from-slot-generation",
@@ -1129,6 +1145,10 @@ describe("useCalendarGrid", () => {
   })
 
   it("keeps wrapped UTC+3:30 rows continuous and owned by their header date", () => {
+    vi.stubGlobal(
+      "localStorage",
+      createLocalStorageMock({ timeType: timeTypes.HOUR12 })
+    )
     const event = ref<ScheduleOverlapEvent>({
       _id: "evt-6",
       shortId: "grid-wrap-split-gap",
@@ -1218,6 +1238,10 @@ describe("useCalendarGrid", () => {
   })
 
   it("merges wrapped UTC+4:00 rows when the displayed local-day ranges only touch", () => {
+    vi.stubGlobal(
+      "localStorage",
+      createLocalStorageMock({ timeType: timeTypes.HOUR12 })
+    )
     const event = ref<ScheduleOverlapEvent>({
       _id: "evt-6b",
       shortId: "grid-wrap-touching-no-gap",
@@ -1275,6 +1299,10 @@ describe("useCalendarGrid", () => {
   })
 
   it("merges overlapped wrapped Kathmandu rows into one non-duplicated local-day sequence", () => {
+    vi.stubGlobal(
+      "localStorage",
+      createLocalStorageMock({ timeType: timeTypes.HOUR12 })
+    )
     const event = ref<ScheduleOverlapEvent>({
       _id: "evt-7",
       shortId: "grid-wrap-overlap-kathmandu",

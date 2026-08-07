@@ -2,20 +2,23 @@ import { computed, nextTick, onMounted, ref, watch, type ComputedRef, type Ref }
 import {
   dateOptions,
   hoursPlainTime,
+  timeTypes,
   type DateOptionType,
+  type TimeType,
 } from "@/constants"
 import type { EventDraft } from "@/composables/event/types"
 import { useOwnedTimezone } from "@/composables/timezone/useOwnedTimezone"
 import type { Timezone } from "@/composables/schedule_overlap/types"
 import type { Event } from "@/types"
 import {
+  buildTimeOptions,
   getDateWithTimezone,
   getEventMembershipDayOfWeekValues,
   getEventMembershipPlainDates,
   getEventTimeSeed,
-  getTimeOptions,
   normalizeTimezone,
 } from "@/utils"
+import type { TimeFormatOption } from "@/utils"
 import {
   getTimedEventTimezone,
   getTimedRecurrence,
@@ -99,6 +102,7 @@ export interface EventEditorState {
   sendEmailAfterXResponses: Ref<number>
   specificTimesEnabled: Ref<boolean>
   timeIncrement: Ref<number>
+  eventTimeType: Ref<TimeType>
   timezone: Ref<Timezone>
   timezoneModified: Ref<boolean>
   hasMounted: Ref<boolean>
@@ -106,10 +110,11 @@ export interface EventEditorState {
   nameRules: ComputedRef<((value: string) => true | string)[]>
   selectedDaysRules: ComputedRef<((value: unknown[]) => true | string)[]>
   dayOfWeekButtons: ComputedRef<{ key: string; label: string; value: number }[]>
-  times: ComputedRef<ReturnType<typeof getTimeOptions>>
+  times: ComputedRef<TimeFormatOption[]>
   minCalendarDate: ComputedRef<string>
   setTimezone: (value: Timezone) => void
   resetTimezone: () => void
+  updateEventTimeType: (value: string) => void
   getDayOfWeekButtonClass: (dayIndex: number) => Record<string, boolean>
   toggleEmailReminders: (delayed?: boolean) => void
   applyEventData: () => void
@@ -154,6 +159,12 @@ export function useEventEditorState(
   const sendEmailAfterXResponses = ref(3)
   const specificTimesEnabled = ref(false)
   const timeIncrement = ref(15)
+  const eventTimeType = ref<TimeType>(
+    (localStorage.getItem("eventTimeType") as TimeType | null) ?? timeTypes.HOUR24,
+  )
+  watch(eventTimeType, (val) => {
+    localStorage.eventTimeType = val
+  })
   const { timezone, modified: timezoneModified, setTimezone, resetTimezone } =
     useOwnedTimezone()
   const hasMounted = ref(false)
@@ -194,6 +205,7 @@ export function useEventEditorState(
     sendEmailAfterXResponses,
     specificTimesEnabled,
     timeIncrement,
+    eventTimeType,
     timezone,
     timezoneModified,
     hasMounted,
@@ -216,10 +228,15 @@ export function useEventEditorState(
         ? [{ key: "sun-end", label: "Sun", value: 7 }]
         : []),
     ]),
-    times: computed(() => getTimeOptions()),
+    times: computed(() =>
+      buildTimeOptions(eventTimeType.value === timeTypes.HOUR12),
+    ),
     minCalendarDate: computed(() => (edit.value ? "" : createTodayIsoDate())),
     setTimezone,
     resetTimezone,
+    updateEventTimeType: (value: string) => {
+      eventTimeType.value = value as TimeType
+    },
     getDayOfWeekButtonClass: (dayIndex: number) => ({
       "editor-dow-button": true,
       "editor-dow-button--selected": selectedDaysOfWeek.value.includes(dayIndex),

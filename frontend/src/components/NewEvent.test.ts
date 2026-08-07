@@ -392,8 +392,8 @@ describe("NewEvent", () => {
     expect(selects[0]?.props("variant")).toBe("solo")
     expect(selects[0]?.props("items")).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ text: "9 AM", value: 9 }),
-        expect.objectContaining({ text: "5 PM", value: 17 }),
+        expect.objectContaining({ text: "09:00", value: 9 }),
+        expect.objectContaining({ text: "17:00", value: 17 }),
       ])
     )
     expect(selects[1]?.props("itemTitle")).toBe("text")
@@ -559,6 +559,18 @@ describe("NewEvent", () => {
     )
     expect(compactSwitchCssSource).toMatch(
       /background-color:\s*var\(--timeful-compact-switch-track-active-bg\) !important;/
+    )
+  })
+
+  it("renders an event time format switch above the time range dropdowns", () => {
+    expect(newEventSource).toContain(
+      "What times might work?"
+    )
+    expect(newEventSource).toContain(
+      ':model-value="eventTimeType"'
+    )
+    expect(newEventSource).toContain(
+      '@update:model-value="updateEventTimeType"'
     )
   })
 

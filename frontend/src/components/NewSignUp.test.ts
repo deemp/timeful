@@ -186,6 +186,12 @@ describe("NewSignUp", () => {
     expect(newSignUpSource).not.toContain("<v-btn-toggle\n                  v-model=\"selectedDaysOfWeek\"\n                  multiple\n                  solo")
   })
 
+  it("renders an event time format switch above the time range dropdowns", () => {
+    expect(newSignUpSource).toContain("What times might work?")
+    expect(newSignUpSource).toContain(':model-value="eventTimeType"')
+    expect(newSignUpSource).toContain('@update:model-value="updateEventTimeType"')
+  })
+
   it("commits ISO dates emitted by DatePicker into Temporal selected days", async () => {
     const wrapper = shallowMount(NewSignUp, {
       global: {

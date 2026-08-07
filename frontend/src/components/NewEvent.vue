@@ -63,6 +63,12 @@
               <div class="tw-mb-2 tw-text-lg tw-text-black">
                 What times might work?
               </div>
+              <div class="tw-mb-2 tw-flex tw-items-center">
+                <TimeFormatToggle
+                  :model-value="eventTimeType"
+                  @update:model-value="updateEventTimeType"
+                />
+              </div>
               <v-expand-transition>
                 <div v-if="!specificTimesEnabled">
                   <div class="time-range-row tw-mb-2 tw-flex tw-justify-center tw-space-x-2">
@@ -557,6 +563,7 @@ import { signInEnabled } from "@/utils/signInAvailability"
 import { useMainStore } from "@/stores/main"
 import { posthog } from "@/plugins/posthog"
 import TimezoneSelector from "./schedule_overlap/TimezoneSelector.vue"
+import TimeFormatToggle from "./schedule_overlap/TimeFormatToggle.vue"
 import { Temporal } from "temporal-polyfill"
 import EmailInput from "./event/EmailInput.vue"
 import DatePicker from "@/components/DatePicker.vue"
@@ -743,6 +750,7 @@ const {
   sendEmailAfterXResponses,
   specificTimesEnabled,
   timeIncrement,
+  eventTimeType,
   timezone,
   timezoneModified,
   hasMounted,
@@ -753,6 +761,7 @@ const {
   minCalendarDate,
   setTimezone,
   resetTimezone,
+  updateEventTimeType,
   getDayOfWeekButtonClass,
   reset: resetEditorState,
   resetToEventData: resetEditorStateToEventData,
