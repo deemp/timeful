@@ -2,7 +2,10 @@ import { shallowMount } from "@vue/test-utils"
 import { vi } from "vitest"
 import { Temporal } from "temporal-polyfill"
 import { eventTypes, timeTypes, UTC } from "@/constants"
-import { states } from "@/composables/schedule_overlap/types"
+import {
+  states,
+  type ScheduleOverlapEvent,
+} from "@/composables/schedule_overlap/types"
 import { createLocalStorageMock } from "@/test/localStorage"
 import { ZdtMap } from "@/utils"
 import ScheduleOverlap from "./ScheduleOverlap.vue"
@@ -18,6 +21,98 @@ export type ScheduleOverlapWrapper = ReturnType<
 >
 
 export const zdt = (iso: string) => Temporal.Instant.from(iso).toZonedDateTimeISO(UTC)
+
+export const utcTimezone = {
+  value: "UTC",
+  offset: Temporal.Duration.from({ hours: 0 }),
+  label: "UTC",
+  gmtString: "GMT+0",
+}
+
+export const buildUtcSpecificTimes = (date: string, times: string[]) =>
+  times.map((time) => zdt(`${date}T${time}Z`))
+
+export const buildUtcQuarterHourSlots = (date: string) =>
+  Array.from({ length: 96 }, (_, index) =>
+    Temporal.PlainDate.from(date)
+      .toZonedDateTime({
+        timeZone: "UTC",
+        plainTime: "00:00:00",
+      })
+      .add({ minutes: index * 15 })
+  )
+
+export const buildCanonicalSpecificTimesEvent = ({
+  name,
+  dates,
+}: {
+  name: string
+  dates: string[]
+}): ScheduleOverlapEvent => ({
+  ...buildScheduleOverlapProps().event,
+  name,
+  dates: dates.map((date) => Temporal.PlainDate.from(date)),
+  timeSeed: zdt(`${dates[0]}T00:00:00Z`),
+  startTime: Temporal.PlainTime.from("00:00"),
+  duration: Temporal.Duration.from({ hours: 24 }),
+  hasSpecificTimes: true,
+  timeIncrement: Temporal.Duration.from({ minutes: 15 }),
+  times: [],
+  enabledSlots: dates.flatMap((date) => buildUtcQuarterHourSlots(date)),
+  eventTimezone: "UTC",
+  slotGeneration: {
+    startTimeLocal: Temporal.PlainTime.from("00:00"),
+    endTimeLocal: Temporal.PlainTime.from("00:00"),
+    timeIncrement: Temporal.Duration.from({ minutes: 15 }),
+  },
+  timedRecurrence: {
+    kind: "specific_dates",
+    selectedDays: dates.map((date) => Temporal.PlainDate.from(date)),
+    selectedDaysOfWeek: [],
+    startOnMonday: false,
+  },
+})
+
+export interface TimedGridPresentationForTest {
+  days: { dateObject: Temporal.ZonedDateTime; isConsecutive?: boolean }[]
+  renderedRows: {
+    id: string
+    kind: "timeslot" | "collapsed" | "filler" | "split-gap"
+    startLabel?: string
+    endLabel?: string
+    timeText?: string
+    height: number
+  }[]
+  splitTimes: {
+    absoluteMinutes?: number
+    displayedMinutes?: number
+    text?: string
+  }[][]
+  timeAxisEndText?: string
+}
+
+export const getTimedGridPresentation = (wrapper: ScheduleOverlapWrapper) =>
+  wrapper.findComponent({ name: "ScheduleOverlapTimeGrid" }).props("timedGrid") as
+    TimedGridPresentationForTest
+
+export const stubResizeObserver = () => {
+  vi.stubGlobal(
+    "ResizeObserver",
+    class {
+      observe() {
+        return undefined
+      }
+
+      disconnect() {
+        return undefined
+      }
+    }
+  )
+}
+
+export const stubScrollTo = () => {
+  vi.stubGlobal("scrollTo", vi.fn())
+}
 
 export const scheduleOverlapGlobalStubs = {
   "v-btn": true,
