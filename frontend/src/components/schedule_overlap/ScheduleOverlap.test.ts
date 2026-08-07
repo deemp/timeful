@@ -85,7 +85,7 @@ const buildCanonicalSpecificTimesEvent = ({
 })
 
 interface TimedGridPresentationForTest {
-  days: { dateObject: Temporal.ZonedDateTime }[]
+  days: { dateObject: Temporal.ZonedDateTime; isConsecutive?: boolean }[]
   renderedRows: {
     id: string
     kind: "timeslot" | "collapsed" | "filler" | "split-gap"
@@ -1547,6 +1547,134 @@ describe("ScheduleOverlap", () => {
     expect(vm.curTimeslotInactive).toBe(true)
     expect(vm.curTimeslot).toEqual({ row: -1, col: -1 })
     expect(vm.curTimeslotAvailability["user-1"]).toBe(false)
+
+    wrapper.unmount()
+  })
+
+  it("shows the aggregate responses when hovering the space between split grids", async () => {
+    const wrapper = mountScheduleOverlap({
+      props: {
+        event: {
+          ...buildScheduleOverlapProps().event,
+          dates: [
+            Temporal.PlainDate.from("2026-08-06"),
+            Temporal.PlainDate.from("2026-08-09"),
+          ],
+          timeSeed: zdt("2026-08-06T09:00:00Z"),
+          startTime: Temporal.PlainTime.from("09:00"),
+          duration: Temporal.Duration.from({ hours: 3 }),
+          timeIncrement: Temporal.Duration.from({ hours: 1 }),
+          times: [
+            zdt("2026-08-06T09:00:00Z"),
+            zdt("2026-08-06T11:00:00Z"),
+            zdt("2026-08-09T09:00:00Z"),
+            zdt("2026-08-09T11:00:00Z"),
+          ],
+          responses: {
+            "user-1": {
+              name: "User One",
+              user: {
+                _id: "user-1",
+                firstName: "User",
+                lastName: "One",
+                email: "",
+              },
+              availability: [],
+              ifNeeded: [],
+              manualAvailability: {},
+            },
+          },
+        },
+        initialTimezone: utcTimezone,
+      },
+    })
+
+    const vm = wrapper.vm as unknown as {
+      curTimeslot: { row: number; col: number }
+      curTimeslotInactive: boolean
+      curTimeslotAvailability: Record<string, boolean>
+      getTimeslotVon: (row: number, col: number) => Record<string, () => void>
+      markSplitGapOutside: () => void
+    }
+
+    expect(
+      getTimedGridPresentation(wrapper).days.map((day) => day.isConsecutive)
+    ).toEqual([true, false])
+
+    vm.getTimeslotVon(0, 0).mouseover()
+    await nextTick()
+
+    expect(vm.curTimeslot).toEqual({ row: 0, col: 0 })
+    expect(vm.curTimeslotAvailability["user-1"]).toBe(false)
+
+    vm.markSplitGapOutside()
+    await nextTick()
+
+    expect(vm.curTimeslot).toEqual({ row: -1, col: -1 })
+    expect(vm.curTimeslotInactive).toBe(false)
+    expect(vm.curTimeslotAvailability["user-1"]).toBe(true)
+
+    wrapper.unmount()
+  })
+
+  it("shows the aggregate responses when clicking the space between split grids", async () => {
+    const wrapper = mountScheduleOverlap({
+      props: {
+        event: {
+          ...buildScheduleOverlapProps().event,
+          dates: [
+            Temporal.PlainDate.from("2026-08-06"),
+            Temporal.PlainDate.from("2026-08-09"),
+          ],
+          timeSeed: zdt("2026-08-06T09:00:00Z"),
+          startTime: Temporal.PlainTime.from("09:00"),
+          duration: Temporal.Duration.from({ hours: 3 }),
+          timeIncrement: Temporal.Duration.from({ hours: 1 }),
+          times: [
+            zdt("2026-08-06T09:00:00Z"),
+            zdt("2026-08-06T11:00:00Z"),
+            zdt("2026-08-09T09:00:00Z"),
+            zdt("2026-08-09T11:00:00Z"),
+          ],
+          responses: {
+            "user-1": {
+              name: "User One",
+              user: {
+                _id: "user-1",
+                firstName: "User",
+                lastName: "One",
+                email: "",
+              },
+              availability: [],
+              ifNeeded: [],
+              manualAvailability: {},
+            },
+          },
+        },
+        initialTimezone: utcTimezone,
+      },
+    })
+
+    const vm = wrapper.vm as unknown as {
+      curTimeslot: { row: number; col: number }
+      curTimeslotInactive: boolean
+      curTimeslotAvailability: Record<string, boolean>
+      getTimeslotVon: (row: number, col: number) => Record<string, () => void>
+      clickSplitGapOutside: () => void
+    }
+
+    vm.getTimeslotVon(0, 0).click()
+    await nextTick()
+
+    expect(vm.curTimeslot).toEqual({ row: 0, col: 0 })
+    expect(vm.curTimeslotAvailability["user-1"]).toBe(false)
+
+    vm.clickSplitGapOutside()
+    await nextTick()
+
+    expect(vm.curTimeslot).toEqual({ row: -1, col: -1 })
+    expect(vm.curTimeslotInactive).toBe(false)
+    expect(vm.curTimeslotAvailability["user-1"]).toBe(true)
 
     wrapper.unmount()
   })

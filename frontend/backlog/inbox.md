@@ -365,6 +365,7 @@ Semi-structured TODO list
   - the responses should show 0/N (behave similarly to disabled cells)
   - and mark everyone unavailable
   - and the selection at the highlight at the last hovered timeslot must be cleared
+- [x] Given the selected dates are non-consecutive and make the grid split into sub-grids (e.g. Aug 6 and 9), when I click (desktop, mobile) or hover (desktop) in the space between sub-grids, the highlight and tooltip at the last selected timeslot must be cleared like when clicking or hovering inactive timeslots
 
 ## SHOULD - Done
 

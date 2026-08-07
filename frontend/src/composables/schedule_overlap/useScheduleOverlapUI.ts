@@ -239,6 +239,10 @@ export function useScheduleOverlapUI(opts: UseScheduleOverlapUIOptions) {
       return
     }
 
+    deselectRespondentsSelection()
+  }
+
+  const deselectRespondentsSelection = () => {
     if (state.value === states.SUBSET_AVAILABILITY) {
       state.value = defaultState.value
     }
@@ -412,6 +416,7 @@ export function useScheduleOverlapUI(opts: UseScheduleOverlapUIOptions) {
     mouseLeaveRespondent,
     clickRespondent,
     deselectRespondents,
+    deselectRespondentsSelection,
     resetCurTimeslot,
     isGuest,
     checkElementsVisible,

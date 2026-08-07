@@ -125,7 +125,12 @@
                       <div
                         v-if="!day.isConsecutive"
                         :key="`${row.id}-${d}-gap`"
+                        class="schedule-overlap-time-grid__split-gap"
                         :style="{ width: `${SPLIT_GAP_WIDTH}px` }"
+                        @pointerdown.stop
+                        @mousedown.stop
+                        @mouseenter="timedGrid.actions.markSplitGapOutside()"
+                        @click="timedGrid.actions.clickSplitGapOutside()"
                       ></div>
                       <div
                         class="schedule-overlap-time-grid__day-column tw-flex-1"

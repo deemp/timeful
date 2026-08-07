@@ -20,6 +20,8 @@ const mountInteractions = (
     isSelectableSlot?: (row: number, col: number) => boolean
     clearSelectedSlot?: () => void
     markCurTimeslotInactive?: () => void
+    resetGridOutside?: () => void
+    deselectGridOutside?: () => void
     interactable?: boolean
   }
 ) => {
@@ -59,6 +61,8 @@ const mountInteractions = (
         isSelectableSlot: options?.isSelectableSlot ?? (() => true),
         clearSelectedSlot: options?.clearSelectedSlot,
         markCurTimeslotInactive: options?.markCurTimeslotInactive,
+        resetGridOutside: options?.resetGridOutside,
+        deselectGridOutside: options?.deselectGridOutside,
         getTooltipContent: (row, col) => [{ text: `slot-${String(row)}-${String(col)}`, mono: false }],
       })
       return () => null
@@ -379,5 +383,63 @@ describe("useTimedGridInteractions", () => {
 
     expect(markCurTimeslotInactive).not.toHaveBeenCalled()
     expect(clearSelectedSlot).not.toHaveBeenCalled()
+  })
+
+  it("resets the grid state and clears the tooltip when hovering a split gap on desktop", () => {
+    const resetGridOutside = vi.fn()
+    const { interactions, tooltipContent } = mountInteractions(false, {
+      resetGridOutside,
+    })
+
+    tooltipContent.value = [{ text: "stale", mono: false }]
+    interactions.tooltipPosition.value = { x: 10, y: 20 }
+    interactions.markSplitGapOutside()
+
+    expect(resetGridOutside).toHaveBeenCalledTimes(1)
+    expect(interactions.tooltipPosition.value).toBeNull()
+    expect(tooltipContent.value).toEqual([])
+  })
+
+  it("does not reset the grid state when hovering a split gap on mobile", () => {
+    const resetGridOutside = vi.fn()
+    const { interactions } = mountInteractions(true, {
+      resetGridOutside,
+    })
+
+    interactions.markSplitGapOutside()
+
+    expect(resetGridOutside).not.toHaveBeenCalled()
+  })
+
+  it("deselects the grid state and clears the tooltip when clicking a split gap on desktop", () => {
+    const deselectGridOutside = vi.fn()
+    const { interactions, tooltipContent } = mountInteractions(false, {
+      deselectGridOutside,
+    })
+
+    tooltipContent.value = [{ text: "stale", mono: false }]
+    interactions.tooltipPosition.value = { x: 10, y: 20 }
+    interactions.clickSplitGapOutside()
+
+    expect(deselectGridOutside).toHaveBeenCalledTimes(1)
+    expect(interactions.tooltipPosition.value).toBeNull()
+    expect(tooltipContent.value).toEqual([])
+  })
+
+  it("dismisses the anchored mobile tooltip when clicking a split gap", () => {
+    const deselectGridOutside = vi.fn()
+    const { interactions, tooltipContent } = mountInteractions(true, {
+      deselectGridOutside,
+    })
+
+    interactions.selectedTooltipSlot.value = { row: 1, col: 0 }
+    interactions.tooltipPosition.value = { x: 10, y: 20 }
+    tooltipContent.value = [{ text: "stale", mono: false }]
+    interactions.clickSplitGapOutside()
+
+    expect(deselectGridOutside).toHaveBeenCalledTimes(1)
+    expect(interactions.selectedTooltipSlot.value).toBeNull()
+    expect(interactions.tooltipPosition.value).toBeNull()
+    expect(tooltipContent.value).toEqual([])
   })
 })

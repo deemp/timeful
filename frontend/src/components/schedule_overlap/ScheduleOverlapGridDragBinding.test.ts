@@ -45,6 +45,8 @@ function createTimeGridViewModel() {
     signUpForBlock: vi.fn(),
     toggleCollapsedSpan: vi.fn(),
     markCollapsedRowInactive: vi.fn(),
+    markSplitGapOutside: vi.fn(),
+    clickSplitGapOutside: vi.fn(),
   }
 
   const timedGrid: ScheduleOverlapTimeGridViewModel = {
@@ -61,6 +63,7 @@ function createTimeGridViewModel() {
       dayText: "thu",
       dateString: "jan 1",
       dateObject: Temporal.Instant.from("2026-01-01T09:00:00Z").toZonedDateTimeISO("UTC"),
+      isConsecutive: true,
     }],
     isSpecificDates: true,
     isGroup: false,
@@ -576,6 +579,144 @@ describe("ScheduleOverlap grid drag bindings", () => {
     await collapsedRow.trigger("mouseenter")
 
     expect(actions.markCollapsedRowInactive).toHaveBeenCalled()
+  })
+
+  it("renders split-gap cells between non-consecutive days", () => {
+    const { timedGrid } = createNonConsecutiveTimeGridViewModel()
+    timedGrid.renderedRows = [
+      {
+        id: "time-4",
+        kind: "timeslot",
+        height: 60,
+        rowTop: 0,
+        timeText: "03:00",
+        baseRowIndex: 4,
+        cells: [
+          { class: "day-0", style: {}, von: {} },
+          { class: "day-1", style: {}, von: {} },
+        ],
+      },
+    ]
+
+    const wrapper = mount(ScheduleOverlapTimeGrid, {
+      props: { timedGrid },
+      global,
+    })
+
+    expect(
+      wrapper.findAll(".schedule-overlap-time-grid__split-gap")
+    ).toHaveLength(1)
+  })
+
+  it("does not render split-gap cells between consecutive days", () => {
+    const { timedGrid } = createTimeGridViewModel()
+    timedGrid.renderedRows = [
+      {
+        id: "time-4",
+        kind: "timeslot",
+        height: 60,
+        rowTop: 0,
+        timeText: "03:00",
+        baseRowIndex: 4,
+        cells: [
+          { class: "day-0", style: {}, von: {} },
+        ],
+      },
+    ]
+
+    const wrapper = mount(ScheduleOverlapTimeGrid, {
+      props: { timedGrid },
+      global,
+    })
+
+    expect(
+      wrapper.findAll(".schedule-overlap-time-grid__split-gap")
+    ).toHaveLength(0)
+  })
+
+  it("marks the grid state as outside when hovering a split gap", async () => {
+    const { timedGrid, actions } = createNonConsecutiveTimeGridViewModel()
+    timedGrid.renderedRows = [
+      {
+        id: "time-4",
+        kind: "timeslot",
+        height: 60,
+        rowTop: 0,
+        timeText: "03:00",
+        baseRowIndex: 4,
+        cells: [
+          { class: "day-0", style: {}, von: {} },
+          { class: "day-1", style: {}, von: {} },
+        ],
+      },
+    ]
+
+    const wrapper = mount(ScheduleOverlapTimeGrid, {
+      props: { timedGrid },
+      global,
+    })
+
+    const gap = wrapper.get(".schedule-overlap-time-grid__split-gap")
+    await gap.trigger("mouseenter")
+
+    expect(actions.markSplitGapOutside).toHaveBeenCalledTimes(1)
+  })
+
+  it("deselects the grid state as outside when clicking a split gap", async () => {
+    const { timedGrid, actions } = createNonConsecutiveTimeGridViewModel()
+    timedGrid.renderedRows = [
+      {
+        id: "time-4",
+        kind: "timeslot",
+        height: 60,
+        rowTop: 0,
+        timeText: "03:00",
+        baseRowIndex: 4,
+        cells: [
+          { class: "day-0", style: {}, von: {} },
+          { class: "day-1", style: {}, von: {} },
+        ],
+      },
+    ]
+
+    const wrapper = mount(ScheduleOverlapTimeGrid, {
+      props: { timedGrid },
+      global,
+    })
+
+    const gap = wrapper.get(".schedule-overlap-time-grid__split-gap")
+    await gap.trigger("click")
+
+    expect(actions.clickSplitGapOutside).toHaveBeenCalledTimes(1)
+  })
+
+  it("does not start a drag from a split gap", async () => {
+    const { timedGrid, actions } = createNonConsecutiveTimeGridViewModel()
+    timedGrid.renderedRows = [
+      {
+        id: "time-4",
+        kind: "timeslot",
+        height: 60,
+        rowTop: 0,
+        timeText: "03:00",
+        baseRowIndex: 4,
+        cells: [
+          { class: "day-0", style: {}, von: {} },
+          { class: "day-1", style: {}, von: {} },
+        ],
+      },
+    ]
+
+    const wrapper = mount(ScheduleOverlapTimeGrid, {
+      props: { timedGrid },
+      global,
+    })
+
+    const gap = wrapper.get(".schedule-overlap-time-grid__split-gap")
+    await gap.trigger("pointerdown")
+    await gap.trigger("mousedown")
+
+    expect(actions.startDrag).not.toHaveBeenCalled()
   })
 
   it("applies the mono font class directly to the time-row label text", () => {

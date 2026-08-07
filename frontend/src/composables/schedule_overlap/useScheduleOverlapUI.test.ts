@@ -59,6 +59,7 @@ function createUi() {
     isSignUp,
     curTimeslot,
     curTimeslotInactive,
+    timeslotSelected,
     endDrag,
   }
 }
@@ -141,6 +142,20 @@ describe("useScheduleOverlapUI deselectRespondents", () => {
 
     expect(curTimeslot.value).toEqual({ row: 2, col: 3 })
     expect(endDrag).not.toHaveBeenCalled()
+  })
+
+  it("clears the timeslot when deselecting respondent selection even on mobile", () => {
+    const { ui, isPhone, curTimeslot, curTimeslotInactive, timeslotSelected, endDrag } = createUi()
+    isPhone.value = true
+    timeslotSelected.value = true
+    curTimeslotInactive.value = true
+
+    ui.deselectRespondentsSelection()
+
+    expect(curTimeslot.value).toEqual({ row: -1, col: -1 })
+    expect(timeslotSelected.value).toBe(false)
+    expect(curTimeslotInactive.value).toBe(false)
+    expect(endDrag).toHaveBeenCalledTimes(1)
   })
 
   it("uses a responsive respondents panel width on compact desktop", () => {

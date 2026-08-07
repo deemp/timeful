@@ -63,6 +63,8 @@ export interface ScheduleOverlapTimeGridActions {
   signUpForBlock: (block: SignUpBlockLite) => void
   toggleCollapsedSpan: (id: string) => void
   markCollapsedRowInactive: () => void
+  markSplitGapOutside: () => void
+  clickSplitGapOutside: () => void
 }
 
 export interface ScheduleOverlapRespondentsPanelViewModel {

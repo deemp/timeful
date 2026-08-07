@@ -666,6 +666,8 @@ const timedGridInteractions = useTimedGridInteractions({
   isSelectableSlot: (row, col) => Boolean(getDateFromRowCol(row, col)),
   clearSelectedSlot: () => { avail.resetCurTimeslot() },
   markCurTimeslotInactive: () => { avail.markCurTimeslotInactive() },
+  resetGridOutside: () => { ui.resetCurTimeslot() },
+  deselectGridOutside: () => { ui.deselectRespondentsSelection() },
 })
 const {
   selectedTooltipSlot,
@@ -673,6 +675,8 @@ const {
   visibleTooltipContent,
   getTimeslotVon,
   markCollapsedRowInactive,
+  markSplitGapOutside,
+  clickSplitGapOutside,
   startTimedGridDrag,
   moveTimedGridDrag,
   endTimedGridDrag,
@@ -900,6 +904,8 @@ const timedGridActions = computed<ScheduleOverlapTimeGridActions>(() => ({
   },
   toggleCollapsedSpan,
   markCollapsedRowInactive,
+  markSplitGapOutside,
+  clickSplitGapOutside,
 }))
 
 const {

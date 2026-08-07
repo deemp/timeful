@@ -33,6 +33,8 @@ interface UseTimedGridInteractionsOptions {
   isSelectableSlot?: (row: number, col: number) => boolean
   clearSelectedSlot?: () => void
   markCurTimeslotInactive?: () => void
+  resetGridOutside?: () => void
+  deselectGridOutside?: () => void
   document?: Document
 }
 
@@ -235,6 +237,20 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
     opts.tooltipContent.value = []
   }
 
+  const markSplitGapOutside = () => {
+    if (opts.isPhone.value) return
+    opts.resetGridOutside?.()
+    tooltipPosition.value = null
+    opts.tooltipContent.value = []
+  }
+
+  const clickSplitGapOutside = () => {
+    opts.deselectGridOutside?.()
+    selectedTooltipSlot.value = null
+    tooltipPosition.value = null
+    opts.tooltipContent.value = []
+  }
+
   onMounted(() => {
     documentRef.addEventListener("click", dismissMobileTooltipOnOutsideGridClick, true)
     documentRef.defaultView?.addEventListener(
@@ -259,6 +275,8 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
     visibleTooltipContent,
     getTimeslotVon,
     markCollapsedRowInactive,
+    markSplitGapOutside,
+    clickSplitGapOutside,
     startTimedGridDrag,
     moveTimedGridDrag,
     endTimedGridDrag,
