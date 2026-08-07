@@ -660,6 +660,7 @@ const timedGridInteractions = useTimedGridInteractions({
       : undefined
   },
   isSelectableSlot: (row, col) => Boolean(getDateFromRowCol(row, col)),
+  clearSelectedSlot: () => { avail.resetCurTimeslot() },
 })
 const {
   selectedTooltipSlot,

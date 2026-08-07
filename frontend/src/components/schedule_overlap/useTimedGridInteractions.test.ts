@@ -18,6 +18,7 @@ const mountInteractions = (
   phone = false,
   options?: {
     isSelectableSlot?: (row: number, col: number) => boolean
+    clearSelectedSlot?: () => void
   }
 ) => {
   const isPhone = ref(phone)
@@ -54,6 +55,7 @@ const mountInteractions = (
         shouldHighlightAvailability: () => true,
         highlightAvailability,
         isSelectableSlot: options?.isSelectableSlot ?? (() => true),
+        clearSelectedSlot: options?.clearSelectedSlot,
         getTooltipContent: (row, col) => [{ text: `slot-${String(row)}-${String(col)}`, mono: false }],
       })
       return () => null
@@ -265,5 +267,28 @@ describe("useTimedGridInteractions", () => {
 
     expect(tooltipContent.value).toEqual([])
     expect(interactions.tooltipPosition.value).toBeNull()
+  })
+
+  it("clears a mobile selection and tooltip when clicking a non-selectable slot", () => {
+    appendSlot(1, 0)
+    appendSlot(2, 0)
+    const clearSelectedSlot = vi.fn()
+    const { interactions, tooltipContent } = mountInteractions(true, {
+      isSelectableSlot: (row, _col) => row === 1,
+      clearSelectedSlot,
+    })
+
+    interactions.getTimeslotVon(1, 0).click()
+
+    expect(interactions.selectedTooltipSlot.value).toEqual({ row: 1, col: 0 })
+    expect(interactions.tooltipPosition.value).not.toBeNull()
+    expect(joinTooltipSegments(tooltipContent.value)).toBe("slot-1-0")
+
+    interactions.getTimeslotVon(2, 0).click()
+
+    expect(interactions.selectedTooltipSlot.value).toBeNull()
+    expect(interactions.tooltipPosition.value).toBeNull()
+    expect(tooltipContent.value).toEqual([])
+    expect(clearSelectedSlot).toHaveBeenCalledTimes(1)
   })
 })

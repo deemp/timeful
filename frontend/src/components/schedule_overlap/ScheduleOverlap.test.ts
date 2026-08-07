@@ -2009,4 +2009,49 @@ describe("ScheduleOverlap", () => {
     dragSection.remove()
   })
 
+  it("clears the mobile selection and tooltip when clicking an inactive gap", async () => {
+    viewportWidth.value = 375
+    const wrapper = mountScheduleOverlap({
+      props: {
+        event: {
+          ...buildScheduleOverlapProps().event,
+          dates: [Temporal.PlainDate.from("2026-01-01")],
+          timeSeed: zdt("2026-01-01T09:00:00Z"),
+          hasSpecificTimes: true,
+          startTime: Temporal.PlainTime.from("09:00"),
+          duration: Temporal.Duration.from({ hours: 3 }),
+          timeIncrement: Temporal.Duration.from({ hours: 1 }),
+          times: [
+            zdt("2026-01-01T09:00:00Z"),
+            zdt("2026-01-01T11:00:00Z"),
+          ],
+        },
+        initialTimezone: utcTimezone,
+      },
+      global: {
+        stubs: {
+          Tooltip,
+        },
+      },
+    })
+    const vm = wrapper.vm as unknown as {
+      curTimeslot: { row: number; col: number }
+      getTimeslotVon: (row: number, col: number) => Record<string, () => void>
+    }
+
+    vm.getTimeslotVon(0, 0).click()
+    await nextTick()
+
+    expect(vm.curTimeslot).toEqual({ row: 0, col: 0 })
+    expect(wrapper.find(".tw-fixed.tw-z-50").exists()).toBe(true)
+
+    vm.getTimeslotVon(1, 0).click()
+    await nextTick()
+
+    expect(vm.curTimeslot).toEqual({ row: -1, col: -1 })
+    expect(wrapper.find(".tw-fixed.tw-z-50").exists()).toBe(false)
+
+    wrapper.unmount()
+  })
+
 })
