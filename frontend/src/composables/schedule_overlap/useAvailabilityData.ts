@@ -155,6 +155,7 @@ export function useAvailabilityData(opts: UseAvailabilityDataOptions) {
   const curTimeslotAvailability = ref<Record<string, boolean>>({})
   const curTimeslotInactive = ref(false)
   const curTimeslotCellState = ref<TimedCellState | null>(null)
+  const curTimeslotCollapsed = ref(false)
   const timeslotSelected = ref(false)
 
   const availabilityArray = computed<Temporal.ZonedDateTime[]>(() => [
@@ -699,12 +700,13 @@ export function useAvailabilityData(opts: UseAvailabilityDataOptions) {
     return maxLocal
   }
 
-  const markCurTimeslotInactive = () => {
+  const markCurTimeslotInactive = (collapsed = false) => {
     if (opts.state.value === states.EDIT_AVAILABILITY) {
       return
     }
     curTimeslotInactive.value = true
     curTimeslotCellState.value = "enabled_inactive"
+    curTimeslotCollapsed.value = collapsed
     for (const respondent of respondents.value) {
       if (respondent._id) {
         curTimeslotAvailability.value[respondent._id] = false
@@ -724,6 +726,7 @@ export function useAvailabilityData(opts: UseAvailabilityDataOptions) {
       // Don't show availability when editing
       curTimeslot.value = { row, col }
       curTimeslotInactive.value = false
+      curTimeslotCollapsed.value = false
       curTimeslotCellState.value = getCurTimeslotCellState(row, col)
       return
     }
@@ -735,6 +738,7 @@ export function useAvailabilityData(opts: UseAvailabilityDataOptions) {
     }
     curTimeslotInactive.value = false
     curTimeslot.value = { row, col }
+    curTimeslotCollapsed.value = false
     curTimeslotCellState.value = getCurTimeslotCellState(row, col)
     const available =
       zdtMapGet(responsesFormatted.value, date) ?? new Set()
@@ -958,6 +962,7 @@ export function useAvailabilityData(opts: UseAvailabilityDataOptions) {
     curTimeslotAvailability,
     curTimeslotInactive,
     curTimeslotCellState,
+    curTimeslotCollapsed,
     timeslotSelected,
     // computed
     availabilityArray,

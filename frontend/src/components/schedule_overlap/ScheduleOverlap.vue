@@ -469,6 +469,7 @@ const ui = useScheduleOverlapUI({
   timeslotSelected: avail.timeslotSelected,
   curTimeslotAvailability: avail.curTimeslotAvailability,
   curTimeslotInactive: avail.curTimeslotInactive,
+  curTimeslotCollapsed: avail.curTimeslotCollapsed,
   respondents: avail.respondents,
   curGuestId: computed(() => props.curGuestId),
   guestName,
@@ -666,7 +667,9 @@ const timedGridInteractions = useTimedGridInteractions({
   },
   isSelectableSlot: (row, col) => Boolean(getDateFromRowCol(row, col)),
   clearSelectedSlot: () => { avail.resetCurTimeslot() },
-  markCurTimeslotInactive: () => { avail.markCurTimeslotInactive() },
+  markCurTimeslotInactive: (collapsed?: boolean) => {
+    avail.markCurTimeslotInactive(collapsed)
+  },
   resetGridOutside: () => { ui.resetCurTimeslot() },
   deselectGridOutside: () => { ui.deselectRespondentsSelection() },
 })

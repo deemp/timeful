@@ -389,6 +389,7 @@ const props = withDefaults(
     curTimeslotAvailability: Record<string, boolean>
     curTimeslotInactive?: boolean
     curTimeslotCellState?: TimedCellState | null
+    curTimeslotCollapsed?: boolean
     respondents: User[]
     parsedResponses: ParsedResponses
     isOwner: boolean
@@ -405,6 +406,7 @@ const props = withDefaults(
   {
     curTimeslotInactive: false,
     curTimeslotCellState: null,
+    curTimeslotCollapsed: false,
   }
 )
 
@@ -452,6 +454,7 @@ const {
   curTimeslotAvailability: computed(() => props.curTimeslotAvailability),
   curTimeslotInactive: computed(() => props.curTimeslotInactive),
   curTimeslotCellState: computed(() => props.curTimeslotCellState),
+  curTimeslotCollapsed: computed(() => props.curTimeslotCollapsed),
   parsedResponses: computed(() => props.parsedResponses),
   curDate: computed(() => props.curDate),
   hideIfNeeded: computed(() => props.hideIfNeeded),

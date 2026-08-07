@@ -94,6 +94,7 @@ interface UseScheduleOverlapViewModelsFlatOptions {
   curTimeslotAvailability: Ref<Record<string, boolean>>
   curTimeslotInactive: Ref<boolean>
   curTimeslotCellState: Ref<TimedCellState | null>
+  curTimeslotCollapsed: Ref<boolean>
   respondents: ComputedRef<User[]>
   parsedResponses: ComputedRef<ParsedResponses>
   attendees: ComputedRef<{ email: string; declined?: boolean }[] | undefined>
@@ -272,6 +273,7 @@ export function useScheduleOverlapViewModels(
       curTimeslotAvailability: opts.curTimeslotAvailability.value,
       curTimeslotInactive: opts.curTimeslotInactive.value,
       curTimeslotCellState: opts.curTimeslotCellState.value,
+      curTimeslotCollapsed: opts.curTimeslotCollapsed.value,
       respondents: opts.respondents.value,
       parsedResponses: opts.parsedResponses.value,
       isOwner: opts.isOwner.value,
@@ -304,6 +306,15 @@ export function useScheduleOverlapViewModels(
       opts.event.value.activeSlots ?? opts.event.value.times ?? []
     ).length,
     responseCount: opts.respondents.value.length,
+    canCollapseHours: (() => {
+      const state = opts.state.value
+      return (
+        !opts.event.value.daysOnly &&
+        state !== opts.states.EDIT_SIGN_UP_BLOCKS &&
+        state !== opts.states.SET_SPECIFIC_TIMES &&
+        !opts.showAllHours.value
+      )
+    })(),
     curGuestId: opts.curGuestId.value,
     userHasResponded: opts.userHasResponded.value,
     addingAvailabilityAsGuest: opts.addingAvailabilityAsGuest.value,

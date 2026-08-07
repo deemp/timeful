@@ -347,12 +347,14 @@ describe("ScheduleOverlap inactive gap interactions", () => {
       respondentsPanel: {
         curTimeslotInactive: boolean
         curTimeslotCellState: string | null
+        curTimeslotCollapsed: boolean
       }
     }
     expect(sidebarViewModel.respondentsPanel.curTimeslotInactive).toBe(true)
     expect(sidebarViewModel.respondentsPanel.curTimeslotCellState).toBe(
       "enabled_inactive"
     )
+    expect(sidebarViewModel.respondentsPanel.curTimeslotCollapsed).toBe(true)
 
     wrapper.unmount()
   })
@@ -411,6 +413,7 @@ describe("ScheduleOverlap inactive gap interactions", () => {
         respondentsPanel: {
           curTimeslotInactive: boolean
           curTimeslotCellState: string | null
+          curTimeslotCollapsed: boolean
         }
       }
 
@@ -423,6 +426,7 @@ describe("ScheduleOverlap inactive gap interactions", () => {
     expect(sidebarViewModel().respondentsPanel.curTimeslotCellState).toBe(
       "enabled_inactive"
     )
+    expect(sidebarViewModel().respondentsPanel.curTimeslotCollapsed).toBe(false)
 
     vm.getTimeslotVon(0, 0).mouseover()
     await nextTick()

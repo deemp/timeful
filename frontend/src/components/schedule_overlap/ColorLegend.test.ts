@@ -13,6 +13,7 @@ describe("ColorLegend", () => {
         responseCount: 0,
         isAddingAvailability: false,
         isSpecificTimes: false,
+        canCollapseHours: false,
         ...props,
       },
     })
@@ -92,11 +93,19 @@ describe("ColorLegend", () => {
     expect(wrapper.html()).toContain("tw-bg-light-gray-stroke")
   })
 
+  it("shows the collapsed-hours item only when hours can collapse", () => {
+    const wrapper = mountLegend({ canCollapseHours: true })
+
+    expect(wrapper.text()).toContain("Disabled, collapsed")
+    expect(wrapper.html()).toContain("tw-bg-[var(--timeful-collapsed-hours-bg)]")
+  })
+
   it("keeps range-event legends free of the edit-event item", () => {
     const wrapper = mountLegend({ activeSlotsCount: 1 })
 
     expect(wrapper.text()).toContain("Unavailable, change in Add/Edit availability")
     expect(wrapper.text()).not.toContain("Disabled, change in Edit event")
+    expect(wrapper.text()).not.toContain("Disabled, collapsed")
     expect(wrapper.html()).not.toContain("tw-bg-light-gray-stroke")
   })
 })

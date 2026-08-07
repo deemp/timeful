@@ -454,6 +454,35 @@ describe("useAvailabilityData respondent saves", () => {
     expect(availabilityData.curTimeslotCellState.value).toBe("enabled_inactive")
   })
 
+  it("records collapsed hours when marking the timeslot inactive with the collapsed flag", () => {
+    const availabilityData = makeAvailabilityData({
+      state: states.BEST_TIMES,
+    })
+
+    expect(availabilityData.curTimeslotCollapsed.value).toBe(false)
+
+    availabilityData.markCurTimeslotInactive(true)
+    expect(availabilityData.curTimeslotCollapsed.value).toBe(true)
+
+    availabilityData.resetCurTimeslot()
+    expect(availabilityData.curTimeslotCollapsed.value).toBe(true)
+
+    availabilityData.showAvailability(0, 0)
+    expect(availabilityData.curTimeslotCollapsed.value).toBe(false)
+  })
+
+  it("clears the collapsed flag when marking the timeslot inactive without it", () => {
+    const availabilityData = makeAvailabilityData({
+      state: states.BEST_TIMES,
+    })
+
+    availabilityData.markCurTimeslotInactive(true)
+    expect(availabilityData.curTimeslotCollapsed.value).toBe(true)
+
+    availabilityData.markCurTimeslotInactive()
+    expect(availabilityData.curTimeslotCollapsed.value).toBe(false)
+  })
+
   it("records a cell state without marking the slot inactive while editing availability", () => {
     const availabilityData = makeAvailabilityData({
       getTimedCellState: () => "enabled_inactive",

@@ -259,6 +259,7 @@
           :response-count="sidebar.responseCount"
           :is-adding-availability="sidebar.state === states.EDIT_AVAILABILITY"
           :is-specific-times="Boolean(sidebar.event.hasSpecificTimes)"
+          :can-collapse-hours="sidebar.canCollapseHours"
         />
       </div>
     </template>

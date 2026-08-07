@@ -18,6 +18,7 @@
       :cur-timeslot-availability="panel.curTimeslotAvailability"
       :cur-timeslot-inactive="panel.curTimeslotInactive"
       :cur-timeslot-cell-state="panel.curTimeslotCellState"
+      :cur-timeslot-collapsed="panel.curTimeslotCollapsed"
       :respondents="panel.respondents"
       :parsed-responses="panel.parsedResponses"
       :is-owner="panel.isOwner"

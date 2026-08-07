@@ -26,6 +26,7 @@ function createUi() {
   const curTimeslot = ref({ row: 2, col: 3 })
   const curTimeslotAvailability = ref<Record<string, boolean>>({ "user-1": true })
   const curTimeslotInactive = ref(false)
+  const curTimeslotCollapsed = ref(false)
   const timeslotSelected = ref(false)
   const endDrag = vi.fn()
 
@@ -45,6 +46,7 @@ function createUi() {
     timeslotSelected,
     curTimeslotAvailability,
     curTimeslotInactive,
+    curTimeslotCollapsed,
     respondents: computed(() => [{ _id: "user-1" }]),
     curGuestId: ref(""),
     guestName: computed(() => undefined),
@@ -59,6 +61,7 @@ function createUi() {
     isSignUp,
     curTimeslot,
     curTimeslotInactive,
+    curTimeslotCollapsed,
     timeslotSelected,
     endDrag,
   }
@@ -132,6 +135,15 @@ describe("useScheduleOverlapUI deselectRespondents", () => {
     ui.resetCurTimeslot(true)
 
     expect(curTimeslotInactive.value).toBe(false)
+  })
+
+  it("clears the collapsed-hours flag when resetting the current timeslot", () => {
+    const { ui, curTimeslotCollapsed } = createUi()
+    curTimeslotCollapsed.value = true
+
+    ui.resetCurTimeslot(true)
+
+    expect(curTimeslotCollapsed.value).toBe(false)
   })
 
   it("keeps a mobile timeslot selected when the grid receives mouseleave", () => {

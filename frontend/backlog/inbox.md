@@ -174,9 +174,7 @@ Semi-structured TODO list
 - [ ] On mobile, make tooltip durable - after scrolling the page, it should appear near the selected timeslot
   - Currently, when I click a grey slot, then scroll down, then return back, the tooltip disappears.
     When I click a grey slot, it reappears
-- [ ] In responses, show the square for the status of a person at the corresponding timeslot (available, if needed, unavailable, etc.) instead of a profile image
 - [ ] The event that spans two dates must appear on both dates
-- [ ] Add "Disabled, collapsed" legend item
 - [ ] Given I'm scheduling an event, when I'm outside of active cells, I can't schedule the event and when I'm inside them, I can schedule
 
 ## SHOULD
@@ -372,6 +370,10 @@ Semi-structured TODO list
 - [x] On mobile, when I click a disabled timeslot, the selection should disappear
 - [x] On desktop, given I'm on the event page, when I hover or click inside the grid outside active cells, the highlight at the last timeslot and any tooltip should not be visible
 - [x] Create a glossary and oblige agents to read it in AGENTS.md
+- [x] In responses,
+  - when I hover or click in a grid, show the square for the status of a person at the corresponding timeslot (available, if needed, unavailable, etc.) instead of a profile image;
+  - when I hover or click outside of the grid, replace the status square with a profile icon like it's now
+- [x] Add "Disabled, collapsed" legend item
 
 ## SHOULD - Done
 

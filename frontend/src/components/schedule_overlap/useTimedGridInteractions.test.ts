@@ -19,7 +19,7 @@ const mountInteractions = (
   options?: {
     isSelectableSlot?: (row: number, col: number) => boolean
     clearSelectedSlot?: () => void
-    markCurTimeslotInactive?: () => void
+    markCurTimeslotInactive?: (collapsed?: boolean) => void
     resetGridOutside?: () => void
     deselectGridOutside?: () => void
     interactable?: boolean
@@ -336,6 +336,7 @@ describe("useTimedGridInteractions", () => {
     interactions.markCollapsedRowInactive()
 
     expect(markCurTimeslotInactive).toHaveBeenCalledTimes(1)
+    expect(markCurTimeslotInactive).toHaveBeenCalledWith(true)
     expect(clearSelectedSlot).toHaveBeenCalledTimes(1)
     expect(interactions.tooltipPosition.value).toBeNull()
     expect(tooltipContent.value).toEqual([])

@@ -83,6 +83,7 @@ export interface ScheduleOverlapRespondentsPanelViewModel {
   curTimeslotAvailability: Record<string, boolean>
   curTimeslotInactive: boolean
   curTimeslotCellState: TimedCellState | null
+  curTimeslotCollapsed: boolean
   respondents: User[]
   parsedResponses: ParsedResponses
   isOwner: boolean
@@ -116,6 +117,7 @@ export interface ScheduleOverlapSidebarViewModel {
   numTempTimes: number
   activeSlotsCount: number
   responseCount: number
+  canCollapseHours: boolean
   curGuestId?: string
   userHasResponded: boolean
   addingAvailabilityAsGuest: boolean

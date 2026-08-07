@@ -32,7 +32,7 @@ interface UseTimedGridInteractionsOptions {
   getTooltipContent: (row: number, col: number) => TooltipSegment[] | undefined
   isSelectableSlot?: (row: number, col: number) => boolean
   clearSelectedSlot?: () => void
-  markCurTimeslotInactive?: () => void
+  markCurTimeslotInactive?: (collapsed?: boolean) => void
   resetGridOutside?: () => void
   deselectGridOutside?: () => void
   document?: Document
@@ -231,7 +231,7 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
     if (!opts.interactable.value) return
     if (opts.timeslotSelected.value) return
     if (opts.isPhone.value) return
-    opts.markCurTimeslotInactive?.()
+    opts.markCurTimeslotInactive?.(true)
     opts.clearSelectedSlot?.()
     tooltipPosition.value = null
     opts.tooltipContent.value = []

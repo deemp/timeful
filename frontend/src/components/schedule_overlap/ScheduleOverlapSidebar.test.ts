@@ -171,6 +171,27 @@ describe("ScheduleOverlapSidebar", () => {
     expect(wrapper.text()).toContain("Disabled, change in Edit event")
   })
 
+  it("shows the collapsed-hours legend item when hours can collapse", () => {
+    const wrapper = mount(ScheduleOverlapSidebar, {
+      props: {
+        sidebar: {
+          ...buildScheduleOverlapSidebarViewModel(),
+          state: states.BEST_TIMES,
+          activeSlotsCount: 1,
+          canCollapseHours: true,
+        },
+      },
+      global: {
+        stubs: {
+          ...scheduleOverlapGlobalStubs,
+          ColorLegend,
+        },
+      },
+    })
+
+    expect(wrapper.text()).toContain("Disabled, collapsed")
+  })
+
   it("does not render the overlay availability switch in the sidebar", () => {
     const wrapper = mount(ScheduleOverlapSidebar, {
       props: {

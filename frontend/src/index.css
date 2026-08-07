@@ -10,6 +10,7 @@
   --timeful-weekday-segment-foreground: rgba(0, 0, 0, 0.72);
   --timeful-grid-cursor-outline: #000000;
   --timeful-error-foreground: #dc2626;
+  --timeful-collapsed-hours-bg: #f8f8f8;
   --timeful-unavailable-bg: #e523230d;
   --timeful-unavailable-bg-time-grid: #f9cccc;
   --timeful-unavailable-bg-day-grid: #e523233b;

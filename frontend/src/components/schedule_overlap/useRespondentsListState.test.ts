@@ -20,6 +20,7 @@ function makeState(options: {
   active?: Temporal.ZonedDateTime
   inactive?: boolean
   cellState?: TimedCellState | null
+  collapsed?: boolean
   availability?: Temporal.ZonedDateTime[]
   ifNeeded?: Temporal.ZonedDateTime[]
   hideIfNeeded?: boolean
@@ -39,6 +40,7 @@ function makeState(options: {
     curTimeslotAvailability: computed(() => ({ "user-1": false })),
     curTimeslotInactive: computed(() => options.inactive ?? false),
     curTimeslotCellState: computed(() => options.cellState ?? null),
+    curTimeslotCollapsed: computed(() => options.collapsed ?? false),
     parsedResponses: computed(() => parsedResponses),
     curDate: computed(() => options.active ?? undefined),
     hideIfNeeded: computed(() => options.hideIfNeeded ?? false),
@@ -83,6 +85,16 @@ describe("useRespondentsListState respondentSlotStatus", () => {
     expect(state.respondentSlotStatus("user-1")).toBe("disabled-inactive")
   })
 
+  it("returns disabled-collapsed when hovering collapsed hours", () => {
+    const state = makeState({
+      collapsed: true,
+      inactive: true,
+      cellState: "enabled_inactive",
+      active: baseSlot,
+    })
+    expect(state.respondentSlotStatus("user-1")).toBe("disabled-collapsed")
+  })
+
   it("returns disabled-out-of-range for any other inactive cell state", () => {
     const outsideRange = makeState({ inactive: true, cellState: "outside_range" })
     expect(outsideRange.respondentSlotStatus("user-1")).toBe(
@@ -111,6 +123,9 @@ describe("useRespondentsListState respondentSlotStatus", () => {
     expect(respondentStatusClass("unavailable")).toBe("tw-bg-[#F9CCCC]")
     expect(respondentStatusClass("disabled-inactive")).toBe(
       "tw-bg-light-gray-stroke"
+    )
+    expect(respondentStatusClass("disabled-collapsed")).toBe(
+      "tw-bg-[var(--timeful-collapsed-hours-bg)]"
     )
     expect(respondentStatusClass("disabled-out-of-range")).toBe("tw-bg-gray")
     expect(respondentStatusClass(null)).toBe("")

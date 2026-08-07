@@ -397,7 +397,7 @@ defineProps<{
 }
 
 .schedule-overlap-collapsed-row {
-  background: #f8f8f8;
+  background: var(--timeful-collapsed-hours-bg);
   border-top: var(--timeful-grid-line-width) dashed var(--timeful-grid-line-color);
   border-right: var(--timeful-grid-line-width) dashed var(--timeful-grid-line-color);
   border-bottom: var(--timeful-grid-line-width) dashed var(--timeful-grid-line-color);

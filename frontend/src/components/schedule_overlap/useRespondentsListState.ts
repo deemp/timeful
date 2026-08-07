@@ -14,6 +14,7 @@ export type RespondentSlotStatus =
   | "if-needed"
   | "unavailable"
   | "disabled-inactive"
+  | "disabled-collapsed"
   | "disabled-out-of-range"
   | null
 
@@ -25,6 +26,7 @@ export const respondentSlotStatusClassMap: Record<
   "if-needed": "tw-bg-yellow",
   unavailable: "tw-bg-[#F9CCCC]",
   "disabled-inactive": "tw-bg-light-gray-stroke",
+  "disabled-collapsed": "tw-bg-[var(--timeful-collapsed-hours-bg)]",
   "disabled-out-of-range": "tw-bg-gray",
 }
 
@@ -39,6 +41,7 @@ interface UseRespondentsListStateOptions {
   curTimeslotAvailability: ComputedRef<Record<string, boolean>>
   curTimeslotInactive: ComputedRef<boolean>
   curTimeslotCellState: ComputedRef<TimedCellState | null>
+  curTimeslotCollapsed: ComputedRef<boolean>
   parsedResponses: ComputedRef<ParsedResponses>
   curDate: ComputedRef<Temporal.ZonedDateTime | undefined>
   hideIfNeeded: ComputedRef<boolean>
@@ -134,6 +137,9 @@ export function useRespondentsListState(
   }
 
   function respondentSlotStatus(id: string): RespondentSlotStatus {
+    if (opts.curTimeslotCollapsed.value) {
+      return "disabled-collapsed"
+    }
     if (opts.curTimeslotInactive.value) {
       return opts.curTimeslotCellState.value === "enabled_inactive"
         ? "disabled-inactive"

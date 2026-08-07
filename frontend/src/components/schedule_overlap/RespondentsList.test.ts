@@ -53,6 +53,7 @@ const mountRespondentsList = ({
   curTimeslotAvailability = { "user-1": true },
   curTimeslotInactive = false,
   curTimeslotCellState = null,
+  curTimeslotCollapsed = false,
   availability = [],
 }: {
   curDate?: Temporal.ZonedDateTime
@@ -61,6 +62,7 @@ const mountRespondentsList = ({
   curTimeslotAvailability?: Record<string, boolean>
   curTimeslotInactive?: boolean
   curTimeslotCellState?: TimedCellState | null
+  curTimeslotCollapsed?: boolean
   availability?: Temporal.ZonedDateTime[]
 }) => {
   const eventSlot = curDate ?? baseDate
@@ -88,6 +90,7 @@ const mountRespondentsList = ({
       curTimeslotAvailability,
       curTimeslotInactive,
       curTimeslotCellState,
+      curTimeslotCollapsed,
       respondents: [
         {
           _id: "user-1",
@@ -244,6 +247,25 @@ describe("RespondentsList", () => {
     )
     expect(statusSquare.exists()).toBe(true)
     expect(statusSquare.classes()).toContain("tw-bg-light-gray-stroke")
+    expect(wrapper.findComponent({ name: "UserAvatarContent" }).exists()).toBe(false)
+  })
+
+  it("renders the collapsed-hours status square when hovering collapsed hours", () => {
+    const wrapper = mountRespondentsList({
+      curDate: baseDate,
+      setEntry: baseDate,
+      curTimeslotInactive: true,
+      curTimeslotCellState: "enabled_inactive",
+      curTimeslotCollapsed: true,
+    })
+
+    const statusSquare = wrapper.find(
+      ".respondent-control__avatar div.tw-h-4.tw-w-4"
+    )
+    expect(statusSquare.exists()).toBe(true)
+    expect(statusSquare.classes()).toContain(
+      "tw-bg-[var(--timeful-collapsed-hours-bg)]"
+    )
     expect(wrapper.findComponent({ name: "UserAvatarContent" }).exists()).toBe(false)
   })
 
