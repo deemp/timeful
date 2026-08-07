@@ -153,7 +153,7 @@ describe("ScheduleOverlap", () => {
       "SCHEDULE_OVERLAP_COMPACT_DESKTOP_BREAKPOINT"
     )
     expect(scheduleOverlapSource).toContain(
-      'class="schedule-overlap-layout__grid-pane tw-flex tw-grow tw-pl-2"'
+      'class="schedule-overlap-layout__grid-pane tw-flex tw-grow tw-pl-4"'
     )
     expect(scheduleOverlapSource).toContain(
       "@media (min-width: 640px) and (max-width: 767px)"

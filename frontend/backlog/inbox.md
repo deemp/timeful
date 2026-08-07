@@ -170,7 +170,6 @@ Semi-structured TODO list
 - [ ] Add format 12h/24h - in the event creation form
 - [ ] Make the format in the event form independent of the local format on the event page
 - [ ] "If necessary" - don't show in the legend, color the "if necessary" text that appears on hover
-- [ ] On mobile, make the grid labels fit on the screen
 - [ ] Use TypeScript 7 to speed up type checking and tests (?)
 - [ ] On mobile, make tooltip durable - after scrolling the page, it should appear near the selected timeslot
   - Currently, when I click a grey slot, then scroll down, then return back, the tooltip disappears.
@@ -361,7 +360,7 @@ Semi-structured TODO list
   - [x] in the tooltip
 - [x] Don't show the cursor and tooltip in enabled, inactive or disabled cells
 - [x] On mobile, given I'm on the event page and a timeslot is selected and the tooltip is visible, when I click the responses offcanvas, the selected timeslot and its tooltip must not disappear
-
+- [x] On mobile, make the grid labels fit on the screen
 
 ## SHOULD - Done
 

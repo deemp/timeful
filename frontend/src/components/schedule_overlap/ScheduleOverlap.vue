@@ -11,7 +11,7 @@
           :class="isPhone ? 'tw-flex-col' : 'tw-flex-row'"
         >
           <div
-            class="schedule-overlap-layout__grid-pane tw-flex tw-grow tw-pl-2"
+            class="schedule-overlap-layout__grid-pane tw-flex tw-grow tw-pl-4"
             :class="isSignUp ? '' : 'tw-pr-0'"
           >
             <ScheduleOverlapDaysOnlyGrid
