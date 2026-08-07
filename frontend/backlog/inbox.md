@@ -377,6 +377,8 @@ Semi-structured TODO list
 - [x] dashed outline in the legend bullet for Disabled, collapsed
 - [x] In the new event form, the event time format should be persisted in the localstorage
 - [x] The event time format should have a separate state from the display time format on the event page
+- [x] The display time format doesn't inherit from the event time format
+  - The display format is a personal setting. It's stored globally. When the user sets the format for one event, all other events use the same format.
 
 ## SHOULD - Done
 
