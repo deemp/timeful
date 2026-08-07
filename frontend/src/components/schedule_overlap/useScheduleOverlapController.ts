@@ -41,6 +41,7 @@ export interface UseScheduleOverlapControllerOptions {
   parsedResponses: ComputedRef<ParsedResponses>
   respondents: ComputedRef<{ _id?: string }[]>
   curTimeslotAvailability: Ref<Record<string, boolean>>
+  curTimeslotInactive: Ref<boolean>
   unsavedChanges: Ref<boolean>
   hideIfNeeded: Ref<boolean>
   page: Ref<number>
@@ -72,8 +73,10 @@ export interface UseScheduleOverlapControllerOptions {
 
 const updateCurTimeslotAvailability = (
   curTimeslotAvailability: Ref<Record<string, boolean>>,
+  curTimeslotInactive: Ref<boolean>,
   respondents: { _id?: string }[]
 ) => {
+  curTimeslotInactive.value = false
   curTimeslotAvailability.value = {}
   for (const respondent of respondents) {
     if (respondent._id) {
@@ -324,9 +327,13 @@ export function useScheduleOverlapController(
   )
 
   watch(
-    opts.respondents,
-    (respondents) => {
-      updateCurTimeslotAvailability(opts.curTimeslotAvailability, respondents)
+    () => opts.respondents.value.map((respondent) => respondent._id ?? "").join(","),
+    () => {
+      updateCurTimeslotAvailability(
+        opts.curTimeslotAvailability,
+        opts.curTimeslotInactive,
+        opts.respondents.value
+      )
     },
     { immediate: true }
   )
@@ -383,7 +390,11 @@ export function useScheduleOverlapController(
 
   return {
     updateCurTimeslotAvailability: (respondents: { _id?: string }[]) => {
-      updateCurTimeslotAvailability(opts.curTimeslotAvailability, respondents)
+      updateCurTimeslotAvailability(
+        opts.curTimeslotAvailability,
+        opts.curTimeslotInactive,
+        respondents
+      )
     },
   }
 }

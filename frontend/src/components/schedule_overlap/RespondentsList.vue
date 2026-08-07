@@ -362,32 +362,38 @@ import { useRespondentsCsvExport } from "./useRespondentsCsvExport"
 import { useRespondentsListSizing } from "./useRespondentsListSizing"
 import { useRespondentsListState } from "./useRespondentsListState"
 
-const props = defineProps<{
-  eventId: string
-  event: ScheduleOverlapEvent
-  curGuestId: string
-  ownedGuestResponseLookupKeys: string[]
-  guestResponseLookupKey: string
-  days: unknown[]
-  times: unknown[]
-  curDate?: Temporal.ZonedDateTime
-  curRespondent: string
-  curRespondents: string[]
-  curTimeslot: { dayIndex: number; timeIndex: number }
-  curTimeslotAvailability: Record<string, boolean>
-  respondents: User[]
-  parsedResponses: ParsedResponses
-  isOwner: boolean
-  maxHeight?: number
-  isGroup: boolean
-  attendees?: { email: string; declined?: boolean }[]
-  showCalendarEvents: boolean
-  responsesFormatted: ZdtMap<Set<string>>
-  timezone: Timezone
-  hideIfNeeded: boolean
-  guestAddedAvailability: boolean
-  addingAvailabilityAsGuest: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    eventId: string
+    event: ScheduleOverlapEvent
+    curGuestId: string
+    ownedGuestResponseLookupKeys: string[]
+    guestResponseLookupKey: string
+    days: unknown[]
+    times: unknown[]
+    curDate?: Temporal.ZonedDateTime
+    curRespondent: string
+    curRespondents: string[]
+    curTimeslot: { dayIndex: number; timeIndex: number }
+    curTimeslotAvailability: Record<string, boolean>
+    curTimeslotInactive?: boolean
+    respondents: User[]
+    parsedResponses: ParsedResponses
+    isOwner: boolean
+    maxHeight?: number
+    isGroup: boolean
+    attendees?: { email: string; declined?: boolean }[]
+    showCalendarEvents: boolean
+    responsesFormatted: ZdtMap<Set<string>>
+    timezone: Timezone
+    hideIfNeeded: boolean
+    guestAddedAvailability: boolean
+    addingAvailabilityAsGuest: boolean
+  }>(),
+  {
+    curTimeslotInactive: false,
+  }
+)
 
 const emit = defineEmits<{
   mouseOverRespondent: [e: MouseEvent, userId: string]
@@ -430,6 +436,7 @@ const {
   respondents: computed(() => props.respondents),
   curRespondents: computed(() => props.curRespondents),
   curTimeslotAvailability: computed(() => props.curTimeslotAvailability),
+  curTimeslotInactive: computed(() => props.curTimeslotInactive),
   parsedResponses: computed(() => props.parsedResponses),
   curDate: computed(() => props.curDate),
   hideIfNeeded: computed(() => props.hideIfNeeded),

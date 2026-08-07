@@ -301,4 +301,65 @@ describe("useAvailabilityData respondent saves", () => {
 
     expect(availabilityData.curTimeslot.value).toEqual({ row: 0, col: 0 })
   })
+
+  it("marks the timeslot inactive and clears per-respondent availability on a null-date cell", () => {
+    const availabilityData = makeAvailabilityData({
+      state: states.BEST_TIMES,
+      eventResponses: {
+        "user-1": {
+          user: { _id: "user-1" },
+          availability: [],
+          ifNeeded: [],
+        },
+      },
+      fetchedResponses: { "user-1": { availability: [day], ifNeeded: [] } },
+    })
+
+    availabilityData.getResponsesFormatted()
+    availabilityData.showAvailability(0, 0)
+
+    expect(availabilityData.curTimeslotInactive.value).toBe(false)
+    expect(availabilityData.curTimeslotAvailability.value["user-1"]).toBe(true)
+
+    availabilityData.showAvailability(1, 0)
+
+    expect(availabilityData.curTimeslotInactive.value).toBe(true)
+    expect(availabilityData.curTimeslot.value).toEqual({ row: 0, col: 0 })
+    expect(availabilityData.curTimeslotAvailability.value).toEqual({
+      "user-1": false,
+    })
+  })
+
+  it("returns to per-respondent availability when hovering a valid cell after an inactive one", () => {
+    const availabilityData = makeAvailabilityData({
+      state: states.BEST_TIMES,
+      eventResponses: {
+        "user-1": {
+          user: { _id: "user-1" },
+          availability: [],
+          ifNeeded: [],
+        },
+      },
+      fetchedResponses: { "user-1": { availability: [day], ifNeeded: [] } },
+    })
+
+    availabilityData.getResponsesFormatted()
+    availabilityData.showAvailability(1, 0)
+
+    expect(availabilityData.curTimeslotInactive.value).toBe(true)
+
+    availabilityData.showAvailability(0, 0)
+
+    expect(availabilityData.curTimeslotInactive.value).toBe(false)
+    expect(availabilityData.curTimeslotAvailability.value["user-1"]).toBe(true)
+  })
+
+  it("does not mark the timeslot inactive while editing availability", () => {
+    const availabilityData = makeAvailabilityData({})
+
+    availabilityData.showAvailability(1, 0)
+
+    expect(availabilityData.curTimeslotInactive.value).toBe(false)
+    expect(availabilityData.curTimeslot.value).toEqual({ row: 1, col: 0 })
+  })
 })

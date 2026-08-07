@@ -13,6 +13,7 @@ interface UseRespondentsListStateOptions {
   respondents: ComputedRef<User[]>
   curRespondents: ComputedRef<string[]>
   curTimeslotAvailability: ComputedRef<Record<string, boolean>>
+  curTimeslotInactive: ComputedRef<boolean>
   parsedResponses: ComputedRef<ParsedResponses>
   curDate: ComputedRef<Temporal.ZonedDateTime | undefined>
   hideIfNeeded: ComputedRef<boolean>
@@ -45,7 +46,7 @@ export function useRespondentsListState(
   })
 
   const isCurTimeslotSelected = computed(
-    () => opts.curDate.value != null
+    () => opts.curDate.value != null || opts.curTimeslotInactive.value
   )
 
   const numUsersAvailable = computed(() => {
@@ -93,7 +94,11 @@ export function useRespondentsListState(
   })
 
   function respondentIfNeeded(id: string) {
-    if (!opts.curDate.value || opts.hideIfNeeded.value) {
+    if (
+      opts.curTimeslotInactive.value ||
+      !opts.curDate.value ||
+      opts.hideIfNeeded.value
+    ) {
       return false
     }
 

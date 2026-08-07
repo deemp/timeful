@@ -56,6 +56,7 @@ const mountControllerHarness = (options: ControllerHarnessOptions = {}) => {
   const parsedResponses = computed(() => ({}))
   const respondents = ref(options.respondents ?? [])
   const curTimeslotAvailability = ref<Record<string, boolean>>({})
+  const curTimeslotInactive = ref(false)
   const unsavedChanges = ref(false)
   const hideIfNeeded = ref(false)
   const page = ref(0)
@@ -110,6 +111,7 @@ const mountControllerHarness = (options: ControllerHarnessOptions = {}) => {
         parsedResponses,
         respondents: computed(() => respondents.value),
         curTimeslotAvailability,
+        curTimeslotInactive,
         unsavedChanges,
         hideIfNeeded,
         page,
@@ -146,6 +148,7 @@ const mountControllerHarness = (options: ControllerHarnessOptions = {}) => {
         tempTimes,
         curScheduledEvent,
         curTimeslotAvailability,
+        curTimeslotInactive,
         respondents,
       }
     },
@@ -169,6 +172,7 @@ const mountControllerHarness = (options: ControllerHarnessOptions = {}) => {
     tempTimes,
     curScheduledEvent,
     curTimeslotAvailability,
+    curTimeslotInactive,
     respondents,
     showStickyRespondents,
     delayedShowStickyRespondents,
@@ -213,7 +217,12 @@ describe("useScheduleOverlapController", () => {
   })
 
   it("seeds current-timeslot availability from respondents immediately and on respondent changes", async () => {
-    const { wrapper, respondents, curTimeslotAvailability } = mountControllerHarness({
+    const {
+      wrapper,
+      respondents,
+      curTimeslotAvailability,
+      curTimeslotInactive,
+    } = mountControllerHarness({
       respondents: [{ _id: "a" }, { _id: "b" }],
     })
 
@@ -222,12 +231,14 @@ describe("useScheduleOverlapController", () => {
       b: true,
     })
 
+    curTimeslotInactive.value = true
     respondents.value = [{ _id: "solo" }]
     await nextTick()
 
     expect(curTimeslotAvailability.value).toEqual({
       solo: true,
     })
+    expect(curTimeslotInactive.value).toBe(false)
 
     wrapper.unmount()
   })

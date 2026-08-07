@@ -256,8 +256,10 @@ describe("useTimedGridInteractions", () => {
 
   it("clears a stale hover tooltip when moving onto a non-selectable cell", () => {
     appendSlot(1, 0)
+    const clearSelectedSlot = vi.fn()
     const { interactions, tooltipContent } = mountInteractions(false, {
       isSelectableSlot: (row, col) => !(row === 1 && col === 0),
+      clearSelectedSlot,
     })
 
     interactions.getTimeslotVon(0, 0).mouseover()
@@ -267,6 +269,27 @@ describe("useTimedGridInteractions", () => {
 
     expect(tooltipContent.value).toEqual([])
     expect(interactions.tooltipPosition.value).toBeNull()
+    expect(clearSelectedSlot).toHaveBeenCalledTimes(1)
+  })
+
+  it("clears the desktop selection and tooltip when clicking a non-selectable slot", () => {
+    appendSlot(1, 0)
+    appendSlot(2, 0)
+    const clearSelectedSlot = vi.fn()
+    const { interactions, tooltipContent } = mountInteractions(false, {
+      isSelectableSlot: (row, _col) => row === 1,
+      clearSelectedSlot,
+    })
+
+    interactions.getTimeslotVon(1, 0).click()
+
+    expect(clearSelectedSlot).not.toHaveBeenCalled()
+
+    interactions.getTimeslotVon(2, 0).click()
+
+    expect(tooltipContent.value).toEqual([])
+    expect(interactions.tooltipPosition.value).toBeNull()
+    expect(clearSelectedSlot).toHaveBeenCalledTimes(1)
   })
 
   it("clears a mobile selection and tooltip when clicking a non-selectable slot", () => {

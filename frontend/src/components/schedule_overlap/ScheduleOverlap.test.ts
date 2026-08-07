@@ -1220,7 +1220,7 @@ describe("ScheduleOverlap", () => {
     expect(vm.curTimeslot).toEqual({ row: 1, col: 0 })
   })
 
-  it("keeps hover cursor and tooltip off inactive grey specific-time gaps", async () => {
+  it("clears the hover highlight and tooltip on inactive grey specific-time gaps", async () => {
     const wrapper = mountScheduleOverlap({
       props: {
         event: {
@@ -1261,8 +1261,176 @@ describe("ScheduleOverlap", () => {
     vm.getTimeslotVon(1, 0).mouseover()
     await nextTick()
 
-    expect(vm.curTimeslot).toEqual({ row: 0, col: 0 })
+    expect(vm.curTimeslot).toEqual({ row: -1, col: -1 })
     expect(vm.tooltipContent).toEqual([])
+  })
+
+  it("clears the desktop selection and tooltip when clicking an inactive gap", async () => {
+    const wrapper = mountScheduleOverlap({
+      props: {
+        event: {
+          ...buildScheduleOverlapProps().event,
+          dates: [Temporal.PlainDate.from("2026-01-01")],
+          timeSeed: zdt("2026-01-01T09:00:00Z"),
+          hasSpecificTimes: true,
+          startTime: Temporal.PlainTime.from("09:00"),
+          duration: Temporal.Duration.from({ hours: 3 }),
+          timeIncrement: Temporal.Duration.from({ hours: 1 }),
+          times: [
+            zdt("2026-01-01T09:00:00Z"),
+            zdt("2026-01-01T11:00:00Z"),
+          ],
+        },
+        initialTimezone: utcTimezone,
+      },
+    })
+
+    const vm = wrapper.vm as unknown as {
+      curTimeslot: { row: number; col: number }
+      getTimeslotVon: (row: number, col: number) => Record<string, () => void>
+    }
+
+    vm.getTimeslotVon(0, 0).click()
+    await nextTick()
+
+    expect(vm.curTimeslot).toEqual({ row: 0, col: 0 })
+
+    vm.getTimeslotVon(1, 0).click()
+    await nextTick()
+
+    expect(vm.curTimeslot).toEqual({ row: -1, col: -1 })
+
+    wrapper.unmount()
+  })
+
+  it("marks the timeslot inactive and clears respondent availability when hovering an inactive gap", async () => {
+    const wrapper = mountScheduleOverlap({
+      props: {
+        event: {
+          ...buildScheduleOverlapProps().event,
+          dates: [Temporal.PlainDate.from("2026-01-01")],
+          timeSeed: zdt("2026-01-01T09:00:00Z"),
+          hasSpecificTimes: true,
+          startTime: Temporal.PlainTime.from("09:00"),
+          duration: Temporal.Duration.from({ hours: 3 }),
+          timeIncrement: Temporal.Duration.from({ hours: 1 }),
+          times: [
+            zdt("2026-01-01T09:00:00Z"),
+            zdt("2026-01-01T11:00:00Z"),
+          ],
+          responses: {
+            "user-1": {
+              name: "User One",
+              user: {
+                _id: "user-1",
+                firstName: "User",
+                lastName: "One",
+                email: "",
+              },
+              availability: [],
+              ifNeeded: [],
+              manualAvailability: {},
+            },
+          },
+        },
+        initialTimezone: utcTimezone,
+      },
+    })
+
+    const vm = wrapper.vm as unknown as {
+      curTimeslot: { row: number; col: number }
+      curTimeslotInactive: boolean
+      curTimeslotAvailability: Record<string, boolean>
+      fetchedResponses: Record<
+        string,
+        {
+          availability?: Temporal.ZonedDateTime[]
+          ifNeeded?: Temporal.ZonedDateTime[]
+        }
+      >
+      getTimeslotVon: (row: number, col: number) => Record<string, () => void>
+    }
+
+    vm.fetchedResponses = {
+      "user-1": {
+        availability: [zdt("2026-01-01T09:00:00Z")],
+        ifNeeded: [],
+      },
+    }
+    await nextTick()
+
+    vm.getTimeslotVon(0, 0).mouseover()
+    await nextTick()
+
+    expect(vm.curTimeslotInactive).toBe(false)
+    expect(vm.curTimeslot).toEqual({ row: 0, col: 0 })
+    expect(vm.curTimeslotAvailability["user-1"]).toBe(true)
+
+    vm.getTimeslotVon(1, 0).mouseover()
+    await nextTick()
+
+    expect(vm.curTimeslotInactive).toBe(true)
+    expect(vm.curTimeslot).toEqual({ row: -1, col: -1 })
+    expect(vm.curTimeslotAvailability["user-1"]).toBe(false)
+
+    wrapper.unmount()
+  })
+
+
+  it("marks the timeslot inactive and clears respondent availability when clicking an inactive gap", async () => {
+    const wrapper = mountScheduleOverlap({
+      props: {
+        event: {
+          ...buildScheduleOverlapProps().event,
+          dates: [Temporal.PlainDate.from("2026-01-01")],
+          timeSeed: zdt("2026-01-01T09:00:00Z"),
+          hasSpecificTimes: true,
+          startTime: Temporal.PlainTime.from("09:00"),
+          duration: Temporal.Duration.from({ hours: 3 }),
+          timeIncrement: Temporal.Duration.from({ hours: 1 }),
+          times: [
+            zdt("2026-01-01T09:00:00Z"),
+            zdt("2026-01-01T11:00:00Z"),
+          ],
+          responses: {
+            "user-1": {
+              name: "User One",
+              user: {
+                _id: "user-1",
+                firstName: "User",
+                lastName: "One",
+                email: "",
+              },
+              availability: [],
+              ifNeeded: [],
+              manualAvailability: {},
+            },
+          },
+        },
+        initialTimezone: utcTimezone,
+      },
+    })
+
+    const vm = wrapper.vm as unknown as {
+      curTimeslot: { row: number; col: number }
+      curTimeslotInactive: boolean
+      curTimeslotAvailability: Record<string, boolean>
+      getTimeslotVon: (row: number, col: number) => Record<string, () => void>
+    }
+
+    vm.getTimeslotVon(0, 0).click()
+    await nextTick()
+
+    expect(vm.curTimeslotInactive).toBe(false)
+
+    vm.getTimeslotVon(1, 0).click()
+    await nextTick()
+
+    expect(vm.curTimeslotInactive).toBe(true)
+    expect(vm.curTimeslot).toEqual({ row: -1, col: -1 })
+    expect(vm.curTimeslotAvailability["user-1"]).toBe(false)
+
+    wrapper.unmount()
   })
 
   it("keeps a fully active saved specific-times window expanded", async () => {

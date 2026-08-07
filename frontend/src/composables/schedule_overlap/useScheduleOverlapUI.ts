@@ -37,6 +37,7 @@ export interface UseScheduleOverlapUIOptions {
   endDrag: () => void
   timeslotSelected: Ref<boolean>
   curTimeslotAvailability: Ref<Record<string, boolean>>
+  curTimeslotInactive: Ref<boolean>
   respondents: ComputedRef<{ _id?: string }[]>
   curGuestId: Ref<string>
   guestName: ComputedRef<string | undefined>
@@ -216,6 +217,7 @@ export function useScheduleOverlapUI(opts: UseScheduleOverlapUIOptions) {
         opts.curTimeslotAvailability.value[respondent._id] = true
     }
     opts.curTimeslot.value = { row: -1, col: -1 }
+    opts.curTimeslotInactive.value = false
     opts.endDrag()
   }
 

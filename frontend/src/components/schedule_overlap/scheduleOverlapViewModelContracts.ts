@@ -77,6 +77,7 @@ export interface ScheduleOverlapRespondentsPanelViewModel {
   curRespondents: string[]
   curTimeslot: { dayIndex: number; timeIndex: number }
   curTimeslotAvailability: Record<string, boolean>
+  curTimeslotInactive: boolean
   respondents: User[]
   parsedResponses: ParsedResponses
   isOwner: boolean

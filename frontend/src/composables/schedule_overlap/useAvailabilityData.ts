@@ -151,6 +151,7 @@ export function useAvailabilityData(opts: UseAvailabilityDataOptions) {
   const responsesFormatted = shallowRef<ResponsesFormatted>(new ZdtMap())
   const curTimeslot = ref<RowCol>({ row: -1, col: -1 })
   const curTimeslotAvailability = ref<Record<string, boolean>>({})
+  const curTimeslotInactive = ref(false)
   const timeslotSelected = ref(false)
 
   const availabilityArray = computed<Temporal.ZonedDateTime[]>(() => [
@@ -699,10 +700,20 @@ export function useAvailabilityData(opts: UseAvailabilityDataOptions) {
     if (opts.state.value === states.EDIT_AVAILABILITY) {
       // Don't show availability when editing
       curTimeslot.value = { row, col }
+      curTimeslotInactive.value = false
       return
     }
     const date = opts.getDateFromRowCol(row, col)
-    if (!date) return
+    if (!date) {
+      curTimeslotInactive.value = true
+      for (const respondent of respondents.value) {
+        if (respondent._id) {
+          curTimeslotAvailability.value[respondent._id] = false
+        }
+      }
+      return
+    }
+    curTimeslotInactive.value = false
     curTimeslot.value = { row, col }
     const available =
       zdtMapGet(responsesFormatted.value, date) ?? new Set()
@@ -924,6 +935,7 @@ export function useAvailabilityData(opts: UseAvailabilityDataOptions) {
     responsesFormatted,
     curTimeslot,
     curTimeslotAvailability,
+    curTimeslotInactive,
     timeslotSelected,
     // computed
     availabilityArray,

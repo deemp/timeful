@@ -91,6 +91,7 @@ interface UseScheduleOverlapViewModelsFlatOptions {
   curRespondent: Ref<string>
   curRespondents: Ref<string[]>
   curTimeslotAvailability: Ref<Record<string, boolean>>
+  curTimeslotInactive: Ref<boolean>
   respondents: ComputedRef<User[]>
   parsedResponses: ComputedRef<ParsedResponses>
   attendees: ComputedRef<{ email: string; declined?: boolean }[] | undefined>
@@ -267,6 +268,7 @@ export function useScheduleOverlapViewModels(
         timeIndex: opts.curTimeslot.value.row,
       },
       curTimeslotAvailability: opts.curTimeslotAvailability.value,
+      curTimeslotInactive: opts.curTimeslotInactive.value,
       respondents: opts.respondents.value,
       parsedResponses: opts.parsedResponses.value,
       isOwner: opts.isOwner.value,

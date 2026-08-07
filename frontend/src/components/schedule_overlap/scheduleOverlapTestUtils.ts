@@ -95,6 +95,7 @@ export const buildRespondentsPanelViewModel =
     curRespondents: [],
     curTimeslot: { dayIndex: 0, timeIndex: 0 },
     curTimeslotAvailability: {},
+    curTimeslotInactive: false,
     respondents: [],
     parsedResponses: {},
     isOwner: false,

@@ -48,10 +48,14 @@ const mountRespondentsList = ({
   curDate,
   setEntry,
   timezone = UTC,
+  curTimeslotAvailability = { "user-1": true },
+  curTimeslotInactive = false,
 }: {
   curDate: Temporal.ZonedDateTime
   setEntry: Temporal.ZonedDateTime
   timezone?: string
+  curTimeslotAvailability?: Record<string, boolean>
+  curTimeslotInactive?: boolean
 }) =>
   shallowMount(RespondentsList, {
     props: {
@@ -73,7 +77,8 @@ const mountRespondentsList = ({
       curRespondent: "",
       curRespondents: [],
       curTimeslot: { dayIndex: -1, timeIndex: -1 },
-      curTimeslotAvailability: { "user-1": true },
+      curTimeslotAvailability,
+      curTimeslotInactive,
       respondents: [
         {
           _id: "user-1",
@@ -205,6 +210,34 @@ describe("RespondentsList", () => {
 
     expect(wrapper.text()).toContain("Ada Lovelace*")
     expect(wrapper.text()).toContain("* if needed")
+  })
+
+  it("shows (0/N) and strikes through respondents when hovering an inactive timeslot", () => {
+    const wrapper = mountRespondentsList({
+      curDate: zdt("2026-01-01T09:00:00Z"),
+      setEntry: zdt("2026-01-01T09:00:00Z"),
+      curTimeslotAvailability: { "user-1": false },
+      curTimeslotInactive: true,
+    })
+
+    expect(wrapper.text()).toContain("(0/1)")
+    expect(wrapper.find(".respondent-name-line").classes()).toContain(
+      "tw-line-through"
+    )
+    expect(wrapper.find(".respondent-name-line").classes()).toContain(
+      "tw-text-gray"
+    )
+  })
+
+  it("suppresses stale if-needed stars while hovering an inactive timeslot", () => {
+    const wrapper = mountRespondentsList({
+      curDate: zdt("2026-01-01T09:00:00Z"),
+      setEntry: zdt("2026-01-01T09:00:00Z"),
+      curTimeslotInactive: true,
+    })
+
+    expect(wrapper.text()).toContain("(1/1)")
+    expect(wrapper.text()).not.toContain("Ada Lovelace*")
   })
 
   it("renders guest respondents without leaking undefined last names", () => {

@@ -185,6 +185,12 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
             opts.tooltipContent.value = []
             opts.clearSelectedSlot?.()
           }
+          return
+        }
+        if (!opts.daysOnly.value && !isSelectableSlot(row, col)) {
+          tooltipPosition.value = null
+          opts.tooltipContent.value = []
+          opts.clearSelectedSlot?.()
         }
       },
       mousedown: () => {
@@ -196,6 +202,9 @@ export function useTimedGridInteractions(opts: UseTimedGridInteractionsOptions) 
           if (!isSelectableSlot(row, col)) {
             tooltipPosition.value = null
             opts.tooltipContent.value = []
+            if (!opts.isPhone.value && !opts.daysOnly.value) {
+              opts.clearSelectedSlot?.()
+            }
             return
           }
           if (!opts.daysOnly.value) {

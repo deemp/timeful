@@ -16,6 +16,7 @@
       :cur-respondents="panel.curRespondents"
       :cur-timeslot="panel.curTimeslot"
       :cur-timeslot-availability="panel.curTimeslotAvailability"
+      :cur-timeslot-inactive="panel.curTimeslotInactive"
       :respondents="panel.respondents"
       :parsed-responses="panel.parsedResponses"
       :is-owner="panel.isOwner"
