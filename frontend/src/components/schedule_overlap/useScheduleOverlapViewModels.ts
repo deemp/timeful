@@ -15,6 +15,7 @@ import type {
   ScheduledEvent,
   SignUpBlockLite,
   TimeItem,
+  TimedCellState,
   Timezone,
 } from "@/composables/schedule_overlap/types"
 import type { CalendarAccountEntry } from "@/components/settings/CalendarAccounts.vue"
@@ -92,6 +93,7 @@ interface UseScheduleOverlapViewModelsFlatOptions {
   curRespondents: Ref<string[]>
   curTimeslotAvailability: Ref<Record<string, boolean>>
   curTimeslotInactive: Ref<boolean>
+  curTimeslotCellState: Ref<TimedCellState | null>
   respondents: ComputedRef<User[]>
   parsedResponses: ComputedRef<ParsedResponses>
   attendees: ComputedRef<{ email: string; declined?: boolean }[] | undefined>
@@ -269,6 +271,7 @@ export function useScheduleOverlapViewModels(
       },
       curTimeslotAvailability: opts.curTimeslotAvailability.value,
       curTimeslotInactive: opts.curTimeslotInactive.value,
+      curTimeslotCellState: opts.curTimeslotCellState.value,
       respondents: opts.respondents.value,
       parsedResponses: opts.parsedResponses.value,
       isOwner: opts.isOwner.value,

@@ -14,6 +14,7 @@ import type {
   ScheduledEvent,
   SignUpBlockLite,
   TimeItem,
+  TimedCellState,
   Timezone,
 } from "@/composables/schedule_overlap/types"
 import type { CalendarAccountEntry } from "@/components/settings/CalendarAccounts.vue"
@@ -81,6 +82,7 @@ export interface ScheduleOverlapRespondentsPanelViewModel {
   curTimeslot: { dayIndex: number; timeIndex: number }
   curTimeslotAvailability: Record<string, boolean>
   curTimeslotInactive: boolean
+  curTimeslotCellState: TimedCellState | null
   respondents: User[]
   parsedResponses: ParsedResponses
   isOwner: boolean

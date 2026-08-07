@@ -169,14 +169,21 @@
                     <span
                       class="respondent-control__avatar tw-flex tw-h-4 tw-w-4 tw-items-center tw-justify-center"
                     >
-                      <UserAvatarContent
-                        v-if="shouldUseRichAvatar(user)"
-                        :user="user"
-                        :size="16"
-                      ></UserAvatarContent>
-                      <v-avatar v-else :size="16">
-                        <v-icon small>mdi-account</v-icon>
-                      </v-avatar>
+                      <div
+                        v-if="respondentSlotStatus(user._id ?? '')"
+                        class="tw-h-4 tw-w-4 tw-rounded tw-border tw-border-gray"
+                        :class="respondentStatusClass(respondentSlotStatus(user._id ?? ''))"
+                      ></div>
+                      <template v-else>
+                        <UserAvatarContent
+                          v-if="shouldUseRichAvatar(user)"
+                          :user="user"
+                          :size="16"
+                        ></UserAvatarContent>
+                        <v-avatar v-else :size="16">
+                          <v-icon small>mdi-account</v-icon>
+                        </v-avatar>
+                      </template>
                     </span>
                   </button>
                 </div>
@@ -354,13 +361,17 @@ import type { Temporal } from "temporal-polyfill"
 import type {
   ParsedResponses,
   ScheduleOverlapEvent,
+  TimedCellState,
   Timezone,
 } from "@/composables/schedule_overlap/types"
 import { canGuestEditResponse } from "@/composables/schedule_overlap/useScheduleOverlapUI"
 import type { User } from "@/types"
 import { useRespondentsCsvExport } from "./useRespondentsCsvExport"
 import { useRespondentsListSizing } from "./useRespondentsListSizing"
-import { useRespondentsListState } from "./useRespondentsListState"
+import {
+  respondentStatusClass,
+  useRespondentsListState,
+} from "./useRespondentsListState"
 
 const props = withDefaults(
   defineProps<{
@@ -377,6 +388,7 @@ const props = withDefaults(
     curTimeslot: { dayIndex: number; timeIndex: number }
     curTimeslotAvailability: Record<string, boolean>
     curTimeslotInactive?: boolean
+    curTimeslotCellState?: TimedCellState | null
     respondents: User[]
     parsedResponses: ParsedResponses
     isOwner: boolean
@@ -392,6 +404,7 @@ const props = withDefaults(
   }>(),
   {
     curTimeslotInactive: false,
+    curTimeslotCellState: null,
   }
 )
 
@@ -427,6 +440,7 @@ const {
   userToDelete,
   respondentClass,
   respondentIfNeeded,
+  respondentSlotStatus,
   respondentSelected,
   shouldUseRichAvatar,
   isGuest,
@@ -437,6 +451,7 @@ const {
   curRespondents: computed(() => props.curRespondents),
   curTimeslotAvailability: computed(() => props.curTimeslotAvailability),
   curTimeslotInactive: computed(() => props.curTimeslotInactive),
+  curTimeslotCellState: computed(() => props.curTimeslotCellState),
   parsedResponses: computed(() => props.parsedResponses),
   curDate: computed(() => props.curDate),
   hideIfNeeded: computed(() => props.hideIfNeeded),

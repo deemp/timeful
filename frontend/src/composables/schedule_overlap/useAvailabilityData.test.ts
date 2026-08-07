@@ -5,7 +5,12 @@ import type * as UtilsModule from "@/utils"
 import { durations, eventTypes } from "@/constants"
 import { ZdtSet } from "@/utils"
 import { useAvailabilityData } from "./useAvailabilityData"
-import { states, type FetchedResponse, type ScheduleOverlapResponse } from "./types"
+import {
+  states,
+  type FetchedResponse,
+  type ScheduleOverlapResponse,
+  type TimedCellState,
+} from "./types"
 
 const {
   authUserState,
@@ -64,6 +69,7 @@ function makeAvailabilityData(options?: {
   fetchedResponses?: Record<string, FetchedResponse | undefined>
   eventResponses?: Record<string, ScheduleOverlapResponse>
   getAvailabilityFromCalendarEvents?: () => ZdtSet
+  getTimedCellState?: (row: number, col: number) => TimedCellState
 }) {
   authUserState.value = options?.authUserId ? { _id: options.authUserId } : null
 
@@ -123,6 +129,7 @@ function makeAvailabilityData(options?: {
     getOwnedGuestOwnership: getOwnedGuestOwnershipMock,
     getDateFromRowCol: (row: number, col: number) =>
       row === 0 && col === 0 ? day : null,
+    getTimedCellState: options?.getTimedCellState,
     calendarEventsByDay: computed(() => []),
     groupCalendarEventsByDay: computed(() => ({})),
     bufferTime: ref({ enabled: false, time: 0 }),
@@ -401,5 +408,60 @@ describe("useAvailabilityData respondent saves", () => {
 
     expect(availabilityData.curTimeslotInactive.value).toBe(false)
     expect(availabilityData.curTimeslot.value).toEqual({ row: 1, col: 0 })
+  })
+
+  it("records enabled_inactive when hovering a null-date cell and active on a valid one", () => {
+    const availabilityData = makeAvailabilityData({
+      state: states.BEST_TIMES,
+      getTimedCellState: (row, col) =>
+        row === 1 && col === 0 ? "enabled_inactive" : "active",
+    })
+
+    availabilityData.showAvailability(1, 0)
+
+    expect(availabilityData.curTimeslotInactive.value).toBe(true)
+    expect(availabilityData.curTimeslotCellState.value).toBe("enabled_inactive")
+
+    availabilityData.showAvailability(0, 0)
+
+    expect(availabilityData.curTimeslotInactive.value).toBe(false)
+    expect(availabilityData.curTimeslotCellState.value).toBe("active")
+  })
+
+  it("preserves the recorded cell state when the timeslot is reset", () => {
+    const availabilityData = makeAvailabilityData({
+      state: states.BEST_TIMES,
+      getTimedCellState: () => "active",
+    })
+
+    availabilityData.showAvailability(0, 0)
+    expect(availabilityData.curTimeslotCellState.value).toBe("active")
+
+    availabilityData.resetCurTimeslot()
+    expect(availabilityData.curTimeslotCellState.value).toBe("active")
+  })
+
+  it("records enabled_inactive when marking the timeslot inactive without a cell", () => {
+    const availabilityData = makeAvailabilityData({
+      state: states.BEST_TIMES,
+      getTimedCellState: () => "active",
+    })
+
+    availabilityData.showAvailability(0, 0)
+    expect(availabilityData.curTimeslotCellState.value).toBe("active")
+
+    availabilityData.markCurTimeslotInactive()
+    expect(availabilityData.curTimeslotCellState.value).toBe("enabled_inactive")
+  })
+
+  it("records a cell state without marking the slot inactive while editing availability", () => {
+    const availabilityData = makeAvailabilityData({
+      getTimedCellState: () => "enabled_inactive",
+    })
+
+    availabilityData.showAvailability(1, 0)
+
+    expect(availabilityData.curTimeslotInactive.value).toBe(false)
+    expect(availabilityData.curTimeslotCellState.value).toBe("enabled_inactive")
   })
 })

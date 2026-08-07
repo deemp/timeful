@@ -216,6 +216,20 @@ describe("ScheduleOverlap inactive gap interactions", () => {
   it("marks the collapsed hours inactive and clears the highlight on hover", async () => {
     localStorage.setItem("showAllHours", "false")
     const wrapper = mountScheduleOverlap({
+      global: {
+        stubs: {
+          ScheduleOverlapSidebar: {
+            name: "ScheduleOverlapSidebar",
+            props: {
+              sidebar: {
+                type: Object,
+                required: true,
+              },
+            },
+            template: "<div />",
+          },
+        },
+      },
       props: {
         event: {
           ...buildScheduleOverlapProps().event,
@@ -326,6 +340,98 @@ describe("ScheduleOverlap inactive gap interactions", () => {
     expect(vm.curTimeslotInactive).toBe(true)
     expect(vm.curTimeslot).toEqual({ row: -1, col: -1 })
     expect(vm.curTimeslotAvailability).toEqual({ "user-1": false })
+
+    const sidebarViewModel = wrapper.findComponent({
+      name: "ScheduleOverlapSidebar",
+    }).props("sidebar") as {
+      respondentsPanel: {
+        curTimeslotInactive: boolean
+        curTimeslotCellState: string | null
+      }
+    }
+    expect(sidebarViewModel.respondentsPanel.curTimeslotInactive).toBe(true)
+    expect(sidebarViewModel.respondentsPanel.curTimeslotCellState).toBe(
+      "enabled_inactive"
+    )
+
+    wrapper.unmount()
+  })
+
+  it("keeps the enabled_inactive cell state when hovering an enabled but inactive gap", async () => {
+    const wrapper = mountScheduleOverlap({
+      global: {
+        stubs: {
+          ScheduleOverlapSidebar: {
+            name: "ScheduleOverlapSidebar",
+            props: {
+              sidebar: {
+                type: Object,
+                required: true,
+              },
+            },
+            template: "<div />",
+          },
+        },
+      },
+      props: {
+        event: {
+          ...buildScheduleOverlapProps().event,
+          dates: [Temporal.PlainDate.from("2026-01-01")],
+          timeSeed: zdt("2026-01-01T09:00:00Z"),
+          hasSpecificTimes: true,
+          startTime: Temporal.PlainTime.from("09:00"),
+          duration: Temporal.Duration.from({ hours: 4 }),
+          timeIncrement: Temporal.Duration.from({ hours: 1 }),
+          enabledSlots: buildUtcSpecificTimes("2026-01-01", [
+            "09:00:00",
+            "10:00:00",
+            "11:00:00",
+            "12:00:00",
+          ]),
+          activeSlots: buildUtcSpecificTimes("2026-01-01", [
+            "09:00:00",
+            "12:00:00",
+          ]),
+          times: buildUtcSpecificTimes("2026-01-01", ["09:00:00", "12:00:00"]),
+        },
+        initialTimezone: utcTimezone,
+      },
+    })
+
+    const vm = wrapper.vm as unknown as {
+      curTimeslot: { row: number; col: number }
+      curTimeslotInactive: boolean
+      getTimeslotVon: (row: number, col: number) => Record<string, () => void>
+    }
+
+    const sidebarViewModel = () =>
+      wrapper.findComponent({ name: "ScheduleOverlapSidebar" }).props(
+        "sidebar"
+      ) as {
+        respondentsPanel: {
+          curTimeslotInactive: boolean
+          curTimeslotCellState: string | null
+        }
+      }
+
+    vm.getTimeslotVon(1, 0).mouseover()
+    await nextTick()
+
+    expect(vm.curTimeslotInactive).toBe(true)
+    expect(vm.curTimeslot).toEqual({ row: -1, col: -1 })
+    expect(sidebarViewModel().respondentsPanel.curTimeslotInactive).toBe(true)
+    expect(sidebarViewModel().respondentsPanel.curTimeslotCellState).toBe(
+      "enabled_inactive"
+    )
+
+    vm.getTimeslotVon(0, 0).mouseover()
+    await nextTick()
+
+    expect(vm.curTimeslotInactive).toBe(false)
+    expect(vm.curTimeslot).toEqual({ row: 0, col: 0 })
+    expect(sidebarViewModel().respondentsPanel.curTimeslotCellState).toBe(
+      "active"
+    )
 
     wrapper.unmount()
   })

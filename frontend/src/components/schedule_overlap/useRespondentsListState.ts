@@ -5,8 +5,32 @@ import { Temporal } from "temporal-polyfill"
 import type {
   ParsedResponses,
   ScheduleOverlapEvent,
+  TimedCellState,
 } from "@/composables/schedule_overlap/types"
 import type { User } from "@/types"
+
+export type RespondentSlotStatus =
+  | "available"
+  | "if-needed"
+  | "unavailable"
+  | "disabled-inactive"
+  | "disabled-out-of-range"
+  | null
+
+export const respondentSlotStatusClassMap: Record<
+  Exclude<RespondentSlotStatus, null>,
+  string
+> = {
+  available: "tw-bg-[#00994C77]",
+  "if-needed": "tw-bg-yellow",
+  unavailable: "tw-bg-[#F9CCCC]",
+  "disabled-inactive": "tw-bg-light-gray-stroke",
+  "disabled-out-of-range": "tw-bg-gray",
+}
+
+export function respondentStatusClass(status: RespondentSlotStatus): string {
+  return status ? respondentSlotStatusClassMap[status] : ""
+}
 
 interface UseRespondentsListStateOptions {
   event: ScheduleOverlapEvent
@@ -14,6 +38,7 @@ interface UseRespondentsListStateOptions {
   curRespondents: ComputedRef<string[]>
   curTimeslotAvailability: ComputedRef<Record<string, boolean>>
   curTimeslotInactive: ComputedRef<boolean>
+  curTimeslotCellState: ComputedRef<TimedCellState | null>
   parsedResponses: ComputedRef<ParsedResponses>
   curDate: ComputedRef<Temporal.ZonedDateTime | undefined>
   hideIfNeeded: ComputedRef<boolean>
@@ -106,6 +131,23 @@ export function useRespondentsListState(
     return Boolean(
       response.ifNeeded && zdtSetHas(response.ifNeeded, opts.curDate.value)
     )
+  }
+
+  function respondentSlotStatus(id: string): RespondentSlotStatus {
+    if (opts.curTimeslotInactive.value) {
+      return opts.curTimeslotCellState.value === "enabled_inactive"
+        ? "disabled-inactive"
+        : "disabled-out-of-range"
+    }
+    if (!opts.curDate.value) return null
+    const response = opts.parsedResponses.value[id]
+    if (zdtSetHas(response.availability, opts.curDate.value)) {
+      return "available"
+    }
+    if (respondentIfNeeded(id)) {
+      return "if-needed"
+    }
+    return "unavailable"
   }
 
   const showIfNeededStar = computed(() => {
@@ -225,6 +267,7 @@ export function useRespondentsListState(
     userToDelete,
     respondentClass,
     respondentIfNeeded,
+    respondentSlotStatus,
     respondentSelected,
     shouldUseRichAvatar,
     isGuest,

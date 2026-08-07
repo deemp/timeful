@@ -10,6 +10,7 @@ import {
   type ComponentStubMap,
 } from "@/test/componentStubs"
 import { ZdtMap, ZdtSet } from "@/utils"
+import type { TimedCellState } from "@/composables/schedule_overlap/types"
 import RespondentsList from "./RespondentsList.vue"
 import respondentsListSource from "./RespondentsList.vue?raw"
 
@@ -42,6 +43,7 @@ vi.mock("@/utils/useDisplayHelpers", () => ({
 }))
 
 const zdt = (iso: string) => Temporal.Instant.from(iso).toZonedDateTimeISO(UTC)
+const baseDate = zdt("2026-01-01T09:00:00Z")
 const sharedRespondentsListStubs: ComponentStubMap = respondentsListStubs
 
 const mountRespondentsList = ({
@@ -50,21 +52,27 @@ const mountRespondentsList = ({
   timezone = UTC,
   curTimeslotAvailability = { "user-1": true },
   curTimeslotInactive = false,
+  curTimeslotCellState = null,
+  availability = [],
 }: {
-  curDate: Temporal.ZonedDateTime
+  curDate?: Temporal.ZonedDateTime
   setEntry: Temporal.ZonedDateTime
   timezone?: string
   curTimeslotAvailability?: Record<string, boolean>
   curTimeslotInactive?: boolean
-}) =>
-  shallowMount(RespondentsList, {
+  curTimeslotCellState?: TimedCellState | null
+  availability?: Temporal.ZonedDateTime[]
+}) => {
+  const eventSlot = curDate ?? baseDate
+
+  return shallowMount(RespondentsList, {
     props: {
       eventId: "evt-1",
       event: {
         blindAvailabilityEnabled: false,
         collectEmails: false,
-        dates: [curDate.toPlainDate()],
-        timeSeed: curDate,
+        dates: [eventSlot.toPlainDate()],
+        timeSeed: eventSlot,
         duration: durations.ONE_HOUR,
         daysOnly: false,
       },
@@ -79,6 +87,7 @@ const mountRespondentsList = ({
       curTimeslot: { dayIndex: -1, timeIndex: -1 },
       curTimeslotAvailability,
       curTimeslotInactive,
+      curTimeslotCellState,
       respondents: [
         {
           _id: "user-1",
@@ -95,7 +104,7 @@ const mountRespondentsList = ({
             lastName: "Lovelace",
             picture: "https://example.com/ada.png",
           } as never,
-          availability: new ZdtSet(),
+          availability: new ZdtSet(availability),
           ifNeeded: new ZdtSet([setEntry]),
           guest: false,
         },
@@ -120,12 +129,13 @@ const mountRespondentsList = ({
       stubs: sharedRespondentsListStubs,
     },
   })
+}
 
 describe("RespondentsList", () => {
   it("uses a fixed respondent control slot with hover-visible checkbox shell", () => {
     const wrapper = mountRespondentsList({
-      curDate: zdt("2026-01-01T09:00:00Z"),
-      setEntry: zdt("2026-01-01T09:00:00Z"),
+      curDate: undefined,
+      setEntry: baseDate,
     })
 
     const respondentRow = wrapper.find(".respondent-row")
@@ -162,6 +172,107 @@ describe("RespondentsList", () => {
     expect(checkboxShell.attributes("style")).toContain(
       "border-color: var(--timeful-primary-action-bg);"
     )
+  })
+
+  it("shows the profile avatar when no grid slot is in context", () => {
+    const wrapper = mountRespondentsList({
+      curDate: undefined,
+      setEntry: baseDate,
+    })
+
+    const avatar = wrapper.find(".respondent-control__avatar")
+    expect(avatar.find("div.tw-h-4.tw-w-4").exists()).toBe(false)
+    expect(wrapper.findComponent({ name: "UserAvatarContent" }).exists()).toBe(true)
+  })
+
+  it("renders a green status square for an available respondent on an active slot", () => {
+    const wrapper = mountRespondentsList({
+      curDate: baseDate,
+      setEntry: baseDate,
+      availability: [baseDate],
+    })
+
+    const statusSquare = wrapper.find(
+      ".respondent-control__avatar div.tw-h-4.tw-w-4"
+    )
+    expect(statusSquare.exists()).toBe(true)
+    expect(statusSquare.classes()).toContain("tw-bg-[#00994C77]")
+    expect(statusSquare.classes()).toContain("tw-border-gray")
+    expect(wrapper.findComponent({ name: "UserAvatarContent" }).exists()).toBe(false)
+  })
+
+  it("renders a yellow status square for an if-needed respondent on an active slot", () => {
+    const wrapper = mountRespondentsList({
+      curDate: baseDate,
+      setEntry: baseDate,
+    })
+
+    const statusSquare = wrapper.find(
+      ".respondent-control__avatar div.tw-h-4.tw-w-4"
+    )
+    expect(statusSquare.exists()).toBe(true)
+    expect(statusSquare.classes()).toContain("tw-bg-yellow")
+  })
+
+  it("renders a pink status square for an unavailable respondent on an active slot", () => {
+    const otherSlot = Temporal.Instant.from(
+      "2026-01-01T10:00:00Z"
+    ).toZonedDateTimeISO(UTC)
+
+    const wrapper = mountRespondentsList({
+      curDate: baseDate,
+      setEntry: otherSlot,
+    })
+
+    const statusSquare = wrapper.find(
+      ".respondent-control__avatar div.tw-h-4.tw-w-4"
+    )
+    expect(statusSquare.exists()).toBe(true)
+    expect(statusSquare.classes()).toContain("tw-bg-[#F9CCCC]")
+  })
+
+  it("renders a light-gray-stroke status square when hovering an enabled-inactive cell", () => {
+    const wrapper = mountRespondentsList({
+      curDate: baseDate,
+      setEntry: baseDate,
+      curTimeslotInactive: true,
+      curTimeslotCellState: "enabled_inactive",
+    })
+
+    const statusSquare = wrapper.find(
+      ".respondent-control__avatar div.tw-h-4.tw-w-4"
+    )
+    expect(statusSquare.exists()).toBe(true)
+    expect(statusSquare.classes()).toContain("tw-bg-light-gray-stroke")
+    expect(wrapper.findComponent({ name: "UserAvatarContent" }).exists()).toBe(false)
+  })
+
+  it("renders a gray status square when hovering an out-of-range or padding cell", () => {
+    const wrapper = mountRespondentsList({
+      curDate: baseDate,
+      setEntry: baseDate,
+      curTimeslotInactive: true,
+      curTimeslotCellState: null,
+    })
+
+    const statusSquare = wrapper.find(
+      ".respondent-control__avatar div.tw-h-4.tw-w-4"
+    )
+    expect(statusSquare.exists()).toBe(true)
+    expect(statusSquare.classes()).toContain("tw-bg-gray")
+    expect(wrapper.findComponent({ name: "UserAvatarContent" }).exists()).toBe(false)
+  })
+
+  it("keeps the hover-to-select checkbox shell when a status square is shown", () => {
+    const wrapper = mountRespondentsList({
+      curDate: baseDate,
+      setEntry: baseDate,
+    })
+
+    const selectionButton = wrapper.find('button[aria-pressed="false"]')
+    expect(selectionButton.exists()).toBe(true)
+    expect(selectionButton.find(".respondent-control__checkbox").exists()).toBe(true)
+    expect(selectionButton.find(".respondent-control__avatar").exists()).toBe(true)
   })
 
   it("keeps the respondent action in the same inline row as the respondent name", () => {

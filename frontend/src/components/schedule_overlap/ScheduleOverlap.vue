@@ -361,6 +361,7 @@ const avail = useAvailabilityData({
   removeGuestOwnership,
   getOwnedGuestOwnership,
   getDateFromRowCol: grid.getDateFromRowCol,
+  getTimedCellState: grid.getTimedCellState,
   calendarEventsByDay: calEvents.calendarEventsByDay,
   groupCalendarEventsByDay: calEvents.groupCalendarEventsByDay,
   bufferTime: calEvents.bufferTime,

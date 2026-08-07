@@ -41,6 +41,7 @@ import {
   type ScheduleOverlapEvent,
   type ScheduleOverlapState,
   type TimeItem,
+  type TimedCellState,
 } from "./types"
 import {
   encodeEventResponseSubmissionPayload,
@@ -109,6 +110,7 @@ export interface UseAvailabilityDataOptions {
   ) => StoredGuestOwnership | undefined
   // TODO
   getDateFromRowCol: (row: number, col: number) => Temporal.ZonedDateTime | null
+  getTimedCellState?: (row: number, col: number) => TimedCellState
 
   // from useCalendarEvents
   calendarEventsByDay: ComputedRef<CalendarEventsByDay>
@@ -152,6 +154,7 @@ export function useAvailabilityData(opts: UseAvailabilityDataOptions) {
   const curTimeslot = ref<RowCol>({ row: -1, col: -1 })
   const curTimeslotAvailability = ref<Record<string, boolean>>({})
   const curTimeslotInactive = ref(false)
+  const curTimeslotCellState = ref<TimedCellState | null>(null)
   const timeslotSelected = ref(false)
 
   const availabilityArray = computed<Temporal.ZonedDateTime[]>(() => [
@@ -701,6 +704,7 @@ export function useAvailabilityData(opts: UseAvailabilityDataOptions) {
       return
     }
     curTimeslotInactive.value = true
+    curTimeslotCellState.value = "enabled_inactive"
     for (const respondent of respondents.value) {
       if (respondent._id) {
         curTimeslotAvailability.value[respondent._id] = false
@@ -708,20 +712,30 @@ export function useAvailabilityData(opts: UseAvailabilityDataOptions) {
     }
   }
 
+  const getCurTimeslotCellState = (
+    row: number,
+    col: number
+  ): TimedCellState | null =>
+    opts.getTimedCellState?.(row, opts.maxDaysPerPage.value * opts.page.value + col) ??
+    null
+
   const showAvailability = (row: number, col: number) => {
     if (opts.state.value === states.EDIT_AVAILABILITY) {
       // Don't show availability when editing
       curTimeslot.value = { row, col }
       curTimeslotInactive.value = false
+      curTimeslotCellState.value = getCurTimeslotCellState(row, col)
       return
     }
     const date = opts.getDateFromRowCol(row, col)
     if (!date) {
       markCurTimeslotInactive()
+      curTimeslotCellState.value = getCurTimeslotCellState(row, col)
       return
     }
     curTimeslotInactive.value = false
     curTimeslot.value = { row, col }
+    curTimeslotCellState.value = getCurTimeslotCellState(row, col)
     const available =
       zdtMapGet(responsesFormatted.value, date) ?? new Set()
     for (const respondent of respondents.value) {
@@ -943,6 +957,7 @@ export function useAvailabilityData(opts: UseAvailabilityDataOptions) {
     curTimeslot,
     curTimeslotAvailability,
     curTimeslotInactive,
+    curTimeslotCellState,
     timeslotSelected,
     // computed
     availabilityArray,
